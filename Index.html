@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ava's Shift Tracker</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; padding: 20px; color: #1c1e21; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); max-width: 450px; width: 100%; text-align: center; }
+        h1 { font-size: 24px; margin-bottom: 5px; color: #1a73e8; }
+        #status-msg { font-size: 13px; color: #606770; margin-bottom: 25px; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid #dddfe2; }
+        .btn { background-color: #1a73e8; color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; font-weight: 600; margin-bottom: 15px; transition: background 0.2s; display: none; }
+        .btn:hover { background-color: #1557b0; }
+        .shift-card { background: #ffffff; padding: 15px; border-radius: 10px; margin-bottom: 12px; border: 1px solid #dddfe2; text-align: left; border-left: 6px solid #1a73e8; }
+        .shift-title { font-weight: bold; font-size: 17px; color: #1c1e21; margin-bottom: 4px; }
+        .shift-date { color: #606770; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Ava's Shift Tracker</h1>
+        <div id="status-msg">Connecting to Google...</div>
+        
+        <button id="authorize_button" class="btn" onclick="handleAuthClick()">Log in with Google</button>
+        <button id="signout_button" class="btn" style="background-color: #f02849;" onclick="handleSignoutClick()">Sign Out</button>
+
+        <div id="content"></div>
+    </div>
+
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+
+    <script>
+        const CLIENT_ID = '728744386309-ocoa425l1ummb759h3dthefsf8i9q15g.apps.googleusercontent.com';
+        const CALENDAR_ID = 'family11537808756268491091@group.calendar.google.com';
+        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
+        const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
+
+        let tokenClient;
+
+        function updateStatus(msg) {
+            document.getElementById('status-msg').innerText = msg;
+        }
+
+        // Start the engine
+        window.onload = function() {
+            if (typeof gapi !== 'undefined') {
+                updateStatus("Library Loaded. Getting Client Ready...");
+                // This is the key: we MUST load 'client' first
+                gapi.load('client', {
+                    callback: initializeGapiClient,
+                    onerror: function() { updateStatus("Error loading GAPI client."); }
+                });
+            } else {
+                updateStatus("Google Library missing. Check Ad-Blocker.");
+            }
+        };
+
+        async function initializeGapiClient() {
+            try {
+                // Initialize the client with the discovery document
+                await gapi.client.init({ discoveryDocs: [DISCOVERY_DOC] });
+                updateStatus("Google Client Ready. Setting up Login...");
+                
+                // Now set up the Identity Service (GIS)
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID,
+                    scope: SCOPES,
+                    callback: '', // Handled at login
+                });
+
+                updateStatus("Ready! Please Log In.");
+                document.getElementById('authorize_button').style.display = 'block';
+            } catch (err) {
+                updateStatus("Init Error: " + err.message);
+                console.error(err);
+            }
+        }
+
+        function handleAuthClick() {
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) { throw (resp); }
+                document.getElementById('authorize_button').style.display = 'none';
+                document.getElementById('signout_button').style.display = 'block';
+                updateStatus("Fetching your shifts...");
+                await listUpcomingShifts();
+            };
+
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        }
+
+        async function listUpcomingShifts() {
+            try {
+                const response = await gapi.client.calendar.events.list({
+                    'calendarId': CALENDAR_ID,
+                    'q': 'turn with Ava',
+                    'timeMin': (new Date()).toISOString(),
+                    'showDeleted': false,
+                    'singleEvents': true,
+                    'maxResults': 6,
+                    'orderBy': 'startTime'
+                });
+
+                const events = response.result.items;
+                if (!events || events.length == 0) {
+                    updateStatus("No upcoming shifts found.");
+                    return;
+                }
+
+                updateStatus("Showing upcoming " + events.length + " shifts.");
+                let output = '';
+                events.forEach((event) => {
+                    const start = event.start.date || event.start.dateTime;
+                    const startDate = new Date(start).toLocaleDateString('en-ZA', { weekday: 'short', day: 'numeric', month: 'short' });
+                    output += `
+                        <div class="shift-card">
+                            <div class="shift-title">${event.summary}</div>
+                            <div class="shift-date">From: ${startDate}</div>
+                        </div>`;
+                });
+                document.getElementById('content').innerHTML = output;
+            } catch (err) {
+                updateStatus("Calendar Error: " + (err.result?.error?.message || "Check permissions"));
+            }
+        }
+
+        function handleSignoutClick() {
+            const token = gapi.client.getToken();
+            if (token !== null) {
+                google.accounts.oauth2.revoke(token.access_token);
+                gapi.client.setToken('');
+                document.getElementById('content').innerHTML = '';
+                document.getElementById('authorize_button').style.display = 'block';
+                document.getElementById('signout_button').style.display = 'none';
+                updateStatus("Signed out.");
+            }
+        }
+    </script>
+</body>
+</html>
