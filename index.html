@@ -26,9 +26,14 @@
 
         .app-container { width: 100%; max-width: 450px; height: 100vh; max-height: 900px; position: relative; display: flex; flex-direction: column; overflow: hidden; background: transparent; }
 
-        .header { padding: 40px 20px 15px; text-align: center; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.5); z-index: 10; display: flex; flex-direction: column; align-items: center; }
+        .header { padding: 40px 20px 15px; text-align: center; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.5); z-index: 10; display: flex; justify-content: center; align-items: center; position: relative; }
+        .header-text { display: flex; flex-direction: column; align-items: center; }
         .header h1 { font-size: 22px; color: var(--text-main); font-weight: 800; letter-spacing: -0.5px; }
         .header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; font-weight: 500; }
+
+        /* NEW: Distraction Mode Trigger Button */
+        .btn-distract { position: absolute; right: 20px; top: 45px; background: #fbbf24; color: #78350f; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; box-shadow: 0 4px 10px rgba(251, 191, 36, 0.4); display: flex; justify-content: center; align-items: center; transition: transform 0.2s; }
+        .btn-distract:active { transform: scale(0.9); }
 
         .btn-install { background: #1e293b; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-top: 10px; cursor: pointer; display: none; gap: 6px; align-items: center; }
 
@@ -63,7 +68,7 @@
         .btn-pill:active { transform: scale(0.95); box-shadow: 0 5px 15px rgba(30, 41, 59, 0.2); }
 
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: flex-end; z-index: 100; opacity: 0; transition: opacity 0.3s; }
-        .modal-content { background: #ffffff; width: 100%; padding: 30px 25px 60px; border-radius: 30px 30px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); max-height: 85vh; overflow-y: auto; }
+        .modal-content { background: #ffffff; width: 100%; padding: 30px 25px 40px; border-radius: 30px 30px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); max-height: 85vh; overflow-y: auto; }
         .modal-overlay.active { opacity: 1; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
         
@@ -72,29 +77,45 @@
         .modal-header h2 { font-size: 22px; color: var(--text-main); margin-bottom: 5px; }
         .modal-date { font-size: 13px; font-weight: 600; display: inline-block; padding: 4px 10px; border-radius: 12px; margin-top: 5px; }
         
-        .action-row { display: flex; gap: 10px; margin-bottom: 25px; }
+        .action-row { display: flex; gap: 10px; margin-bottom: 20px; }
         .btn-swap { flex: 1; background: #f1f5f9; border: none; padding: 14px; border-radius: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-swap:active { background: #e2e8f0; }
 
+        /* TRACKER STYLES */
+        .trackers-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 15px; margin-bottom: 15px; }
+        .tracker-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .tracker-row:last-child { margin-bottom: 0; }
+        .tracker-label { font-size: 14px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .tracker-btn-group { display: flex; gap: 5px; }
+        .tracker-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+        .tracker-btn.active-yes { background: #10b981; color: white; border-color: #10b981; }
+        .tracker-btn.active-no { background: #ef4444; color: white; border-color: #ef4444; }
+        .tracker-select { padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; font-weight: 600; background: white; outline: none; }
+
         .feedback-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 15px; margin-bottom: 20px; position: relative; }
-        .feedback-section label { display: block; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .feedback-section label { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         textarea { width: 100%; border: none; background: transparent; resize: none; font-size: 15px; color: var(--text-main); min-height: 80px; outline: none; line-height: 1.5; }
         textarea::placeholder { color: #cbd5e1; }
 
-        .ai-btn { background: #ede9fe; color: var(--ai-color); border: 1px solid #ddd6fe; padding: 8px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-top: 10px; transition: all 0.2s; }
+        .mic-btn { background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; transition: color 0.2s; }
+        .mic-btn.recording { color: #ef4444; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+        .ai-btn { background: #ede9fe; color: var(--ai-color); border: 1px solid #ddd6fe; padding: 8px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 100%; gap: 6px; margin-top: 10px; transition: all 0.2s; }
         .ai-btn:active { background: #ddd6fe; }
-        .ai-response-box { display: none; background: #f5f3ff; border-left: 4px solid var(--ai-color); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; color: #4c1d95; line-height: 1.5; }
-        .ai-response-box h4 { margin-bottom: 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 5px; }
+
+        .handoff-btn { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 100%; gap: 8px; margin-bottom: 15px; transition: all 0.2s; }
+        .handoff-btn:active { background: #fef3c7; }
 
         .create-form { display: none; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 5px; font-weight: 600;}
         .form-group input, .form-group select { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 15px; background: #f8fafc; outline: none; }
 
-        .btn-save { background: var(--text-main); color: white; border: none; padding: 16px; border-radius: 16px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 15px; }
+        .btn-save { background: var(--text-main); color: white; border: none; padding: 16px; border-radius: 16px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 5px; }
 
-        .dialog-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 999; opacity: 0; transition: opacity 0.2s; }
-        .dialog-box { background: white; width: 85%; max-width: 320px; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2); transform: scale(0.9); transition: transform 0.2s; }
+        .dialog-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 999; opacity: 0; transition: opacity 0.2s; backdrop-filter: blur(2px); }
+        .dialog-box { background: white; width: 85%; max-width: 340px; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2); transform: scale(0.9); transition: transform 0.2s; display:flex; flex-direction:column;}
         .dialog-overlay.active { opacity: 1; }
         .dialog-overlay.active .dialog-box { transform: scale(1); }
         .dialog-title { font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
@@ -103,15 +124,35 @@
         .dialog-btn { flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; }
         .dialog-btn-cancel { background: #f1f5f9; color: var(--text-main); }
         .dialog-btn-confirm { background: var(--text-main); color: white; }
+
+        /* NEW: Distraction Mode Fullscreen */
+        #distraction-mode { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; overflow: hidden; touch-action: none; }
+        #distraction-canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+        .btn-close-distract { position: absolute; top: 30px; right: 30px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 12px 20px; border-radius: 30px; font-weight: 700; font-size: 14px; z-index: 10000; cursor: pointer; backdrop-filter: blur(5px); }
+        .distract-hint { position: absolute; top: 40%; width: 100%; text-align: center; color: rgba(255,255,255,0.2); font-size: 24px; font-weight: 800; pointer-events: none; user-select: none; }
+        
+        @keyframes popBubble {
+            0% { transform: scale(0.2); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
     </style>
 </head>
 <body>
 
+    <div id="distraction-mode">
+        <button class="btn-close-distract" onclick="closeDistraction()">Done</button>
+        <div class="distract-hint" id="distract-hint">Tap anywhere! ✨</div>
+        <div id="distraction-canvas"></div>
+    </div>
+
     <div class="app-container">
         <div class="header" id="app-header" style="display: none;">
-            <h1>Ava's Four Day Care</h1>
-            <p>Schedule & Notes</p>
-            <button class="btn-install" id="install-btn" onclick="triggerInstall()"><i class="fa-solid fa-download"></i> Install App</button>
+            <div class="header-text">
+                <h1>Ava's Four Day Care</h1>
+                <p>Schedule & Notes</p>
+                <button class="btn-install" id="install-btn" onclick="triggerInstall()"><i class="fa-solid fa-download"></i> Install App</button>
+            </div>
+            <button class="btn-distract" onclick="openDistraction()"><i class="fa-solid fa-star"></i></button>
         </div>
 
         <div id="login-screen">
@@ -159,27 +200,57 @@
                     </div>
 
                     <div class="action-row">
-                        <button class="btn-swap" onclick="swapSpecificDay()" id="btn-swap-day">
-                            <i class="fa-solid fa-arrows-rotate"></i> Swap
+                        <button class="btn-swap" onclick="swapSpecificDay()">
+                            <i class="fa-solid fa-arrows-rotate"></i> Swap Day
                         </button>
                         <button class="btn-swap" onclick="deleteSpecificDay()" style="color: #ef4444; flex: 0.6;">
-                            <i class="fa-regular fa-trash-can"></i> Delete
+                            <i class="fa-regular fa-calendar-xmark"></i> Clear
                         </button>
                     </div>
 
-                    <div class="ai-response-box" id="ai-response">
-                        <h4><i class="fa-solid fa-wand-magic-sparkles"></i> AI Sleep Advice</h4>
-                        <p id="ai-text">Loading insights...</p>
+                    <div class="trackers-section">
+                        <div class="tracker-row">
+                            <span class="tracker-label">🍼 Ate Well?</span>
+                            <div class="tracker-btn-group">
+                                <button class="tracker-btn" id="trk-eat-yes" onclick="setTracker('eat', 'yes')">Yes</button>
+                                <button class="tracker-btn" id="trk-eat-no" onclick="setTracker('eat', 'no')">No</button>
+                            </div>
+                        </div>
+                        <div class="tracker-row">
+                            <span class="tracker-label">🛁 Bath Done?</span>
+                            <div class="tracker-btn-group">
+                                <button class="tracker-btn" id="trk-bath-yes" onclick="setTracker('bath', 'yes')">Yes</button>
+                                <button class="tracker-btn" id="trk-bath-no" onclick="setTracker('bath', 'no')">No</button>
+                            </div>
+                        </div>
+                        <div class="tracker-row">
+                            <span class="tracker-label">😴 Nap Duration</span>
+                            <select class="tracker-select" id="trk-nap" onchange="setTracker('nap', this.value)">
+                                <option value="0">None</option>
+                                <option value="1">~1 hr</option>
+                                <option value="2">~2 hrs</option>
+                                <option value="3+">3+ hrs</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="feedback-section">
-                        <label><i class="fa-regular fa-comment-dots"></i> Daily Notes & Feedback</label>
-                        <textarea id="modal-feedback" placeholder="How was Ava's sleep tonight? Keep tossing and turning?"></textarea>
+                        <label>
+                            <span><i class="fa-regular fa-comment-dots"></i> Daily Notes</span>
+                            <button class="mic-btn" id="mic-btn" onclick="toggleDictation()"><i class="fa-solid fa-microphone"></i></button>
+                        </label>
+                        <textarea id="modal-feedback" placeholder="How was Ava's day? Tap the mic to speak..."></textarea>
                         
-                        <button class="ai-btn" onclick="askAITips()"><i class="fa-solid fa-sparkles"></i> Get Sleep Tips for Ava</button>
+                        <button class="ai-btn" onclick="openAIDialog('advice')"><i class="fa-solid fa-sparkles"></i> Ask AI for Sleep Advice</button>
                     </div>
 
+                    <button class="handoff-btn" onclick="openAIDialog('handoff')"><i class="fa-solid fa-handshake"></i> Generate Shift Handoff</button>
+
                     <button class="btn-save" onclick="saveDayUpdates()">Save Updates</button>
+                    
+                    <div style="text-align:center; margin-top: 15px;">
+                        <button onclick="deleteEntireBlock()" style="background:none; border:none; color:#ef4444; font-size:13px; font-weight:600; text-decoration:underline; cursor:pointer;">Delete entire 4-day block from Google</button>
+                    </div>
                 </div>
 
                 <div id="modal-create-mode" class="create-form">
@@ -219,22 +290,40 @@
             </div>
         </div>
 
+        <div class="dialog-overlay" id="ai-dialog">
+            <div class="dialog-box" style="padding: 0; overflow: hidden; max-width: 360px;">
+                <div style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); padding: 20px; color: white; text-align: left;" id="ai-dialog-header">
+                    <h3 style="margin:0; font-size:18px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Ava's Sleep Assistant</h3>
+                    <p style="margin: 5px 0 0; font-size: 12px; opacity: 0.9;">Tell the AI what is happening tonight.</p>
+                </div>
+                
+                <div style="padding: 20px; text-align: left;">
+                    <textarea id="ai-prompt-input" style="width:100%; height:80px; border:1px solid #e2e8f0; border-radius:12px; padding:12px; font-size:14px; background:#f8fafc; resize: none; outline:none;" placeholder="e.g., Ava is tossing and turning..."></textarea>
+                    
+                    <button class="btn-main" style="background:#8b5cf6; padding:12px; width:100%; margin-top:10px;" onclick="fetchAITips()" id="btn-fetch-ai">Get Advice</button>
+                    
+                    <div id="ai-results-area" style="display:none; margin-top:15px; padding:15px; background:#f5f3ff; border-radius:12px; font-size:14px; color:#4c1d95; max-height:180px; overflow-y:auto; border-left: 4px solid var(--ai-color);">
+                        <div id="ai-output-text"></div>
+                    </div>
+                    
+                    <div style="display:flex; gap:10px; margin-top:20px;">
+                        <button class="dialog-btn dialog-btn-cancel" onclick="closeAIDialog()">Close</button>
+                        <button class="dialog-btn dialog-btn-confirm" id="btn-copy-ai" style="display:none; background:var(--text-main);" onclick="copyAIToNotes()">Copy to Notes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
 
     <script>
-        // --- GOOGLE CLOUD CLIENT ID ---
         const CLIENT_ID = '728744386309-ocoa425l1ummb759h3dthefsf8i9q15g.apps.googleusercontent.com';
         
-        // --- STEALTH API KEY ---
-        // GitHub flags the exact letters A-I-z-a. We build those 4 letters using char codes so they don't exist in the text.
         const part1 = String.fromCharCode(65, 73, 122, 97); 
-        
-        // YOUR NEW KEY ENDING:
         const part2 = 'SyDe7Mqjm7k2rYaEv3sMmy-ZKFgbsmICRkA'; 
-        
         const GEMINI_API_KEY = part1 + part2;
 
         const CALENDAR_ID = 'family11537808756268491091@group.calendar.google.com';
@@ -248,7 +337,85 @@
         let activeEvent = null; 
         let activeDateStr = null; 
         let activeAppData = null; 
+        let currentTrackers = { eat: null, bath: null, nap: '0' }; 
         let deferredPrompt = null;
+        let rawAIResult = ""; 
+        let currentAIMode = "advice"; 
+
+        // DISTRACTION MODE LOGIC
+        function openDistraction() {
+            document.getElementById('distraction-mode').style.display = 'block';
+            document.getElementById('distract-hint').style.display = 'block';
+        }
+
+        function closeDistraction() {
+            document.getElementById('distraction-mode').style.display = 'none';
+            document.getElementById('distraction-canvas').innerHTML = ''; // Clear bubbles
+        }
+
+        const distractCanvas = document.getElementById('distraction-canvas');
+        distractCanvas.addEventListener('pointerdown', (e) => {
+            document.getElementById('distract-hint').style.display = 'none'; // hide hint on first tap
+            
+            const colors = ['#f43f5e', '#ec4899', '#d946ef', '#8b5cf6', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#fbbf24'];
+            const bubble = document.createElement('div');
+            const size = Math.random() * 80 + 40; 
+            
+            bubble.style.width = size + 'px';
+            bubble.style.height = size + 'px';
+            bubble.style.background = colors[Math.floor(Math.random() * colors.length)];
+            bubble.style.position = 'absolute';
+            bubble.style.left = (e.clientX - size/2) + 'px';
+            bubble.style.top = (e.clientY - size/2) + 'px';
+            bubble.style.borderRadius = '50%';
+            bubble.style.pointerEvents = 'none';
+            bubble.style.boxShadow = '0 0 20px ' + bubble.style.background;
+            bubble.style.animation = 'popBubble 0.7s ease-out forwards';
+            
+            distractCanvas.appendChild(bubble);
+            
+            // Clean up DOM after animation
+            setTimeout(() => bubble.remove(), 700);
+        });
+        
+        // Prevent default touch actions (like scrolling or zooming) on the canvas
+        distractCanvas.addEventListener('touchstart', (e) => e.preventDefault(), {passive: false});
+
+        // SPEECH RECOGNITION
+        let recognition = null;
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRec();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            
+            recognition.onresult = function(event) {
+                const text = event.results[0][0].transcript;
+                const feedbackBox = document.getElementById('modal-feedback');
+                feedbackBox.value = feedbackBox.value ? feedbackBox.value + " " + text : text;
+                document.getElementById('mic-btn').classList.remove('recording');
+            };
+            
+            recognition.onerror = function(e) { 
+                document.getElementById('mic-btn').classList.remove('recording'); 
+                if(e.error !== 'no-speech') showAppAlert("Mic Error", "Voice recognition error: " + e.error);
+            };
+            
+            recognition.onend = function() { document.getElementById('mic-btn').classList.remove('recording'); };
+        }
+
+        function toggleDictation() {
+            if(!recognition) return showAppAlert("Not Supported", "Voice dictation isn't supported on this browser/device.");
+            const btn = document.getElementById('mic-btn');
+            
+            if(btn.classList.contains('recording')) {
+                recognition.stop();
+                btn.classList.remove('recording');
+            } else {
+                recognition.start();
+                btn.classList.add('recording');
+            }
+        }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -346,6 +513,7 @@
         }
 
         function handleAuthClick() {
+            // FIX: Removed prompt: 'consent' to allow silent token renewal if already logged into Google!
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) { throw (resp); }
                 localStorage.setItem('ava_app_token', resp.access_token);
@@ -353,7 +521,7 @@
                 showAppUI();
                 await fetchEvents();
             };
-            tokenClient.requestAccessToken({prompt: 'consent'});
+            tokenClient.requestAccessToken({prompt: ''}); 
         }
 
         function showAppUI() {
@@ -365,7 +533,7 @@
 
         function getAppData(event) {
             try { if(event.description) return JSON.parse(event.description); } catch(e) { }
-            return { feedback: {}, swaps: {} };
+            return { feedback: {}, swaps: {}, trackers: {} };
         }
 
         async function fetchEvents() {
@@ -383,6 +551,11 @@
             } catch (err) {
                 document.getElementById('loading-txt').innerText = "Session expired.";
                 localStorage.removeItem('ava_app_token'); 
+                // Show login screen again, but user just taps button without password
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('app-header').style.display = 'none';
+                document.getElementById('app-content').style.display = 'none';
+                document.getElementById('fab-pill').style.display = 'none';
             }
         }
 
@@ -440,6 +613,23 @@
             }
         }
 
+        function setTracker(type, val) {
+            currentTrackers[type] = val;
+            if (type === 'eat' || type === 'bath') {
+                document.getElementById(`trk-${type}-yes`).className = `tracker-btn ${val === 'yes' ? 'active-yes' : ''}`;
+                document.getElementById(`trk-${type}-no`).className = `tracker-btn ${val === 'no' ? 'active-no' : ''}`;
+            }
+        }
+
+        function loadTrackers(dateStr) {
+            const trks = activeAppData.trackers && activeAppData.trackers[dateStr] ? activeAppData.trackers[dateStr] : { eat: null, bath: null, nap: '0' };
+            currentTrackers = { ...trks }; 
+            
+            setTracker('eat', currentTrackers.eat);
+            setTracker('bath', currentTrackers.bath);
+            document.getElementById('trk-nap').value = currentTrackers.nap || '0';
+        }
+
         function openSpecificDay(eventId, clickedDateStr) {
             activeEvent = allEvents.find(e => e.id === eventId);
             activeDateStr = clickedDateStr;
@@ -449,7 +639,6 @@
             
             document.getElementById('modal-view-mode').style.display = 'block';
             document.getElementById('modal-create-mode').style.display = 'none';
-            document.getElementById('ai-response').style.display = 'none'; 
             
             const isAlf = currentOwner.toLowerCase().includes('alferenzo');
             document.getElementById('modal-title').innerText = isAlf ? "Alferenzo's Day" : "Lesly's Day";
@@ -462,6 +651,8 @@
             dateBadge.style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
             
             document.getElementById('modal-feedback').value = activeAppData.feedback && activeAppData.feedback[clickedDateStr] ? activeAppData.feedback[clickedDateStr] : '';
+            
+            loadTrackers(clickedDateStr);
 
             showModal();
         }
@@ -471,30 +662,42 @@
             let newOwner = currentOwner.toLowerCase().includes('alferenzo') ? "Lesly's turn with Ava" : "Alferenzo's turn with Ava";
             
             const dateFormatted = formatCustomDate(activeDateStr);
-            
-            showAppConfirm("Swap Day", `Are you sure you want to swap ${dateFormatted} to ${newOwner}?`, "Yes, Swap It", () => {
+            showAppConfirm("Swap Day", `Swap ${dateFormatted} to ${newOwner}?`, "Yes, Swap It", () => {
                 if(!activeAppData.swaps) activeAppData.swaps = {};
                 if (newOwner === activeEvent.summary) delete activeAppData.swaps[activeDateStr];
                 else activeAppData.swaps[activeDateStr] = newOwner;
-                
                 saveDayUpdates();
             });
         }
 
         function deleteSpecificDay() {
             const dateFormatted = formatCustomDate(activeDateStr);
-            
-            showAppConfirm("Delete Day", `Remove ${dateFormatted} from this shift block?\n\n(This will only clear this single day, the rest of the block will remain intact).`, "Delete Day", () => {
+            showAppConfirm("Clear Single Day", `Remove ${dateFormatted} from this shift block?\n\n(This will hide it in the app, but the rest of the 4-day block will remain).`, "Clear Day", () => {
                 if(!activeAppData.swaps) activeAppData.swaps = {};
                 activeAppData.swaps[activeDateStr] = "DELETED";
                 saveDayUpdates();
             });
         }
 
+        function deleteEntireBlock() {
+            showAppConfirm("Delete Entire Block", "WARNING: This will permanently delete this entire 4-day shift from Google Calendar.\n\nAre you sure?", "Delete Entire Block", async () => {
+                document.getElementById('modal-title').innerText = "Deleting Block...";
+                try {
+                    await gapi.client.calendar.events.delete({ calendarId: CALENDAR_ID, eventId: activeEvent.id });
+                    closeModal();
+                    await fetchEvents();
+                } catch (err) { showAppAlert("Error", "Failed to delete from Google Calendar."); }
+            });
+        }
+
         async function saveDayUpdates() {
             const feedbackText = document.getElementById('modal-feedback').value;
+            
             if(!activeAppData.feedback) activeAppData.feedback = {};
             activeAppData.feedback[activeDateStr] = feedbackText;
+
+            if(!activeAppData.trackers) activeAppData.trackers = {};
+            activeAppData.trackers[activeDateStr] = { ...currentTrackers };
 
             activeEvent.description = JSON.stringify(activeAppData);
             document.getElementById('modal-title').innerText = "Saving...";
@@ -552,42 +755,100 @@
             setTimeout(() => overlay.style.display = 'none', 300);
         }
 
-        // --- UPGRADED AI FUNCTION (AUTO-DISCOVER MODELS) ---
-        async function askAITips() {
-            if(!GEMINI_API_KEY) {
-                return showAppAlert("AI Missing", "Gemini API Key is missing.");
+        function openAIDialog(mode) {
+            currentAIMode = mode;
+            const overlay = document.getElementById('ai-dialog');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+            
+            const headerDiv = document.getElementById('ai-dialog-header');
+            const promptInput = document.getElementById('ai-prompt-input');
+            const btnFetch = document.getElementById('btn-fetch-ai');
+            
+            document.getElementById('ai-results-area').style.display = 'none';
+            document.getElementById('btn-copy-ai').style.display = 'none';
+            rawAIResult = "";
+
+            if (mode === 'advice') {
+                headerDiv.style.background = 'linear-gradient(135deg, #8b5cf6, #6d28d9)';
+                headerDiv.innerHTML = `<h3 style="margin:0; font-size:18px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Ava's Sleep Assistant</h3><p style="margin: 5px 0 0; font-size: 12px; opacity: 0.9;">Tell the AI what is happening tonight.</p>`;
+                
+                const existingNotes = document.getElementById('modal-feedback').value;
+                promptInput.value = existingNotes;
+                promptInput.style.display = 'block';
+                btnFetch.innerText = 'Get Advice';
+                btnFetch.style.background = '#8b5cf6';
+            } else {
+                headerDiv.style.background = 'linear-gradient(135deg, #d97706, #b45309)';
+                headerDiv.innerHTML = `<h3 style="margin:0; font-size:18px;"><i class="fa-solid fa-handshake"></i> Shift Handoff</h3><p style="margin: 5px 0 0; font-size: 12px; opacity: 0.9;">AI will summarize the last 4 days.</p>`;
+                
+                promptInput.style.display = 'none'; 
+                btnFetch.innerText = 'Generate Summary';
+                btnFetch.style.background = '#d97706';
+                
+                promptInput.value = compileHandoffData();
+            }
+        }
+
+        function compileHandoffData() {
+            if(!activeEvent || !activeAppData) return "No data available.";
+            
+            let dataStr = `Please generate a warm, concise, bulleted 'Handoff Summary' for the parent taking over childcare for Ava based on the last few days. Highlight any patterns (sleep, eating, bath). Data:\n\n`;
+            
+            const s = new Date(activeEvent.start.date || activeEvent.start.dateTime);
+            const endRaw = new Date(activeEvent.end.date || activeEvent.end.dateTime);
+            const eEnd = activeEvent.start.date ? new Date(endRaw.setDate(endRaw.getDate() - 1)) : endRaw;
+            
+            for (let d = new Date(s); d <= eEnd; d.setDate(d.getDate() + 1)) {
+                const dayStr = d.toISOString().split('T')[0];
+                const fb = activeAppData.feedback && activeAppData.feedback[dayStr] ? activeAppData.feedback[dayStr] : "No notes.";
+                const trks = activeAppData.trackers && activeAppData.trackers[dayStr] ? activeAppData.trackers[dayStr] : null;
+                
+                let trkStr = "";
+                if(trks) {
+                    trkStr = `(Ate: ${trks.eat || '?'}, Bath: ${trks.bath || '?'}, Nap: ${trks.nap}h) `;
+                }
+                dataStr += `- Date: ${dayStr} ${trkStr}\n  Notes: ${fb}\n`;
+            }
+            return dataStr;
+        }
+
+        function closeAIDialog() {
+            const overlay = document.getElementById('ai-dialog');
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.style.display = 'none', 200);
+        }
+
+        async function fetchAITips() {
+            const currentNotes = document.getElementById('ai-prompt-input').value;
+            if(!currentNotes.trim() && currentAIMode === 'advice') {
+                return showAppAlert("No Notes", "Please tell the AI what is happening with Ava first!");
             }
 
-            const currentNotes = document.getElementById('modal-feedback').value;
-            if(!currentNotes.trim()) {
-                return showAppAlert("No Notes", "Please type some notes about how Ava is sleeping first, so the AI knows how to help!");
-            }
-
-            const aiBox = document.getElementById('ai-response');
-            const aiText = document.getElementById('ai-text');
+            const aiBox = document.getElementById('ai-results-area');
+            const aiText = document.getElementById('ai-output-text');
+            const btnFetch = document.getElementById('btn-fetch-ai');
+            
             aiBox.style.display = 'block';
-            aiText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Finding the best AI model...';
+            aiText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
+            btnFetch.innerText = currentAIMode === 'advice' ? 'Ask Again' : 'Regenerate Summary';
 
             try {
                 const modelsResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
-                if (!modelsResp.ok) throw new Error(`Model Check Failed: ${modelsResp.statusText}`);
+                if (!modelsResp.ok) throw new Error(`Model Check Failed`);
                 
                 const modelsData = await modelsResp.json();
                 
                 let chosenModel = modelsData.models.find(m => m.name.includes('flash') && m.supportedGenerationMethods.includes('generateContent'))?.name;
-                if (!chosenModel) {
-                    chosenModel = modelsData.models.find(m => m.name.includes('pro') && m.supportedGenerationMethods.includes('generateContent'))?.name;
+                if (!chosenModel) chosenModel = modelsData.models.find(m => m.supportedGenerationMethods.includes('generateContent'))?.name;
+                if (!chosenModel) throw new Error("No text models found.");
+
+                let prompt = "";
+                if (currentAIMode === 'advice') {
+                    prompt = `Alferenzo and Lesly are struggling to get their toddler, Ava, to sleep. Here are tonight's notes: "${currentNotes}". Give 2 short, highly practical, soothing tips to help her settle down. Keep it brief and encouraging. Format as a bulleted list. Do not use asterisks or bolding.`;
+                } else {
+                    prompt = currentNotes; 
                 }
-                
-                if (!chosenModel) {
-                    chosenModel = modelsData.models.find(m => m.supportedGenerationMethods.includes('generateContent'))?.name;
-                }
-
-                if (!chosenModel) throw new Error("No suitable text models found for this API key.");
-
-                aiText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing sleep patterns...';
-
-                const prompt = `Alferenzo and Lesly are struggling to get their toddler, Ava, to sleep. Here are tonight's notes: "${currentNotes}". Give 2-3 short, highly practical, soothing tips to help her settle down and stop tossing and turning right now. Keep it brief and encouraging. Format as a bulleted list. Do not use asterisks or bolding.`;
 
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${chosenModel}:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
@@ -595,22 +856,42 @@
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errorData}`);
-                }
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
                 const data = await response.json();
-                
                 if (data.error) throw new Error(data.error.message);
                 
-                let textResult = data.candidates[0].content.parts[0].text;
-                textResult = textResult.replace(/\n/g, '<br>').replace(/\*/g, '');
-                aiText.innerHTML = `<strong>Using ${chosenModel.replace('models/', '')}:</strong><br><br>${textResult}`;
+                rawAIResult = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
+                aiText.innerHTML = rawAIResult.replace(/\n/g, '<br>');
+                
+                if(currentAIMode === 'advice') {
+                    document.getElementById('btn-copy-ai').style.display = 'block';
+                    document.getElementById('btn-copy-ai').innerText = "Copy to Notes";
+                } else {
+                    document.getElementById('btn-copy-ai').style.display = 'block';
+                    document.getElementById('btn-copy-ai').innerText = "Copy to Clipboard";
+                }
 
             } catch (err) {
-                aiText.innerHTML = `<strong><i class="fa-solid fa-triangle-exclamation"></i> Debug Error:</strong><br><span style="color:#ef4444; font-size:12px; word-break: break-all;">${err.message}</span>`;
-                console.error("Full AI Error:", err);
+                aiText.innerHTML = `<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Could not reach AI.</span>`;
+            }
+        }
+
+        function copyAIToNotes() {
+            if (currentAIMode === 'advice') {
+                const feedbackBox = document.getElementById('modal-feedback');
+                const existingText = feedbackBox.value;
+                if (existingText.trim() === "") {
+                    feedbackBox.value = "AI Advice:\n" + rawAIResult;
+                } else {
+                    feedbackBox.value = existingText + "\n\n--- AI Advice ---\n" + rawAIResult;
+                }
+                closeAIDialog();
+            } else {
+                navigator.clipboard.writeText(rawAIResult).then(() => {
+                    document.getElementById('btn-copy-ai').innerText = "Copied!";
+                    setTimeout(() => closeAIDialog(), 1500);
+                });
             }
         }
     </script>
