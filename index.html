@@ -52,7 +52,7 @@
         .btn-main:active { transform: scale(0.95); }
         
         /* Content Area */
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; display: none; animation: fadeIn 0.5s; }
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 140px; display: none; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Modern Calendar */
@@ -78,8 +78,8 @@
         .cal-cell.lesly-shift { background: var(--lesly-bg); color: var(--lesly-color); border: 2px solid rgba(219, 39, 119, 0.2); }
         .cal-cell.today::after { content: ''; position: absolute; bottom: 4px; width: 6px; height: 6px; border-radius: 50%; background-color: var(--text-main); }
 
-        /* Floating Pill Button */
-        .pill-container { position: absolute; bottom: 30px; width: 100%; display: flex; justify-content: center; pointer-events: none; z-index: 50; display: none; }
+        /* Floating Pill Button - MOVED UP */
+        .pill-container { position: absolute; bottom: 70px; width: 100%; display: flex; justify-content: center; pointer-events: none; z-index: 50; display: none; }
         .btn-pill { 
             background: var(--text-main); color: white; border: none; padding: 15px 35px; 
             border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; pointer-events: auto;
@@ -88,20 +88,20 @@
         }
         .btn-pill:active { transform: scale(0.95); box-shadow: 0 5px 15px rgba(30, 41, 59, 0.2); }
 
-        /* Bottom Sheet Modal (Event Details / Feedback) */
+        /* Bottom Sheet Modal - ADDED PADDING TO MOVE BUTTONS UP */
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: flex-end; z-index: 100; opacity: 0; transition: opacity 0.3s; }
-        .modal-content { background: #ffffff; width: 100%; padding: 30px 25px 40px; border-radius: 30px 30px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); max-height: 85vh; overflow-y: auto; }
+        .modal-content { background: #ffffff; width: 100%; padding: 30px 25px 60px; border-radius: 30px 30px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); max-height: 85vh; overflow-y: auto; }
         .modal-overlay.active { opacity: 1; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
         
         .modal-drag-bar { width: 40px; height: 5px; background: #e2e8f0; border-radius: 5px; margin: 0 auto 20px; }
         .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
         .modal-header h2 { font-size: 22px; color: var(--text-main); margin-bottom: 5px; }
-        .modal-date { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+        .modal-date { font-size: 13px; font-weight: 600; display: inline-block; padding: 4px 10px; border-radius: 12px; margin-top: 5px; }
         
         /* Modal Actions */
         .action-row { display: flex; gap: 10px; margin-bottom: 25px; }
-        .btn-swap { flex: 1; background: #f1f5f9; border: none; padding: 12px; border-radius: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-swap { flex: 1; background: #f1f5f9; border: none; padding: 14px; border-radius: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-swap:active { background: #e2e8f0; }
 
         /* Feedback Area */
@@ -116,7 +116,7 @@
         .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 5px; font-weight: 600;}
         .form-group input, .form-group select { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 15px; background: #f8fafc; outline: none; }
 
-        .btn-save { background: var(--text-main); color: white; border: none; padding: 16px; border-radius: 16px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .btn-save { background: var(--text-main); color: white; border: none; padding: 16px; border-radius: 16px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -124,11 +124,13 @@
     <div class="app-container">
         <div class="header" id="app-header" style="display: none;">
             <h1>Ava's Four Day Care</h1>
-            <p>Schedule & Notes</p> </div>
+            <p>Schedule & Notes</p>
+        </div>
 
         <div id="login-screen">
             <i class="fa-solid fa-calendar-check hero-icon"></i>
-            <h2 style="margin-bottom: 10px; color: var(--text-main);">Ava's Four Day Care App</h2> <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 14px;">Log in to sync with the calendar.</p>
+            <h2 style="margin-bottom: 10px; color: var(--text-main);">Ava's Four Day Care App</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 14px;">Log in to sync with the calendar.</p>
             <button id="authorize_button" class="btn-main" style="display: none;" onclick="handleAuthClick()">Connect Google Calendar</button>
             <div id="status-msg" style="margin-top: 15px; font-size: 13px; color: var(--text-muted);">Initializing...</div>
         </div>
@@ -146,13 +148,12 @@
                 </div>
                 <div id="cal-days" class="cal-grid"></div>
             </div>
-            
             <p id="loading-txt" style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 14px;"></p>
         </div>
 
         <div class="pill-container" id="fab-pill">
             <button class="btn-pill" onclick="openCreateMode()">
-                <i class="fa-solid fa-plus"></i> New Shift
+                <i class="fa-solid fa-plus"></i> New Shift Block
             </button>
         </div>
 
@@ -162,33 +163,31 @@
                 
                 <div id="modal-view-mode">
                     <div class="modal-header">
-                        <div>
+                        <div style="width: 100%;">
                             <h2 id="modal-title">Shift Details</h2>
-                            <p class="modal-date" id="modal-date">Date range</p>
+                            <p id="modal-subtitle" style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;"></p>
+                            <span class="modal-date" id="modal-date">Specific Date</span>
                         </div>
                         <button onclick="closeModal()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
                     </div>
 
                     <div class="action-row">
-                        <button class="btn-swap" onclick="swapShift()">
-                            <i class="fa-solid fa-arrows-rotate"></i> Swap Shift
-                        </button>
-                        <button class="btn-swap" style="color: #ef4444; flex: 0.5;" onclick="deleteEvent()">
-                            <i class="fa-regular fa-trash-can"></i>
+                        <button class="btn-swap" onclick="swapSpecificDay()" id="btn-swap-day">
+                            <i class="fa-solid fa-arrows-rotate"></i> Swap this Day
                         </button>
                     </div>
 
                     <div class="feedback-section">
-                        <label><i class="fa-regular fa-comment-dots"></i> Daily Feedback & Notes</label>
-                        <textarea id="modal-feedback" placeholder="How was Ava's day? Leave notes here for the family..."></textarea>
+                        <label><i class="fa-regular fa-comment-dots"></i> Daily Notes & Feedback</label>
+                        <textarea id="modal-feedback" placeholder="How was Ava's day?"></textarea>
                     </div>
 
-                    <button class="btn-save" onclick="saveFeedback()">Save Updates</button>
+                    <button class="btn-save" onclick="saveDayUpdates()">Save Updates</button>
                 </div>
 
                 <div id="modal-create-mode" class="create-form">
                     <div class="modal-header">
-                        <h2>Add New Shift</h2>
+                        <h2>Add 4-Day Block</h2>
                         <button onclick="closeModal()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
                     </div>
                     
@@ -207,7 +206,7 @@
                         <label>End Date</label>
                         <input type="date" id="create-end">
                     </div>
-                    <button class="btn-save" onclick="createNewShift()">Create Shift</button>
+                    <button class="btn-save" onclick="createNewShift()">Create Block</button>
                 </div>
 
             </div>
@@ -218,7 +217,6 @@
     <script src="https://accounts.google.com/gsi/client"></script>
 
     <script>
-        // --- CREDENTIALS ---
         const CLIENT_ID = '728744386309-ocoa425l1ummb759h3dthefsf8i9q15g.apps.googleusercontent.com';
         const CALENDAR_ID = 'family11537808756268491091@group.calendar.google.com';
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
@@ -227,7 +225,10 @@
         let tokenClient;
         let allEvents = [];
         let currentMonth = new Date();
+        
         let activeEvent = null; 
+        let activeDateStr = null; // Stores the specific day clicked (YYYY-MM-DD)
+        let activeAppData = null; // Stores the parsed JSON metadata
 
         window.onload = function() {
             if (typeof gapi !== 'undefined') {
@@ -238,12 +239,8 @@
         async function initializeGapiClient() {
             try {
                 await gapi.client.init({ discoveryDocs: [DISCOVERY_DOC] });
-                
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID, scope: SCOPES, callback: '', 
-                });
+                tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '' });
 
-                // Auto-Login Check (Persistent Session)
                 const savedToken = localStorage.getItem('ava_app_token');
                 const tokenExp = localStorage.getItem('ava_app_token_exp');
                 
@@ -263,10 +260,8 @@
         function handleAuthClick() {
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) { throw (resp); }
-                
                 localStorage.setItem('ava_app_token', resp.access_token);
                 localStorage.setItem('ava_app_token_exp', Date.now() + ((resp.expires_in - 60) * 1000));
-                
                 showAppUI();
                 await fetchEvents();
             };
@@ -280,7 +275,15 @@
             document.getElementById('fab-pill').style.display = 'flex';
         }
 
-        // --- FETCH DATA ---
+        // --- SMART APP DATA LOGIC ---
+        // We store Swaps and Feedback as JSON inside the Google Calendar event description
+        function getAppData(event) {
+            try {
+                if(event.description) return JSON.parse(event.description);
+            } catch(e) { /* Ignore non-JSON descriptions */ }
+            return { feedback: {}, swaps: {} };
+        }
+
         async function fetchEvents() {
             document.getElementById('loading-txt').innerText = "Syncing shifts...";
             try {
@@ -305,7 +308,6 @@
             }
         }
 
-        // --- CALENDAR LOGIC ---
         function changeMonth(dir) {
             currentMonth.setMonth(currentMonth.getMonth() + dir);
             renderCalendar();
@@ -330,8 +332,12 @@
                 const cellDate = new Date(year, month, i);
                 const isToday = cellDate.toDateString() === today.toDateString();
                 
+                // Build proper date string YYYY-MM-DD
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                
                 let shiftClass = '';
                 let targetEvent = null;
+                let activeOwner = '';
 
                 for (let e of allEvents) {
                     const s = new Date(e.start.date || e.start.dateTime);
@@ -342,45 +348,99 @@
                     
                     if(cellDate >= s && cellDate <= eEnd) {
                         targetEvent = e;
-                        shiftClass = e.summary.toLowerCase().includes('alferenzo') ? 'alf-shift' : 'lesly-shift';
+                        
+                        // Check if there is a swap specifically for THIS day
+                        const appData = getAppData(e);
+                        activeOwner = appData.swaps && appData.swaps[dateStr] ? appData.swaps[dateStr] : e.summary;
+                        
+                        shiftClass = activeOwner.toLowerCase().includes('alferenzo') ? 'alf-shift' : 'lesly-shift';
                         break;
                     }
                 }
 
                 const classes = `cal-cell ${isToday ? 'today' : ''} ${shiftClass}`;
                 
-                // FIX: Passing the event ID directly to avoid quote-breaking issues!
                 if(targetEvent) {
-                    calDays.innerHTML += `<div class="${classes}" onclick="openEventDetails('${targetEvent.id}')">${i}</div>`;
+                    calDays.innerHTML += `<div class="${classes}" onclick="openSpecificDay('${targetEvent.id}', '${dateStr}', '${activeOwner}')">${i}</div>`;
                 } else {
-                    calDays.innerHTML += `<div class="${classes}" onclick="openCreateModeFromDate('${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}')">${i}</div>`;
+                    calDays.innerHTML += `<div class="${classes}" onclick="openCreateModeFromDate('${dateStr}')">${i}</div>`;
                 }
             }
         }
 
-        // --- MODAL & ACTIONS ---
-        function openEventDetails(eventId) {
-            // Find the event from our allEvents array by its ID
+        // --- SPECIFIC DAY MODAL LOGIC ---
+        function openSpecificDay(eventId, clickedDateStr, currentOwner) {
             activeEvent = allEvents.find(e => e.id === eventId);
-            if(!activeEvent) return;
+            activeDateStr = clickedDateStr;
+            activeAppData = getAppData(activeEvent);
             
             document.getElementById('modal-view-mode').style.display = 'block';
             document.getElementById('modal-create-mode').style.display = 'none';
             
-            document.getElementById('modal-title').innerText = activeEvent.summary;
-            document.getElementById('modal-title').style.color = activeEvent.summary.toLowerCase().includes('alferenzo') ? 'var(--alf-color)' : 'var(--lesly-color)';
+            // UI - Title shows WHO is working THIS specific day
+            const isAlf = currentOwner.toLowerCase().includes('alferenzo');
+            document.getElementById('modal-title').innerText = isAlf ? "Alferenzo's Day" : "Lesly's Day";
+            document.getElementById('modal-title').style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
             
-            const startStr = new Date(activeEvent.start.date || activeEvent.start.dateTime).toLocaleDateString('en-US', {month:'short', day:'numeric'});
-            let endObj = new Date(activeEvent.end.date || activeEvent.end.dateTime);
-            if(activeEvent.start.date) endObj.setDate(endObj.getDate() - 1);
-            const endStr = endObj.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+            // UI - Subtitle reminds them of the original block
+            document.getElementById('modal-subtitle').innerText = `Part of ${activeEvent.summary} (Block)`;
+
+            // Format date for display
+            const displayDate = new Date(clickedDateStr).toLocaleDateString('en-US', {weekday: 'long', month:'short', day:'numeric'});
             
-            document.getElementById('modal-date').innerText = `${startStr} to ${endStr}`;
-            document.getElementById('modal-feedback').value = activeEvent.description || '';
+            const dateBadge = document.getElementById('modal-date');
+            dateBadge.innerText = displayDate;
+            dateBadge.style.backgroundColor = isAlf ? 'var(--alf-bg)' : 'var(--lesly-bg)';
+            dateBadge.style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
+            
+            // Load specific day's feedback
+            const feedbackInput = document.getElementById('modal-feedback');
+            feedbackInput.value = activeAppData.feedback && activeAppData.feedback[clickedDateStr] ? activeAppData.feedback[clickedDateStr] : '';
 
             showModal();
         }
 
+        function swapSpecificDay() {
+            // Determine current owner of this specific day
+            let currentOwner = activeAppData.swaps && activeAppData.swaps[activeDateStr] ? activeAppData.swaps[activeDateStr] : activeEvent.summary;
+            let newOwner = currentOwner.toLowerCase().includes('alferenzo') ? "Lesly's turn with Ava" : "Alferenzo's turn with Ava";
+            
+            if(confirm(`Swap ${new Date(activeDateStr).toLocaleDateString('en-US', {weekday:'short'})} to ${newOwner}?`)) {
+                if(!activeAppData.swaps) activeAppData.swaps = {};
+                
+                // If the new owner matches the original block owner, just remove the swap
+                if (newOwner === activeEvent.summary) {
+                    delete activeAppData.swaps[activeDateStr];
+                } else {
+                    activeAppData.swaps[activeDateStr] = newOwner;
+                }
+                saveDayUpdates();
+            }
+        }
+
+        async function saveDayUpdates() {
+            const feedbackText = document.getElementById('modal-feedback').value;
+            
+            if(!activeAppData.feedback) activeAppData.feedback = {};
+            activeAppData.feedback[activeDateStr] = feedbackText;
+
+            // Save the data as a JSON string in the Google Calendar description
+            activeEvent.description = JSON.stringify(activeAppData);
+            
+            document.getElementById('modal-title').innerText = "Saving...";
+            
+            try {
+                await gapi.client.calendar.events.patch({
+                    calendarId: CALENDAR_ID,
+                    eventId: activeEvent.id,
+                    resource: { description: activeEvent.description }
+                });
+                closeModal();
+                await fetchEvents();
+            } catch (err) { alert("Failed to save. Refresh and try again."); }
+        }
+
+        // --- CREATE BLOCK LOGIC ---
         function openCreateMode() {
             const todayStr = new Date().toISOString().split('T')[0];
             openCreateModeFromDate(todayStr);
@@ -391,55 +451,10 @@
             document.getElementById('modal-create-mode').style.display = 'block';
             
             document.getElementById('create-start').value = dateStr;
-            let tmrw = new Date(dateStr); tmrw.setDate(tmrw.getDate() + 1);
+            let tmrw = new Date(dateStr); tmrw.setDate(tmrw.getDate() + 3); // Default to 4 days
             document.getElementById('create-end').value = tmrw.toISOString().split('T')[0];
             
             showModal();
-        }
-
-        function showModal() {
-            const overlay = document.getElementById('event-modal');
-            overlay.style.display = 'flex';
-            setTimeout(() => overlay.classList.add('active'), 10);
-        }
-
-        function closeModal() {
-            const overlay = document.getElementById('event-modal');
-            overlay.classList.remove('active');
-            setTimeout(() => overlay.style.display = 'none', 300);
-        }
-
-        // --- API CALLS (SWAP, FEEDBACK, CREATE) ---
-        async function swapShift() {
-            const currentTitle = activeEvent.summary;
-            const newTitle = currentTitle.toLowerCase().includes('alferenzo') ? "Lesly's turn with Ava" : "Alferenzo's turn with Ava";
-            
-            if(confirm(`Swap this to ${newTitle}?`)) {
-                activeEvent.summary = newTitle;
-                await updateGoogleEvent(activeEvent);
-            }
-        }
-
-        async function saveFeedback() {
-            const feedbackText = document.getElementById('modal-feedback').value;
-            activeEvent.description = feedbackText;
-            await updateGoogleEvent(activeEvent);
-        }
-
-        async function updateGoogleEvent(updatedEventObj) {
-            document.getElementById('modal-title').innerText = "Saving...";
-            try {
-                await gapi.client.calendar.events.patch({
-                    calendarId: CALENDAR_ID,
-                    eventId: updatedEventObj.id,
-                    resource: {
-                        summary: updatedEventObj.summary,
-                        description: updatedEventObj.description
-                    }
-                });
-                closeModal();
-                await fetchEvents();
-            } catch (err) { alert("Failed to save. Refresh and try again."); }
         }
 
         async function createNewShift() {
@@ -454,25 +469,32 @@
             const googleEndDate = endObj.toISOString().split('T')[0];
 
             closeModal();
-            document.getElementById('loading-txt').innerText = "Creating shift...";
+            document.getElementById('loading-txt').innerText = "Creating shift block...";
 
             try {
                 await gapi.client.calendar.events.insert({
                     calendarId: CALENDAR_ID,
-                    resource: { summary: summary, start: { date: startVal }, end: { date: googleEndDate } }
+                    resource: { 
+                        summary: summary, 
+                        start: { date: startVal }, 
+                        end: { date: googleEndDate },
+                        description: "{}" // Initialize empty JSON for app data
+                    }
                 });
                 await fetchEvents();
             } catch (err) { alert("Failed to create."); }
         }
 
-        async function deleteEvent() {
-            if(!confirm("Delete this shift completely?")) return;
-            closeModal();
-            document.getElementById('loading-txt').innerText = "Deleting...";
-            try {
-                await gapi.client.calendar.events.delete({ calendarId: CALENDAR_ID, eventId: activeEvent.id });
-                await fetchEvents();
-            } catch (err) { alert("Failed to delete."); }
+        function showModal() {
+            const overlay = document.getElementById('event-modal');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+        }
+
+        function closeModal() {
+            const overlay = document.getElementById('event-modal');
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.style.display = 'none', 300);
         }
     </script>
 </body>
