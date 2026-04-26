@@ -124,13 +124,11 @@
     <div class="app-container">
         <div class="header" id="app-header" style="display: none;">
             <h1>Ava's Four Day Care</h1>
-            <p>Family Schedule & Notes</p>
-        </div>
+            <p>Schedule & Notes</p> </div>
 
         <div id="login-screen">
             <i class="fa-solid fa-calendar-check hero-icon"></i>
-            <h2 style="margin-bottom: 10px; color: var(--text-main);">Ava's Care App</h2>
-            <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 14px;">Log in to sync with the family calendar.</p>
+            <h2 style="margin-bottom: 10px; color: var(--text-main);">Ava's Four Day Care App</h2> <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 14px;">Log in to sync with the calendar.</p>
             <button id="authorize_button" class="btn-main" style="display: none;" onclick="handleAuthClick()">Connect Google Calendar</button>
             <div id="status-msg" style="margin-top: 15px; font-size: 13px; color: var(--text-muted);">Initializing...</div>
         </div>
@@ -229,7 +227,7 @@
         let tokenClient;
         let allEvents = [];
         let currentMonth = new Date();
-        let activeEvent = null; // Stores the currently opened event object
+        let activeEvent = null; 
 
         window.onload = function() {
             if (typeof gapi !== 'undefined') {
@@ -250,12 +248,10 @@
                 const tokenExp = localStorage.getItem('ava_app_token_exp');
                 
                 if (savedToken && tokenExp && Date.now() < parseInt(tokenExp)) {
-                    // Token is still valid! Skip login screen.
                     gapi.client.setToken({ access_token: savedToken });
                     showAppUI();
                     await fetchEvents();
                 } else {
-                    // Needs manual login
                     document.getElementById('status-msg').style.display = 'none';
                     document.getElementById('authorize_button').style.display = 'block';
                 }
@@ -268,7 +264,6 @@
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) { throw (resp); }
                 
-                // Save token so we don't have to login on refresh (lasts ~1 hour)
                 localStorage.setItem('ava_app_token', resp.access_token);
                 localStorage.setItem('ava_app_token_exp', Date.now() + ((resp.expires_in - 60) * 1000));
                 
@@ -306,7 +301,7 @@
                 renderCalendar();
             } catch (err) {
                 document.getElementById('loading-txt').innerText = "Session expired. Please refresh.";
-                localStorage.removeItem('ava_app_token'); // Clear bad token
+                localStorage.removeItem('ava_app_token'); 
             }
         }
 
@@ -335,7 +330,6 @@
                 const cellDate = new Date(year, month, i);
                 const isToday = cellDate.toDateString() === today.toDateString();
                 
-                // Find if this day belongs to a shift
                 let shiftClass = '';
                 let targetEvent = null;
 
@@ -355,11 +349,9 @@
 
                 const classes = `cal-cell ${isToday ? 'today' : ''} ${shiftClass}`;
                 
-                // If it has an event, make it clickable to open that event
+                // FIX: Passing the event ID directly to avoid quote-breaking issues!
                 if(targetEvent) {
-                    // We must escape quotes in JSON string
-                    const eventJson = encodeURIComponent(JSON.stringify(targetEvent));
-                    calDays.innerHTML += `<div class="${classes}" onclick="openEventDetails('${eventJson}')">${i}</div>`;
+                    calDays.innerHTML += `<div class="${classes}" onclick="openEventDetails('${targetEvent.id}')">${i}</div>`;
                 } else {
                     calDays.innerHTML += `<div class="${classes}" onclick="openCreateModeFromDate('${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}')">${i}</div>`;
                 }
@@ -367,13 +359,14 @@
         }
 
         // --- MODAL & ACTIONS ---
-        function openEventDetails(eventJsonStr) {
-            activeEvent = JSON.parse(decodeURIComponent(eventJsonStr));
+        function openEventDetails(eventId) {
+            // Find the event from our allEvents array by its ID
+            activeEvent = allEvents.find(e => e.id === eventId);
+            if(!activeEvent) return;
             
             document.getElementById('modal-view-mode').style.display = 'block';
             document.getElementById('modal-create-mode').style.display = 'none';
             
-            // Set UI details
             document.getElementById('modal-title').innerText = activeEvent.summary;
             document.getElementById('modal-title').style.color = activeEvent.summary.toLowerCase().includes('alferenzo') ? 'var(--alf-color)' : 'var(--lesly-color)';
             
@@ -383,8 +376,6 @@
             const endStr = endObj.toLocaleDateString('en-US', {month:'short', day:'numeric'});
             
             document.getElementById('modal-date').innerText = `${startStr} to ${endStr}`;
-            
-            // Load Feedback from Google Calendar 'description' field
             document.getElementById('modal-feedback').value = activeEvent.description || '';
 
             showModal();
@@ -458,7 +449,6 @@
 
             if(!startVal || !endVal) return alert("Select dates.");
 
-            // Add 1 day to end date for Google API requirement
             let endObj = new Date(endVal);
             endObj.setDate(endObj.getDate() + 1);
             const googleEndDate = endObj.toISOString().split('T')[0];
