@@ -9,9 +9,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --alf-color: #008eb3; /* Deep Teal */
+            --alf-color: #008eb3; 
             --alf-bg: #e0f2fe;
-            --lesly-color: #db2777; /* Rose */
+            --lesly-color: #db2777; 
             --lesly-bg: #fce7f3;
             --bg-color: #f0f4f8;
             --card-bg: rgba(255, 255, 255, 0.9);
@@ -23,7 +23,6 @@
 
         body { background: linear-gradient(135deg, #e0e8f5, #f8f9fa); display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; }
 
-        /* Modern App Container */
         .app-container {
             width: 100%; max-width: 450px;
             height: 100vh; max-height: 900px;
@@ -33,29 +32,28 @@
             background: transparent;
         }
 
-        /* Glassmorphism Header */
         .header { 
-            padding: 40px 20px 20px; text-align: center; 
+            padding: 40px 20px 15px; text-align: center; 
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255,255,255,0.5);
-            z-index: 10;
+            z-index: 10; display: flex; flex-direction: column; align-items: center;
         }
         .header h1 { font-size: 22px; color: var(--text-main); font-weight: 800; letter-spacing: -0.5px; }
         .header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; font-weight: 500; }
 
-        /* Login Screen */
+        /* Install Button */
+        .btn-install { background: #1e293b; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-top: 10px; cursor: pointer; display: none; gap: 6px; align-items: center; }
+
         #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 30px; text-align: center; }
         .hero-icon { font-size: 70px; color: var(--alf-color); margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
         .btn-main { background: var(--text-main); color: white; border: none; padding: 16px 32px; border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: transform 0.2s; }
         .btn-main:active { transform: scale(0.95); }
         
-        /* Content Area */
         .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 140px; display: none; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Modern Calendar */
         .cal-wrapper { background: var(--card-bg); border-radius: 24px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.8); }
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .cal-header button { background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%; color: var(--text-main); font-size: 16px; cursor: pointer; transition: background 0.2s; }
@@ -65,30 +63,18 @@
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
         .cal-day-label { font-size: 12px; color: var(--text-muted); font-weight: 700; padding-bottom: 10px; text-transform: uppercase; }
         
-        .cal-cell { 
-            aspect-ratio: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            font-size: 15px; border-radius: 14px; font-weight: 600; color: var(--text-main); 
-            cursor: pointer; transition: all 0.2s; position: relative;
-        }
+        .cal-cell { aspect-ratio: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 15px; border-radius: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: all 0.2s; position: relative; }
         .cal-cell:active { transform: scale(0.9); }
         .cal-cell.empty { visibility: hidden; }
         
-        /* Event Coloring on Calendar */
         .cal-cell.alf-shift { background: var(--alf-bg); color: var(--alf-color); border: 2px solid rgba(0, 142, 179, 0.2); }
         .cal-cell.lesly-shift { background: var(--lesly-bg); color: var(--lesly-color); border: 2px solid rgba(219, 39, 119, 0.2); }
         .cal-cell.today::after { content: ''; position: absolute; bottom: 4px; width: 6px; height: 6px; border-radius: 50%; background-color: var(--text-main); }
 
-        /* Floating Pill Button */
         .pill-container { position: absolute; bottom: 70px; width: 100%; display: flex; justify-content: center; pointer-events: none; z-index: 50; display: none; }
-        .btn-pill { 
-            background: var(--text-main); color: white; border: none; padding: 15px 35px; 
-            border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; pointer-events: auto;
-            box-shadow: 0 10px 25px rgba(30, 41, 59, 0.3); display: flex; align-items: center; gap: 10px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+        .btn-pill { background: var(--text-main); color: white; border: none; padding: 15px 35px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; pointer-events: auto; box-shadow: 0 10px 25px rgba(30, 41, 59, 0.3); display: flex; align-items: center; gap: 10px; transition: transform 0.2s, box-shadow 0.2s; }
         .btn-pill:active { transform: scale(0.95); box-shadow: 0 5px 15px rgba(30, 41, 59, 0.2); }
 
-        /* Bottom Sheet Modal */
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: flex-end; z-index: 100; opacity: 0; transition: opacity 0.3s; }
         .modal-content { background: #ffffff; width: 100%; padding: 30px 25px 60px; border-radius: 30px 30px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); max-height: 85vh; overflow-y: auto; }
         .modal-overlay.active { opacity: 1; }
@@ -99,24 +85,33 @@
         .modal-header h2 { font-size: 22px; color: var(--text-main); margin-bottom: 5px; }
         .modal-date { font-size: 13px; font-weight: 600; display: inline-block; padding: 4px 10px; border-radius: 12px; margin-top: 5px; }
         
-        /* Modal Actions */
         .action-row { display: flex; gap: 10px; margin-bottom: 25px; }
         .btn-swap { flex: 1; background: #f1f5f9; border: none; padding: 14px; border-radius: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-swap:active { background: #e2e8f0; }
 
-        /* Feedback Area */
         .feedback-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 15px; margin-bottom: 20px; }
         .feedback-section label { display: block; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         textarea { width: 100%; border: none; background: transparent; resize: none; font-size: 15px; color: var(--text-main); min-height: 80px; outline: none; line-height: 1.5; }
         textarea::placeholder { color: #cbd5e1; }
 
-        /* Create View inside Modal */
         .create-form { display: none; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 5px; font-weight: 600;}
         .form-group input, .form-group select { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 15px; background: #f8fafc; outline: none; }
 
         .btn-save { background: var(--text-main); color: white; border: none; padding: 16px; border-radius: 16px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 15px; }
+
+        /* CUSTOM ALERT/CONFIRM DIALOG */
+        .dialog-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 999; opacity: 0; transition: opacity 0.2s; }
+        .dialog-box { background: white; width: 85%; max-width: 320px; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2); transform: scale(0.9); transition: transform 0.2s; }
+        .dialog-overlay.active { opacity: 1; }
+        .dialog-overlay.active .dialog-box { transform: scale(1); }
+        .dialog-title { font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
+        .dialog-msg { font-size: 14px; color: var(--text-muted); margin-bottom: 25px; line-height: 1.4; }
+        .dialog-actions { display: flex; gap: 10px; }
+        .dialog-btn { flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; }
+        .dialog-btn-cancel { background: #f1f5f9; color: var(--text-main); }
+        .dialog-btn-confirm { background: var(--text-main); color: white; }
     </style>
 </head>
 <body>
@@ -125,6 +120,7 @@
         <div class="header" id="app-header" style="display: none;">
             <h1>Ava's Four Day Care</h1>
             <p>Schedule & Notes</p>
+            <button class="btn-install" id="install-btn" onclick="triggerInstall()"><i class="fa-solid fa-download"></i> Install App</button>
         </div>
 
         <div id="login-screen">
@@ -173,7 +169,10 @@
 
                     <div class="action-row">
                         <button class="btn-swap" onclick="swapSpecificDay()" id="btn-swap-day">
-                            <i class="fa-solid fa-arrows-rotate"></i> Swap this Day
+                            <i class="fa-solid fa-arrows-rotate"></i> Swap
+                        </button>
+                        <button class="btn-swap" onclick="deleteSpecificDay()" style="color: #ef4444; flex: 0.6;">
+                            <i class="fa-regular fa-trash-can"></i> Delete
                         </button>
                     </div>
 
@@ -208,9 +207,20 @@
                     </div>
                     <button class="btn-save" onclick="createNewShift()">Create Shift</button>
                 </div>
-
             </div>
         </div>
+
+        <div class="dialog-overlay" id="custom-dialog">
+            <div class="dialog-box">
+                <div class="dialog-title" id="dialog-title">Title</div>
+                <div class="dialog-msg" id="dialog-msg">Message</div>
+                <div class="dialog-actions">
+                    <button class="dialog-btn dialog-btn-cancel" id="dialog-cancel" onclick="closeCustomDialog(false)">Cancel</button>
+                    <button class="dialog-btn dialog-btn-confirm" id="dialog-confirm" onclick="closeCustomDialog(true)">OK</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script src="https://apis.google.com/js/api.js"></script>
@@ -229,10 +239,86 @@
         let activeEvent = null; 
         let activeDateStr = null; 
         let activeAppData = null; 
+        let deferredPrompt = null;
 
+        // --- PWA INSTALL LOGIC ---
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-btn').style.display = 'flex';
+        });
+
+        // Always show install button if on iOS (since they don't fire the event)
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if(isIOS && !window.navigator.standalone) {
+            document.getElementById('install-btn').style.display = 'flex';
+        }
+
+        function triggerInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('install-btn').style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                });
+            } else if (isIOS) {
+                showAppAlert("Install App", "To install on iPhone:\nTap the 'Share' icon at the bottom of Safari, then select 'Add to Home Screen'.");
+            }
+        }
+
+        // --- CUSTOM IN-APP DIALOGS ---
+        let dialogCallback = null;
+
+        function showAppConfirm(title, msg, confirmText, callback) {
+            document.getElementById('dialog-title').innerText = title;
+            document.getElementById('dialog-msg').innerText = msg;
+            document.getElementById('dialog-confirm').innerText = confirmText;
+            document.getElementById('dialog-cancel').style.display = 'block';
+            
+            const overlay = document.getElementById('custom-dialog');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+            dialogCallback = callback;
+        }
+
+        function showAppAlert(title, msg) {
+            document.getElementById('dialog-title').innerText = title;
+            document.getElementById('dialog-msg').innerText = msg;
+            document.getElementById('dialog-confirm').innerText = "OK";
+            document.getElementById('dialog-cancel').style.display = 'none';
+            
+            const overlay = document.getElementById('custom-dialog');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+            dialogCallback = null;
+        }
+
+        function closeCustomDialog(result) {
+            const overlay = document.getElementById('custom-dialog');
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                if(result && dialogCallback) dialogCallback();
+            }, 200);
+        }
+
+        // --- FORMAT CUSTOM DATE ---
+        function formatCustomDate(dateStr) {
+            const d = new Date(dateStr);
+            const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+            const dayName = days[d.getDay()];
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const yyyy = d.getFullYear();
+            return `${dayName}, ${dd}/${mm}/${yyyy}`;
+        }
+
+        // --- INITIALIZATION ---
         window.onload = function() {
             if (typeof gapi !== 'undefined') {
-                gapi.load('client', { callback: initializeGapiClient, onerror: () => alert("GAPI Load Error") });
+                gapi.load('client', { callback: initializeGapiClient, onerror: () => showAppAlert("Error", "Google Library failed to load.") });
             }
         };
 
@@ -270,21 +356,20 @@
 
         function showAppUI() {
             document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app-header').style.display = 'block';
+            document.getElementById('app-header').style.display = 'flex';
             document.getElementById('app-content').style.display = 'block';
             document.getElementById('fab-pill').style.display = 'flex';
         }
 
-        // --- SMART APP DATA LOGIC ---
         function getAppData(event) {
             try {
                 if(event.description) return JSON.parse(event.description);
-            } catch(e) { /* Ignore non-JSON descriptions */ }
+            } catch(e) { }
             return { feedback: {}, swaps: {} };
         }
 
         async function fetchEvents() {
-            document.getElementById('loading-txt').innerText = "Syncing shifts...";
+            document.getElementById('loading-txt').innerText = "Syncing calendar...";
             try {
                 let minDate = new Date(); minDate.setMonth(minDate.getMonth() - 2);
                 let maxDate = new Date(); maxDate.setMonth(maxDate.getMonth() + 3);
@@ -302,7 +387,7 @@
                 document.getElementById('loading-txt').innerText = "";
                 renderCalendar();
             } catch (err) {
-                document.getElementById('loading-txt').innerText = "Session expired. Please refresh.";
+                document.getElementById('loading-txt').innerText = "Session expired.";
                 localStorage.removeItem('ava_app_token'); 
             }
         }
@@ -330,7 +415,6 @@
             for(let i=1; i<=daysInMonth; i++) {
                 const cellDate = new Date(year, month, i);
                 const isToday = cellDate.toDateString() === today.toDateString();
-                
                 const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
                 
                 let shiftClass = '';
@@ -344,20 +428,20 @@
                     s.setHours(0,0,0,0); eEnd.setHours(23,59,59,999);
                     
                     if(cellDate >= s && cellDate <= eEnd) {
-                        targetEvent = e;
-                        
                         const appData = getAppData(e);
-                        // Safely determine owner for coloring
                         const activeOwner = appData.swaps && appData.swaps[dateStr] ? appData.swaps[dateStr] : e.summary;
                         
-                        shiftClass = activeOwner.toLowerCase().includes('alferenzo') ? 'alf-shift' : 'lesly-shift';
-                        break;
+                        // If this day was explicitly deleted, skip assigning it and look for overlapping shifts
+                        if (activeOwner !== "DELETED") {
+                            targetEvent = e;
+                            shiftClass = activeOwner.toLowerCase().includes('alferenzo') ? 'alf-shift' : 'lesly-shift';
+                            break;
+                        }
                     }
                 }
 
                 const classes = `cal-cell ${isToday ? 'today' : ''} ${shiftClass}`;
                 
-                // FIXED: We now ONLY pass the ID and Date. Quotes won't break the HTML anymore.
                 if(targetEvent) {
                     calDays.innerHTML += `<div class="${classes}" onclick="openSpecificDay('${targetEvent.id}', '${dateStr}')">${i}</div>`;
                 } else {
@@ -372,7 +456,6 @@
             activeDateStr = clickedDateStr;
             activeAppData = getAppData(activeEvent);
             
-            // Look up the active owner securely inside the function
             let currentOwner = activeAppData.swaps && activeAppData.swaps[clickedDateStr] ? activeAppData.swaps[clickedDateStr] : activeEvent.summary;
             
             document.getElementById('modal-view-mode').style.display = 'block';
@@ -384,15 +467,12 @@
             
             document.getElementById('modal-subtitle').innerText = `Part of ${activeEvent.summary}`;
 
-            const displayDate = new Date(clickedDateStr).toLocaleDateString('en-US', {weekday: 'long', month:'short', day:'numeric'});
-            
             const dateBadge = document.getElementById('modal-date');
-            dateBadge.innerText = displayDate;
+            dateBadge.innerText = formatCustomDate(clickedDateStr);
             dateBadge.style.backgroundColor = isAlf ? 'var(--alf-bg)' : 'var(--lesly-bg)';
             dateBadge.style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
             
-            const feedbackInput = document.getElementById('modal-feedback');
-            feedbackInput.value = activeAppData.feedback && activeAppData.feedback[clickedDateStr] ? activeAppData.feedback[clickedDateStr] : '';
+            document.getElementById('modal-feedback').value = activeAppData.feedback && activeAppData.feedback[clickedDateStr] ? activeAppData.feedback[clickedDateStr] : '';
 
             showModal();
         }
@@ -401,16 +481,26 @@
             let currentOwner = activeAppData.swaps && activeAppData.swaps[activeDateStr] ? activeAppData.swaps[activeDateStr] : activeEvent.summary;
             let newOwner = currentOwner.toLowerCase().includes('alferenzo') ? "Lesly's turn with Ava" : "Alferenzo's turn with Ava";
             
-            if(confirm(`Swap ${new Date(activeDateStr).toLocaleDateString('en-US', {weekday:'short'})} to ${newOwner}?`)) {
+            const dateFormatted = formatCustomDate(activeDateStr);
+            
+            showAppConfirm("Swap Day", `Are you sure you want to swap ${dateFormatted} to ${newOwner}?`, "Yes, Swap It", () => {
                 if(!activeAppData.swaps) activeAppData.swaps = {};
+                if (newOwner === activeEvent.summary) delete activeAppData.swaps[activeDateStr];
+                else activeAppData.swaps[activeDateStr] = newOwner;
                 
-                if (newOwner === activeEvent.summary) {
-                    delete activeAppData.swaps[activeDateStr];
-                } else {
-                    activeAppData.swaps[activeDateStr] = newOwner;
-                }
                 saveDayUpdates();
-            }
+            });
+        }
+
+        function deleteSpecificDay() {
+            const dateFormatted = formatCustomDate(activeDateStr);
+            
+            showAppConfirm("Delete Day", `Remove ${dateFormatted} from this shift block?\n\n(This will only clear this single day, the rest of the block will remain intact).`, "Delete Day", () => {
+                if(!activeAppData.swaps) activeAppData.swaps = {};
+                // Mark this specific day as DELETED in the background data
+                activeAppData.swaps[activeDateStr] = "DELETED";
+                saveDayUpdates();
+            });
         }
 
         async function saveDayUpdates() {
@@ -420,7 +510,6 @@
             activeAppData.feedback[activeDateStr] = feedbackText;
 
             activeEvent.description = JSON.stringify(activeAppData);
-            
             document.getElementById('modal-title').innerText = "Saving...";
             
             try {
@@ -431,7 +520,7 @@
                 });
                 closeModal();
                 await fetchEvents();
-            } catch (err) { alert("Failed to save. Refresh and try again."); }
+            } catch (err) { showAppAlert("Error", "Failed to save. Check connection."); }
         }
 
         // --- CREATE SHIFT LOGIC ---
@@ -456,7 +545,7 @@
             const startVal = document.getElementById('create-start').value;
             const endVal = document.getElementById('create-end').value;
 
-            if(!startVal || !endVal) return alert("Select dates.");
+            if(!startVal || !endVal) return showAppAlert("Required", "Please select both start and end dates.");
 
             let endObj = new Date(endVal);
             endObj.setDate(endObj.getDate() + 1);
@@ -468,15 +557,10 @@
             try {
                 await gapi.client.calendar.events.insert({
                     calendarId: CALENDAR_ID,
-                    resource: { 
-                        summary: summary, 
-                        start: { date: startVal }, 
-                        end: { date: googleEndDate },
-                        description: "{}" 
-                    }
+                    resource: { summary: summary, start: { date: startVal }, end: { date: googleEndDate }, description: "{}" }
                 });
                 await fetchEvents();
-            } catch (err) { alert("Failed to create."); }
+            } catch (err) { showAppAlert("Error", "Failed to create shift."); }
         }
 
         function showModal() {
