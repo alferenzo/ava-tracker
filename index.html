@@ -26,6 +26,10 @@
 
         .app-container { width: 100%; max-width: 450px; height: 100vh; max-height: 900px; position: relative; display: flex; flex-direction: column; overflow: hidden; background: transparent; }
 
+        /* NEW: Global Loader Style */
+        #global-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.4s; }
+        .loader-icon { font-size: 50px; color: var(--alf-color); margin-bottom: 20px; animation: float 2s ease-in-out infinite; }
+
         .header { padding: 40px 20px 15px; text-align: center; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.5); z-index: 10; display: flex; justify-content: center; align-items: center; position: relative; }
         .header-text { display: flex; flex-direction: column; align-items: center; }
         .header h1 { font-size: 22px; color: var(--text-main); font-weight: 800; letter-spacing: -0.5px; }
@@ -80,7 +84,6 @@
         .btn-swap { flex: 1; background: #f1f5f9; border: none; padding: 14px; border-radius: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-swap:active { background: #e2e8f0; }
 
-        /* TRACKER STYLES */
         .trackers-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 15px; margin-bottom: 15px; }
         .tracker-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .tracker-row:last-child { margin-bottom: 0; }
@@ -134,13 +137,17 @@
             100% { transform: scale(2.5); opacity: 0; }
         }
 
-        /* NEW: Future Lock Message */
         #future-lock-msg { display: none; text-align: center; padding: 25px 10px; background: #f8fafc; border-radius: 16px; margin-bottom: 20px; border: 1px dashed #cbd5e1; }
         #future-lock-msg i { font-size: 28px; color: #94a3b8; margin-bottom: 10px; }
         #future-lock-msg p { font-size: 14px; color: var(--text-muted); font-weight: 600; margin: 0; }
     </style>
 </head>
 <body>
+
+    <div id="global-loader">
+        <i class="fa-solid fa-calendar-check loader-icon"></i>
+        <h3 style="color: var(--text-main); font-weight: 700; margin: 0;">Loading Ava's Schedule...</h3>
+    </div>
 
     <div id="distraction-mode">
         <button class="btn-close-distract" onclick="closeDistraction()">Done</button>
@@ -158,12 +165,12 @@
             <button class="btn-distract" onclick="openDistraction()"><i class="fa-solid fa-star"></i></button>
         </div>
 
-        <div id="login-screen">
+        <div id="login-screen" style="display: none;">
             <i class="fa-solid fa-calendar-check hero-icon"></i>
             <h2 style="margin-bottom: 10px; color: var(--text-main);">Ava's Four Day Care App</h2>
             <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 14px;">Log in to sync with the calendar.</p>
-            <button id="authorize_button" class="btn-main" style="display: none;" onclick="handleAuthClick()">Connect Google Calendar</button>
-            <div id="status-msg" style="margin-top: 15px; font-size: 13px; color: var(--text-muted);">Initializing...</div>
+            <button id="authorize_button" class="btn-main" onclick="handleAuthClick()">Connect Google Calendar</button>
+            <div id="status-msg" style="margin-top: 15px; font-size: 13px; color: var(--text-muted);"></div>
         </div>
 
         <div id="app-content" class="content-area">
@@ -352,6 +359,22 @@
         let rawAIResult = ""; 
         let currentAIMode = "advice"; 
 
+        // --- NEW: Timezone Bug Fix Function ---
+        // Forces the app to read your phone's local timezone (SAST) instead of jumping to UTC
+        function getLocalISODate(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        // Hide Global Loader
+        function hideLoader() {
+            const loader = document.getElementById('global-loader');
+            loader.style.opacity = '0';
+            setTimeout(() => { loader.style.display = 'none'; }, 400);
+        }
+
         function openDistraction() {
             document.getElementById('distraction-mode').style.display = 'block';
             document.getElementById('distract-hint').style.display = 'block';
@@ -482,7 +505,10 @@
         }
 
         function formatCustomDate(dateStr) {
-            const d = new Date(dateStr);
+            // Because dateStr is "YYYY-MM-DD", new Date("YYYY-MM-DD") assumes UTC. 
+            // To prevent off-by-one shifts in rendering, we explicitly parse it local:
+            const parts = dateStr.split('-');
+            const d = new Date(parts[0], parts[1] - 1, parts[2]);
             const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
             const dayName = days[d.getDay()];
             const dd = String(d.getDate()).padStart(2, '0');
@@ -493,7 +519,12 @@
 
         window.onload = function() {
             if (typeof gapi !== 'undefined') {
-                gapi.load('client', { callback: initializeGapiClient, onerror: () => showAppAlert("Error", "Google Library failed to load.") });
+                gapi.load('client', { callback: initializeGapiClient, onerror: () => {
+                    hideLoader();
+                    showAppAlert("Error", "Google Library failed to load.");
+                }});
+            } else {
+                hideLoader();
             }
         };
 
@@ -510,17 +541,21 @@
                     showAppUI();
                     await fetchEvents();
                 } else {
-                    document.getElementById('status-msg').style.display = 'none';
-                    document.getElementById('authorize_button').style.display = 'block';
+                    document.getElementById('login-screen').style.display = 'flex';
+                    hideLoader();
                 }
             } catch (err) {
+                hideLoader();
                 document.getElementById('status-msg').innerText = "Init Error: " + err.message;
             }
         }
 
         function handleAuthClick() {
+            document.getElementById('global-loader').style.display = 'flex';
+            document.getElementById('global-loader').style.opacity = '1';
+            
             tokenClient.callback = async (resp) => {
-                if (resp.error !== undefined) { throw (resp); }
+                if (resp.error !== undefined) { hideLoader(); throw (resp); }
                 localStorage.setItem('ava_app_token', resp.access_token);
                 localStorage.setItem('ava_app_token_exp', Date.now() + ((resp.expires_in - 60) * 1000));
                 showAppUI();
@@ -553,7 +588,9 @@
                 allEvents = response.result.items || [];
                 document.getElementById('loading-txt').innerText = "";
                 renderCalendar();
+                hideLoader(); // Safe to remove loader here
             } catch (err) {
+                hideLoader();
                 document.getElementById('loading-txt').innerText = "Session expired.";
                 localStorage.removeItem('ava_app_token'); 
                 document.getElementById('login-screen').style.display = 'flex';
@@ -577,14 +614,16 @@
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const calDays = document.getElementById('cal-days');
             calDays.innerHTML = '';
-            const today = new Date();
+            
+            // Generate local today string securely
+            const localTodayStr = getLocalISODate(new Date());
 
             for(let i=0; i<firstDay; i++) calDays.innerHTML += `<div class="cal-cell empty"></div>`;
 
             for(let i=1; i<=daysInMonth; i++) {
                 const cellDate = new Date(year, month, i);
-                const isToday = cellDate.toDateString() === today.toDateString();
-                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                const dateStr = getLocalISODate(cellDate); // SAFE TIMEZONE FIX
+                const isToday = (dateStr === localTodayStr); 
                 
                 let shiftClass = '';
                 let targetEvent = null;
@@ -654,17 +693,13 @@
             dateBadge.style.backgroundColor = isAlf ? 'var(--alf-bg)' : 'var(--lesly-bg)';
             dateBadge.style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
             
-            // --- NEW: Check if Future Date ---
-            const clickedDateObj = new Date(clickedDateStr);
-            const todayObj = new Date();
-            todayObj.setHours(0,0,0,0);
+            // --- TIMEZONE-SAFE FUTURE CHECK ---
+            const localTodayStr = getLocalISODate(new Date());
             
-            if (clickedDateObj > todayObj) {
-                // Hide inputs for future dates
+            if (clickedDateStr > localTodayStr) {
                 document.getElementById('interactive-content').style.display = 'none';
                 document.getElementById('future-lock-msg').style.display = 'block';
             } else {
-                // Show inputs for today or past dates
                 document.getElementById('interactive-content').style.display = 'block';
                 document.getElementById('future-lock-msg').style.display = 'none';
                 
@@ -697,21 +732,18 @@
             });
         }
 
-        // --- FIXED: Aggressive Calendar Delete ---
         function deleteEntireBlock() {
             showAppConfirm("Delete Entire Block", "WARNING: This will permanently delete this entire 4-day shift from Google Calendar.\n\nAre you sure?", "Delete Entire Block", async () => {
                 document.getElementById('modal-title').innerText = "Deleting Block...";
                 try {
-                    // 1. Tell Google to delete it
                     await gapi.client.calendar.events.delete({ calendarId: CALENDAR_ID, eventId: activeEvent.id });
                     
-                    // 2. Force it out of local memory immediately so UI doesn't show a ghost event
+                    // Immediately wipe it from local memory so the screen doesn't wait for Google
                     allEvents = allEvents.filter(e => e.id !== activeEvent.id);
                     renderCalendar();
-                    
                     closeModal();
                     
-                    // 3. Re-sync silently in the background
+                    // Silently sync the truth in the background
                     fetchEvents();
                 } catch (err) { 
                     console.error("Delete Error:", err);
@@ -741,14 +773,19 @@
             } catch (err) { showAppAlert("Error", "Failed to save. Check connection."); }
         }
 
-        function openCreateMode() { openCreateModeFromDate(new Date().toISOString().split('T')[0]); }
+        function openCreateMode() { openCreateModeFromDate(getLocalISODate(new Date())); }
 
         function openCreateModeFromDate(dateStr) {
             document.getElementById('modal-view-mode').style.display = 'none';
             document.getElementById('modal-create-mode').style.display = 'block';
             document.getElementById('create-start').value = dateStr;
-            let tmrw = new Date(dateStr); tmrw.setDate(tmrw.getDate() + 3); 
-            document.getElementById('create-end').value = tmrw.toISOString().split('T')[0];
+            
+            // TIMEZONE FIX FOR CREATING NEW SHIFTS
+            const parts = dateStr.split('-');
+            let tmrw = new Date(parts[0], parts[1] - 1, parts[2]);
+            tmrw.setDate(tmrw.getDate() + 3); 
+            document.getElementById('create-end').value = getLocalISODate(tmrw);
+            
             showModal();
         }
 
@@ -759,8 +796,11 @@
 
             if(!startVal || !endVal) return showAppAlert("Required", "Please select both start and end dates.");
 
-            let endObj = new Date(endVal); endObj.setDate(endObj.getDate() + 1);
-            const googleEndDate = endObj.toISOString().split('T')[0];
+            // Add exactly 1 calendar day to End Date to satisfy Google's full-day event logic
+            const parts = endVal.split('-');
+            let endObj = new Date(parts[0], parts[1] - 1, parts[2]);
+            endObj.setDate(endObj.getDate() + 1);
+            const googleEndDate = getLocalISODate(endObj);
 
             closeModal();
             document.getElementById('loading-txt').innerText = "Creating shift...";
@@ -829,14 +869,12 @@
             const endRaw = new Date(activeEvent.end.date || activeEvent.end.dateTime);
             const eEnd = activeEvent.start.date ? new Date(endRaw.setDate(endRaw.getDate() - 1)) : endRaw;
             
-            // Only compile data up to Today
-            const today = new Date();
-            today.setHours(0,0,0,0);
+            const localTodayStr = getLocalISODate(new Date());
             
             for (let d = new Date(s); d <= eEnd; d.setDate(d.getDate() + 1)) {
-                if(d > today) continue; // Don't include empty future dates in summary
+                const dayStr = getLocalISODate(d);
+                if(dayStr > localTodayStr) continue; // Don't include empty future dates in summary
                 
-                const dayStr = d.toISOString().split('T')[0];
                 const fb = activeAppData.feedback && activeAppData.feedback[dayStr] ? activeAppData.feedback[dayStr] : "No notes.";
                 const trks = activeAppData.trackers && activeAppData.trackers[dayStr] ? activeAppData.trackers[dayStr] : null;
                 
