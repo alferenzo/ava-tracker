@@ -31,7 +31,6 @@
         .header h1 { font-size: 22px; color: var(--text-main); font-weight: 800; letter-spacing: -0.5px; }
         .header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; font-weight: 500; }
 
-        /* NEW: Distraction Mode Trigger Button */
         .btn-distract { position: absolute; right: 20px; top: 45px; background: #fbbf24; color: #78350f; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; box-shadow: 0 4px 10px rgba(251, 191, 36, 0.4); display: flex; justify-content: center; align-items: center; transition: transform 0.2s; }
         .btn-distract:active { transform: scale(0.9); }
 
@@ -125,7 +124,6 @@
         .dialog-btn-cancel { background: #f1f5f9; color: var(--text-main); }
         .dialog-btn-confirm { background: var(--text-main); color: white; }
 
-        /* NEW: Distraction Mode Fullscreen */
         #distraction-mode { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; overflow: hidden; touch-action: none; }
         #distraction-canvas { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
         .btn-close-distract { position: absolute; top: 30px; right: 30px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 12px 20px; border-radius: 30px; font-weight: 700; font-size: 14px; z-index: 10000; cursor: pointer; backdrop-filter: blur(5px); }
@@ -135,6 +133,11 @@
             0% { transform: scale(0.2); opacity: 1; }
             100% { transform: scale(2.5); opacity: 0; }
         }
+
+        /* NEW: Future Lock Message */
+        #future-lock-msg { display: none; text-align: center; padding: 25px 10px; background: #f8fafc; border-radius: 16px; margin-bottom: 20px; border: 1px dashed #cbd5e1; }
+        #future-lock-msg i { font-size: 28px; color: #94a3b8; margin-bottom: 10px; }
+        #future-lock-msg p { font-size: 14px; color: var(--text-muted); font-weight: 600; margin: 0; }
     </style>
 </head>
 <body>
@@ -208,45 +211,52 @@
                         </button>
                     </div>
 
-                    <div class="trackers-section">
-                        <div class="tracker-row">
-                            <span class="tracker-label">🍼 Ate Well?</span>
-                            <div class="tracker-btn-group">
-                                <button class="tracker-btn" id="trk-eat-yes" onclick="setTracker('eat', 'yes')">Yes</button>
-                                <button class="tracker-btn" id="trk-eat-no" onclick="setTracker('eat', 'no')">No</button>
-                            </div>
-                        </div>
-                        <div class="tracker-row">
-                            <span class="tracker-label">🛁 Bath Done?</span>
-                            <div class="tracker-btn-group">
-                                <button class="tracker-btn" id="trk-bath-yes" onclick="setTracker('bath', 'yes')">Yes</button>
-                                <button class="tracker-btn" id="trk-bath-no" onclick="setTracker('bath', 'no')">No</button>
-                            </div>
-                        </div>
-                        <div class="tracker-row">
-                            <span class="tracker-label">😴 Nap Duration</span>
-                            <select class="tracker-select" id="trk-nap" onchange="setTracker('nap', this.value)">
-                                <option value="0">None</option>
-                                <option value="1">~1 hr</option>
-                                <option value="2">~2 hrs</option>
-                                <option value="3+">3+ hrs</option>
-                            </select>
-                        </div>
+                    <div id="future-lock-msg">
+                        <i class="fa-solid fa-lock"></i>
+                        <p>Tracking and AI features will unlock when this day arrives.</p>
                     </div>
 
-                    <div class="feedback-section">
-                        <label>
-                            <span><i class="fa-regular fa-comment-dots"></i> Daily Notes</span>
-                            <button class="mic-btn" id="mic-btn" onclick="toggleDictation()"><i class="fa-solid fa-microphone"></i></button>
-                        </label>
-                        <textarea id="modal-feedback" placeholder="How was Ava's day? Tap the mic to speak..."></textarea>
-                        
-                        <button class="ai-btn" onclick="openAIDialog('advice')"><i class="fa-solid fa-sparkles"></i> Ask AI for Sleep Advice</button>
+                    <div id="interactive-content">
+                        <div class="trackers-section">
+                            <div class="tracker-row">
+                                <span class="tracker-label">🍼 Ate Well?</span>
+                                <div class="tracker-btn-group">
+                                    <button class="tracker-btn" id="trk-eat-yes" onclick="setTracker('eat', 'yes')">Yes</button>
+                                    <button class="tracker-btn" id="trk-eat-no" onclick="setTracker('eat', 'no')">No</button>
+                                </div>
+                            </div>
+                            <div class="tracker-row">
+                                <span class="tracker-label">🛁 Bath Done?</span>
+                                <div class="tracker-btn-group">
+                                    <button class="tracker-btn" id="trk-bath-yes" onclick="setTracker('bath', 'yes')">Yes</button>
+                                    <button class="tracker-btn" id="trk-bath-no" onclick="setTracker('bath', 'no')">No</button>
+                                </div>
+                            </div>
+                            <div class="tracker-row">
+                                <span class="tracker-label">😴 Nap Duration</span>
+                                <select class="tracker-select" id="trk-nap" onchange="setTracker('nap', this.value)">
+                                    <option value="0">None</option>
+                                    <option value="1">~1 hr</option>
+                                    <option value="2">~2 hrs</option>
+                                    <option value="3+">3+ hrs</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="feedback-section">
+                            <label>
+                                <span><i class="fa-regular fa-comment-dots"></i> Daily Notes</span>
+                                <button class="mic-btn" id="mic-btn" onclick="toggleDictation()"><i class="fa-solid fa-microphone"></i></button>
+                            </label>
+                            <textarea id="modal-feedback" placeholder="How was Ava's day? Tap the mic to speak..."></textarea>
+                            
+                            <button class="ai-btn" onclick="openAIDialog('advice')"><i class="fa-solid fa-sparkles"></i> Ask AI for Sleep Advice</button>
+                        </div>
+
+                        <button class="handoff-btn" onclick="openAIDialog('handoff')"><i class="fa-solid fa-handshake"></i> Generate Shift Handoff</button>
+
+                        <button class="btn-save" onclick="saveDayUpdates()">Save Updates</button>
                     </div>
-
-                    <button class="handoff-btn" onclick="openAIDialog('handoff')"><i class="fa-solid fa-handshake"></i> Generate Shift Handoff</button>
-
-                    <button class="btn-save" onclick="saveDayUpdates()">Save Updates</button>
                     
                     <div style="text-align:center; margin-top: 15px;">
                         <button onclick="deleteEntireBlock()" style="background:none; border:none; color:#ef4444; font-size:13px; font-weight:600; text-decoration:underline; cursor:pointer;">Delete entire 4-day block from Google</button>
@@ -342,7 +352,6 @@
         let rawAIResult = ""; 
         let currentAIMode = "advice"; 
 
-        // DISTRACTION MODE LOGIC
         function openDistraction() {
             document.getElementById('distraction-mode').style.display = 'block';
             document.getElementById('distract-hint').style.display = 'block';
@@ -350,12 +359,12 @@
 
         function closeDistraction() {
             document.getElementById('distraction-mode').style.display = 'none';
-            document.getElementById('distraction-canvas').innerHTML = ''; // Clear bubbles
+            document.getElementById('distraction-canvas').innerHTML = ''; 
         }
 
         const distractCanvas = document.getElementById('distraction-canvas');
         distractCanvas.addEventListener('pointerdown', (e) => {
-            document.getElementById('distract-hint').style.display = 'none'; // hide hint on first tap
+            document.getElementById('distract-hint').style.display = 'none'; 
             
             const colors = ['#f43f5e', '#ec4899', '#d946ef', '#8b5cf6', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#fbbf24'];
             const bubble = document.createElement('div');
@@ -374,14 +383,11 @@
             
             distractCanvas.appendChild(bubble);
             
-            // Clean up DOM after animation
             setTimeout(() => bubble.remove(), 700);
         });
         
-        // Prevent default touch actions (like scrolling or zooming) on the canvas
         distractCanvas.addEventListener('touchstart', (e) => e.preventDefault(), {passive: false});
 
-        // SPEECH RECOGNITION
         let recognition = null;
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -513,7 +519,6 @@
         }
 
         function handleAuthClick() {
-            // FIX: Removed prompt: 'consent' to allow silent token renewal if already logged into Google!
             tokenClient.callback = async (resp) => {
                 if (resp.error !== undefined) { throw (resp); }
                 localStorage.setItem('ava_app_token', resp.access_token);
@@ -551,7 +556,6 @@
             } catch (err) {
                 document.getElementById('loading-txt').innerText = "Session expired.";
                 localStorage.removeItem('ava_app_token'); 
-                // Show login screen again, but user just taps button without password
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('app-header').style.display = 'none';
                 document.getElementById('app-content').style.display = 'none';
@@ -650,9 +654,23 @@
             dateBadge.style.backgroundColor = isAlf ? 'var(--alf-bg)' : 'var(--lesly-bg)';
             dateBadge.style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
             
-            document.getElementById('modal-feedback').value = activeAppData.feedback && activeAppData.feedback[clickedDateStr] ? activeAppData.feedback[clickedDateStr] : '';
+            // --- NEW: Check if Future Date ---
+            const clickedDateObj = new Date(clickedDateStr);
+            const todayObj = new Date();
+            todayObj.setHours(0,0,0,0);
             
-            loadTrackers(clickedDateStr);
+            if (clickedDateObj > todayObj) {
+                // Hide inputs for future dates
+                document.getElementById('interactive-content').style.display = 'none';
+                document.getElementById('future-lock-msg').style.display = 'block';
+            } else {
+                // Show inputs for today or past dates
+                document.getElementById('interactive-content').style.display = 'block';
+                document.getElementById('future-lock-msg').style.display = 'none';
+                
+                document.getElementById('modal-feedback').value = activeAppData.feedback && activeAppData.feedback[clickedDateStr] ? activeAppData.feedback[clickedDateStr] : '';
+                loadTrackers(clickedDateStr);
+            }
 
             showModal();
         }
@@ -679,14 +697,26 @@
             });
         }
 
+        // --- FIXED: Aggressive Calendar Delete ---
         function deleteEntireBlock() {
             showAppConfirm("Delete Entire Block", "WARNING: This will permanently delete this entire 4-day shift from Google Calendar.\n\nAre you sure?", "Delete Entire Block", async () => {
                 document.getElementById('modal-title').innerText = "Deleting Block...";
                 try {
+                    // 1. Tell Google to delete it
                     await gapi.client.calendar.events.delete({ calendarId: CALENDAR_ID, eventId: activeEvent.id });
+                    
+                    // 2. Force it out of local memory immediately so UI doesn't show a ghost event
+                    allEvents = allEvents.filter(e => e.id !== activeEvent.id);
+                    renderCalendar();
+                    
                     closeModal();
-                    await fetchEvents();
-                } catch (err) { showAppAlert("Error", "Failed to delete from Google Calendar."); }
+                    
+                    // 3. Re-sync silently in the background
+                    fetchEvents();
+                } catch (err) { 
+                    console.error("Delete Error:", err);
+                    showAppAlert("Error", "Failed to delete from Google Calendar. Check connection."); 
+                }
             });
         }
 
@@ -799,7 +829,13 @@
             const endRaw = new Date(activeEvent.end.date || activeEvent.end.dateTime);
             const eEnd = activeEvent.start.date ? new Date(endRaw.setDate(endRaw.getDate() - 1)) : endRaw;
             
+            // Only compile data up to Today
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
             for (let d = new Date(s); d <= eEnd; d.setDate(d.getDate() + 1)) {
+                if(d > today) continue; // Don't include empty future dates in summary
+                
                 const dayStr = d.toISOString().split('T')[0];
                 const fb = activeAppData.feedback && activeAppData.feedback[dayStr] ? activeAppData.feedback[dayStr] : "No notes.";
                 const trks = activeAppData.trackers && activeAppData.trackers[dayStr] ? activeAppData.trackers[dayStr] : null;
