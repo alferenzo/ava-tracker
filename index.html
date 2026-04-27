@@ -205,7 +205,11 @@
                             <p id="modal-subtitle" style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;"></p>
                             <span class="modal-date" id="modal-date">Specific Date</span>
                         </div>
-                        <button onclick="closeModal()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
+                        
+                        <div style="display:flex; gap:15px; align-items:flex-start;">
+                            <button onclick="shareTodayNotes()" id="btn-share-today" style="background:none; border:none; font-size:20px; color:var(--text-main); cursor:pointer;"><i class="fa-solid fa-share-nodes"></i></button>
+                            <button onclick="closeModal()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
+                        </div>
                     </div>
 
                     <div class="action-row">
@@ -324,7 +328,7 @@
                     
                     <div style="display:flex; gap:10px; margin-top:20px;">
                         <button class="dialog-btn dialog-btn-cancel" onclick="closeAIDialog()">Close</button>
-                        <button class="dialog-btn dialog-btn-confirm" id="btn-copy-ai" style="display:none; background:var(--text-main);" onclick="copyAIToNotes()">Copy to Notes</button>
+                        <button class="dialog-btn dialog-btn-confirm" id="btn-copy-ai" style="display:none; background:var(--text-main);" onclick="handleAIResult()">Copy to Notes</button>
                     </div>
                 </div>
             </div>
@@ -371,7 +375,6 @@
             setTimeout(() => { loader.style.display = 'none'; }, 400);
         }
 
-        // --- NEW: Universal Re-Auth Function ---
         function forceReAuth() {
             localStorage.removeItem('ava_app_token'); 
             document.getElementById('login-screen').style.display = 'flex';
@@ -380,6 +383,36 @@
             document.getElementById('fab-pill').style.display = 'none';
             document.getElementById('loading-txt').innerText = "";
             showAppAlert("Session Expired", "Please tap 'Connect Google Calendar' to refresh your secure session.");
+        }
+
+        // --- NEW: Universal Web Share Function ---
+        async function shareViaWeb(textToShare, title) {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: title,
+                        text: textToShare
+                    });
+                } catch (err) {
+                    console.log('User cancelled share or it failed', err);
+                }
+            } else {
+                // Fallback: If browser doesn't support native sharing, force open WhatsApp
+                window.open(`https://wa.me/?text=${encodeURIComponent(textToShare)}`);
+            }
+        }
+
+        // --- NEW: Share Today's Notes Button Logic ---
+        function shareTodayNotes() {
+            const dateStr = document.getElementById('modal-date').innerText;
+            const fb = document.getElementById('modal-feedback').value.trim() || "No notes logged.";
+            const eat = currentTrackers.eat || '?';
+            const bath = currentTrackers.bath || '?';
+            const nap = currentTrackers.nap || '0';
+            
+            const shareText = `👶 *Ava's Update: ${dateStr}*\n\n🍼 Ate well: ${eat}\n🛁 Bath done: ${bath}\n😴 Nap: ${nap} hrs\n\n*Notes:*\n${fb}`;
+            
+            shareViaWeb(shareText, "Ava's Daily Update");
         }
 
         function openDistraction() {
@@ -688,9 +721,11 @@
             if (clickedDateStr > localTodayStr) {
                 document.getElementById('interactive-content').style.display = 'none';
                 document.getElementById('future-lock-msg').style.display = 'block';
+                document.getElementById('btn-share-today').style.display = 'none';
             } else {
                 document.getElementById('interactive-content').style.display = 'block';
                 document.getElementById('future-lock-msg').style.display = 'none';
+                document.getElementById('btn-share-today').style.display = 'block';
                 
                 document.getElementById('modal-feedback').value = activeAppData.feedback && activeAppData.feedback[clickedDateStr] ? activeAppData.feedback[clickedDateStr] : '';
                 loadTrackers(clickedDateStr);
@@ -935,7 +970,7 @@
                     document.getElementById('btn-copy-ai').innerText = "Copy to Notes";
                 } else {
                     document.getElementById('btn-copy-ai').style.display = 'block';
-                    document.getElementById('btn-copy-ai').innerText = "Copy to Clipboard";
+                    document.getElementById('btn-copy-ai').innerText = "Share Summary";
                 }
 
             } catch (err) {
@@ -943,7 +978,8 @@
             }
         }
 
-        function copyAIToNotes() {
+        // --- NEW: Handle AI Button Click (Copy vs Share) ---
+        function handleAIResult() {
             if (currentAIMode === 'advice') {
                 const feedbackBox = document.getElementById('modal-feedback');
                 const existingText = feedbackBox.value;
@@ -954,10 +990,8 @@
                 }
                 closeAIDialog();
             } else {
-                navigator.clipboard.writeText(rawAIResult).then(() => {
-                    document.getElementById('btn-copy-ai').innerText = "Copied!";
-                    setTimeout(() => closeAIDialog(), 1500);
-                });
+                // If it's a Handoff Summary, share it!
+                shareViaWeb(rawAIResult, "Ava's Shift Handoff");
             }
         }
     </script>
