@@ -153,6 +153,17 @@
         .tracker-btn.active-yes { background: #10b981; color: white; border-color: #10b981; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
         .tracker-btn.active-no { background: #ef4444; color: white; border-color: #ef4444; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
         
+        /* CUSTOM TIME PICKERS */
+        .custom-time-group { display: flex; gap: 5px; align-items: center; }
+        .custom-time-group select { 
+            padding: 8px 12px; border-radius: 12px; border: 2px solid var(--border-color); 
+            background: var(--input-bg); color: var(--text-main); font-weight: 700; font-size: 15px; 
+            outline: none; cursor: pointer; text-align: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            -webkit-appearance: none; appearance: none;
+        }
+        .custom-time-group select:focus { border-color: var(--ai-color); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02), 0 0 0 4px rgba(139, 92, 246, 0.1); }
+        .custom-time-separator { font-weight: 800; color: var(--text-main); }
+
         .tracker-select, .form-group input, .form-group select { 
             padding: 10px 14px; border-radius: 12px; border: 2px solid var(--border-color); font-size: 14px; font-weight: 600; 
             background: var(--input-bg); color: var(--text-main); outline: none; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
@@ -161,7 +172,6 @@
             border-color: var(--ai-color); background: var(--card-bg); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02), 0 0 0 4px rgba(139, 92, 246, 0.1);
         }
         
-        .bedtime-suggestion { font-size: 13px; color: #047857; background: #d1fae5; padding: 10px; border-radius: 12px; font-weight: 700; text-align: center; margin-top: 5px; border: 1px solid #a7f3d0; display: none; }
         .chk-group { display: flex; flex-wrap: wrap; gap: 8px;}
         .chk-btn { padding: 10px 14px; border-radius: 20px; border: 2px solid var(--border-color); background: var(--input-bg); font-size: 13px; font-weight: 700; color: var(--text-main); cursor: pointer; transition: all 0.2s; user-select: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         .chk-btn.active { background: var(--text-main); color: var(--card-bg); border-color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -311,9 +321,9 @@
                                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:5px; align-items: center;">
                                     <span class="modal-date" id="modal-date">Specific Date</span>
                                     
-                                    <!-- NEW AI BEDTIME PREDICTOR BADGE -->
-                                    <span class="modal-date" id="modal-target-bedtime" style="background: var(--ai-color); color: white; cursor: pointer; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3); transition: transform 0.2s;" onclick="openAIDialog('bedtime')">
-                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Target: Calculating...
+                                    <!-- SMART INSTANT BEDTIME BADGE -->
+                                    <span class="modal-date" id="modal-target-bedtime" style="background: var(--ai-color); color: white; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);">
+                                        <i class="fa-solid fa-moon"></i> Recommended Bedtime: 19:00
                                     </span>
                                 </div>
                             </div>
@@ -343,7 +353,7 @@
                             <div class="tracker-content">
                                 <div class="tracker-row">
                                     <span class="tracker-label">☀️ Morning Wake Up</span>
-                                    <input type="time" class="tracker-select" id="trk-morningWake" onchange="setTracker('morningWake', this.value)">
+                                    <div id="picker-morningWake"></div>
                                 </div>
                                 <div class="tracker-row">
                                     <span class="tracker-label">🍼 Ate Well?</span>
@@ -362,10 +372,9 @@
                                     </select>
                                 </div>
                                 <div class="tracker-row">
-                                    <span class="tracker-label">⏰ Woke from Nap (Afternoon)</span>
-                                    <input type="time" class="tracker-select" id="trk-wakeTime" onchange="updateWakeTime(this.value)">
+                                    <span class="tracker-label">⏰ Woke from Nap</span>
+                                    <div id="picker-wakeTime"></div>
                                 </div>
-                                <div id="bedtime-suggestion" class="bedtime-suggestion"></div>
                             </div>
                         </details>
 
@@ -387,11 +396,11 @@
                             <div class="tracker-content">
                                 <div class="tracker-row">
                                     <span class="tracker-label" style="color: var(--ai-color);">🌙 Bedtime Routine Started</span>
-                                    <input type="time" class="tracker-select" id="trk-bedtimeStart" onchange="setTracker('bedtimeStart', this.value)">
+                                    <div id="picker-bedtimeStart"></div>
                                 </div>
                                 <div class="tracker-row">
-                                    <span class="tracker-label">⏰ Time Finally Asleep (Clock)</span>
-                                    <input type="time" class="tracker-select" id="trk-asleepTime" onchange="setTracker('asleepTime', this.value)">
+                                    <span class="tracker-label">⏰ Time Finally Asleep</span>
+                                    <div id="picker-asleepTime"></div>
                                 </div>
                                 <div class="tracker-row">
                                     <span class="tracker-label">⏳ Time Tossed/Struggled</span>
@@ -558,6 +567,60 @@
     <script src="https://accounts.google.com/gsi/client"></script>
 
     <script>
+        // --- CUSTOM TIME PICKER GENERATION ---
+        function createTimePickerHTML(id) {
+            let hrOpts = '<option value="">--</option>';
+            for(let i=0; i<24; i++) hrOpts += `<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`;
+            
+            let minOpts = '<option value="">--</option>';
+            for(let i=0; i<60; i+=5) minOpts += `<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`;
+            
+            return `
+                <div class="custom-time-group">
+                    <select id="${id}-hr" onchange="handleTimeChange('${id}')">${hrOpts}</select>
+                    <span class="custom-time-separator">:</span>
+                    <select id="${id}-min" onchange="handleTimeChange('${id}')">${minOpts}</select>
+                </div>
+            `;
+        }
+        
+        function handleTimeChange(id) {
+            const hr = document.getElementById(`${id}-hr`).value;
+            const min = document.getElementById(`${id}-min`).value;
+            
+            let val = '';
+            if (hr && min) {
+                val = `${hr}:${min}`;
+            } else if (hr && !min) {
+                 document.getElementById(`${id}-min`).value = '00';
+                 val = `${hr}:00`;
+            } else if (!hr && min) {
+                 document.getElementById(`${id}-hr`).value = '12';
+                 val = `12:${min}`;
+            }
+
+            let type = id.replace('trk-', '');
+            setTracker(type, val);
+        }
+
+        function setTimePickerValue(id, val) {
+            if (!val) {
+                document.getElementById(`${id}-hr`).value = '';
+                document.getElementById(`${id}-min`).value = '';
+            } else {
+                const [hr, min] = val.split(':');
+                let minSel = document.getElementById(`${id}-min`);
+                let exists = Array.from(minSel.options).some(o => o.value === min);
+                if (!exists) {
+                     let opt = document.createElement('option');
+                     opt.value = min; opt.innerText = min;
+                     minSel.appendChild(opt);
+                }
+                document.getElementById(`${id}-hr`).value = hr;
+                document.getElementById(`${id}-min`).value = min;
+            }
+        }
+
         function setupSwipeToClose() {
             const modals = document.querySelectorAll('.modal-overlay');
             modals.forEach(overlay => {
@@ -822,7 +885,7 @@
 
             isAudioPlaying = true;
             document.getElementById('btn-sound').classList.add('playing');
-            document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-stop"></i>';
+            document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-play"></i>';
             updateGlobalPlayer();
             
             if ('mediaSession' in navigator) {
@@ -853,6 +916,12 @@
         }
 
         window.onload = async function() {
+            // Inject Custom Time Pickers
+            document.getElementById('picker-morningWake').innerHTML = createTimePickerHTML('trk-morningWake');
+            document.getElementById('picker-wakeTime').innerHTML = createTimePickerHTML('trk-wakeTime');
+            document.getElementById('picker-bedtimeStart').innerHTML = createTimePickerHTML('trk-bedtimeStart');
+            document.getElementById('picker-asleepTime').innerHTML = createTimePickerHTML('trk-asleepTime');
+
             setupSwipeToClose();
             try { await appDB.init(); } catch(e) { console.error("Local DB Init Failed", e); }
             if (typeof gapi !== 'undefined') {
@@ -955,13 +1024,13 @@
             }
         }
 
+        // --- INSTANT SMART BEDTIME CALCULATION ---
         function updateSmartBedtimeBadge() {
             const badge = document.getElementById('modal-target-bedtime');
             if(!badge) return;
             
-            let targetText = "Target: 19:00 (Standard)";
+            let targetText = "Recommended Bedtime: 19:00";
             const isNight = document.body.classList.contains('night-vision');
-            
             badge.style.color = isNight ? '#0f172a' : 'white';
             
             if (currentTrackers.wakeTime) {
@@ -969,14 +1038,12 @@
                 let wakeDate = new Date(); 
                 wakeDate.setHours(hours, minutes, 0); 
                 wakeDate.setMinutes(wakeDate.getMinutes() + 330); 
-                targetText = `Target: ${String(wakeDate.getHours()).padStart(2, '0')}:${String(wakeDate.getMinutes()).padStart(2, '0')} (Calculated)`;
+                targetText = `Recommended Bedtime: ${String(wakeDate.getHours()).padStart(2, '0')}:${String(wakeDate.getMinutes()).padStart(2, '0')}`;
             } else if (currentTrackers.nap === '0') {
-                targetText = "Target: 18:30 (Early - No Nap)";
-            } else {
-                targetText = "Target: 19:00 (Daycare/Unknown)";
+                targetText = "Recommended Bedtime: 18:30";
             }
             
-            badge.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> ${targetText}`;
+            badge.innerHTML = `<i class="fa-solid fa-moon"></i> ${targetText}`;
         }
 
         function setTracker(type, val) {
@@ -988,20 +1055,6 @@
             if (type === 'nap' || type === 'wakeTime') {
                 updateSmartBedtimeBadge();
             }
-        }
-        
-        function updateWakeTime(val) { 
-            setTracker('wakeTime', val); 
-            calculateBedtime(val); 
-        }
-        
-        function calculateBedtime(wakeTimeStr) {
-            const box = document.getElementById('bedtime-suggestion');
-            if(!wakeTimeStr) { box.style.display = 'none'; return; }
-            const [hours, minutes] = wakeTimeStr.split(':').map(Number);
-            let wakeDate = new Date(); wakeDate.setHours(hours, minutes, 0); wakeDate.setMinutes(wakeDate.getMinutes() + 330); 
-            box.innerHTML = `<i class="fa-solid fa-lightbulb"></i> Suggested Bedtime: <b>${String(wakeDate.getHours()).padStart(2, '0')}:${String(wakeDate.getMinutes()).padStart(2, '0')}</b>`;
-            box.style.display = 'block';
         }
         
         function toggleRoutine(type) {
@@ -1016,17 +1069,18 @@
             let trks = localRec?.trackers || (activeAppData.trackers && activeAppData.trackers[dateStr]) || defTrks;
             currentTrackers = { ...defTrks, ...trks }; 
             
-            document.getElementById('trk-morningWake').value = currentTrackers.morningWake || '';
+            setTimePickerValue('trk-morningWake', currentTrackers.morningWake);
             setTracker('eat', currentTrackers.eat);
             document.getElementById('trk-nap').value = currentTrackers.nap || '0';
-            document.getElementById('trk-wakeTime').value = currentTrackers.wakeTime || '';
-            calculateBedtime(currentTrackers.wakeTime);
+            setTimePickerValue('trk-wakeTime', currentTrackers.wakeTime);
+            
             ['rtnBath','rtnBook','rtnLights','rtnScreen','rtnTeeth'].forEach(t => {
                 const el = document.getElementById('chk-' + t);
                 if(currentTrackers[t]) el.classList.add('active'); else el.classList.remove('active');
             });
-            document.getElementById('trk-bedtimeStart').value = currentTrackers.bedtimeStart || '';
-            document.getElementById('trk-asleepTime').value = currentTrackers.asleepTime || '';
+            
+            setTimePickerValue('trk-bedtimeStart', currentTrackers.bedtimeStart);
+            setTimePickerValue('trk-asleepTime', currentTrackers.asleepTime);
             document.getElementById('trk-settle').value = currentTrackers.settle || 'Unknown';
             document.getElementById('trk-wakings').value = currentTrackers.wakings || '0';
 
@@ -1230,32 +1284,6 @@
             } catch (err) { document.getElementById('loading-txt').innerText = ""; if(err.status === 401) forceReAuth(); else showAppAlert("Error", "Failed to create."); }
         }
 
-        function compileBedtimeData() {
-            if(!activeEvent || !activeAppData) return "No data available.";
-            let dataStr = `You are a pediatric sleep expert. Recommend a specific target bedtime for Ava tonight. Rule of thumb: If she didn't nap or nap is unknown (e.g. at caretaker), recommend an earlier bedtime (e.g., 18:30). If she had a good nap, standard is around 19:00-19:30.\n\nAva's recent history:\n`;
-            
-            const s = new Date(activeEvent.start.date || activeEvent.start.dateTime); 
-            const endRaw = new Date(activeEvent.end.date || activeEvent.end.dateTime);
-            const eEnd = activeEvent.start.date ? new Date(endRaw.setDate(endRaw.getDate() - 1)) : endRaw; 
-            const localTodayStr = getLocalISODate(new Date());
-            
-            for (let d = new Date(s); d <= eEnd; d.setDate(d.getDate() + 1)) {
-                const dayStr = getLocalISODate(d); 
-                if(dayStr > localTodayStr) continue; 
-                
-                if (dayStr === activeDateStr) {
-                    dataStr += `- TODAY: Morning Wake: ${currentTrackers.morningWake||'Unknown'}, Nap: ${currentTrackers.nap||'Unknown'}, Woke from nap: ${currentTrackers.wakeTime||'Unknown'}.\n`;
-                } else {
-                    const trks = activeAppData.trackers && activeAppData.trackers[dayStr] ? activeAppData.trackers[dayStr] : null;
-                    if(trks) {
-                        dataStr += `- Past Day (${dayStr}): Morning Wake: ${trks.morningWake||'Unknown'}, Nap: ${trks.nap}h, Asleep at: ${trks.asleepTime||'?'}, Wakings: ${trks.wakings||'0'}\n`;
-                    }
-                }
-            }
-            dataStr += `\nBased on today's nap status and recent sleep debt, what EXACT time should she start her bedtime routine, and what time should she be asleep? Keep your response under 3 sentences.`;
-            return dataStr;
-        }
-
         function openAIDialog(mode) {
             currentAIMode = mode; const overlay = document.getElementById('ai-dialog');
             overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
@@ -1274,12 +1302,6 @@
                 btnFetchSummary.style.display = 'block';
                 btnFetchSummary.innerText = "Generate Summary";
                 promptInput.value = compileHandoffData();
-            } else if (mode === 'bedtime') {
-                headerDiv.style.background = 'linear-gradient(135deg, #ec4899, #be185d)'; headerDiv.innerHTML = `<h3 style="margin:0; font-size:18px;"><i class="fa-solid fa-moon"></i> AI Bedtime Predictor</h3><p style="margin: 5px 0 0; font-size: 12px; opacity: 0.9;">Calculating optimal sleep time...</p>`;
-                promptWrapper.style.display = 'none';
-                btnFetchSummary.style.display = 'block';
-                btnFetchSummary.innerText = "Calculate Bedtime";
-                promptInput.value = compileBedtimeData();
             }
         }
 
@@ -1326,7 +1348,7 @@
                 
                 const btnCopy = document.getElementById('btn-copy-ai'); 
                 btnCopy.style.display = 'block'; 
-                if(currentAIMode === 'advice' || currentAIMode === 'bedtime') {
+                if(currentAIMode === 'advice') {
                     btnCopy.innerText = "Copy to Notes";
                 } else {
                     btnCopy.innerText = "Share Summary";
@@ -1338,14 +1360,13 @@
                 btnFetch.disabled = false; btnFetch.style.opacity = '1'; 
                 if (currentAIMode === 'advice') { btnFetch.innerHTML = '<i class="fa-solid fa-paper-plane"></i>'; }
                 else if (currentAIMode === 'handoff') { btnFetch.innerText = 'Regenerate Summary'; }
-                else { btnFetch.innerText = 'Recalculate Bedtime'; }
             }
         }
 
         function handleAIResult() {
-            if (currentAIMode === 'advice' || currentAIMode === 'bedtime') {
+            if (currentAIMode === 'advice') {
                 const fbBox = document.getElementById('modal-feedback'); 
-                const prefix = currentAIMode === 'advice' ? "AI Advice:\n" : "AI Bedtime Target:\n";
+                const prefix = "AI Advice:\n";
                 fbBox.value = fbBox.value.trim() === "" ? prefix + rawAIResult : fbBox.value + `\n\n--- ${prefix.trim()} ---\n` + rawAIResult; 
                 closeAIDialog();
             } else { shareViaWeb(rawAIResult, "Ava's Shift Handoff"); }
