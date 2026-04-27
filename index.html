@@ -43,7 +43,8 @@
         .hero-icon { font-size: 70px; color: var(--alf-color); margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
         .btn-main { background: var(--text-main); color: white; border: none; padding: 16px 32px; border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: transform 0.2s; }
-        .btn-main:active { transform: scale(0.95); }
+        .btn-main:active:not(:disabled) { transform: scale(0.95); }
+        .btn-main:disabled { cursor: not-allowed; }
         
         .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 140px; display: none; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -930,12 +931,14 @@
             const aiText = document.getElementById('ai-output-text');
             const btnFetch = document.getElementById('btn-fetch-ai');
             
+            // PREVENT SPAM CLICKING
+            btnFetch.disabled = true;
+            btnFetch.style.opacity = '0.5';
+            
             aiBox.style.display = 'block';
             aiText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
-            btnFetch.innerText = currentAIMode === 'advice' ? 'Ask Again' : 'Regenerate Summary';
 
             try {
-                // FIXED: Changed to the current active model, as 1.5-flash was retired/deprecated.
                 const chosenModel = 'models/gemini-2.5-flash';
 
                 let prompt = "";
@@ -950,6 +953,10 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
+
+                if (response.status === 429) {
+                    throw new Error("Too Many Requests! You hit the AI rate limit. Please wait 1 minute before clicking again.");
+                }
 
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
@@ -982,6 +989,11 @@
                         <span><i class="fa-solid fa-triangle-exclamation"></i> <b>Could not reach AI.</b></span>
                         <span style="font-size:13px; font-weight:normal;"><b>Reason:</b> ${errMsg}</span>
                     </span>`;
+            } finally {
+                // RE-ENABLE BUTTON
+                btnFetch.disabled = false;
+                btnFetch.style.opacity = '1';
+                btnFetch.innerText = currentAIMode === 'advice' ? 'Ask Again' : 'Regenerate Summary';
             }
         }
 
