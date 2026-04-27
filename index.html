@@ -95,8 +95,10 @@
 
         .feedback-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 15px; margin-bottom: 20px; position: relative; }
         .feedback-section label { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-        textarea { width: 100%; border: none; background: transparent; resize: none; font-size: 15px; color: var(--text-main); min-height: 80px; outline: none; line-height: 1.5; }
-        textarea::placeholder { color: #cbd5e1; }
+        
+        /* INCREASED PROMINENCE HERE */
+        textarea { width: 100%; border: none; background: transparent; resize: none; font-size: 16px; font-weight: 600; color: var(--text-main); min-height: 80px; outline: none; line-height: 1.6; }
+        textarea::placeholder { color: #cbd5e1; font-weight: 500; }
 
         .mic-btn { background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; transition: color 0.2s; }
         .mic-btn.recording { color: #ef4444; animation: pulse 1.5s infinite; }
@@ -120,7 +122,10 @@
         .dialog-overlay.active { opacity: 1; }
         .dialog-overlay.active .dialog-box { transform: scale(1); }
         .dialog-title { font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
-        .dialog-msg { font-size: 14px; color: var(--text-muted); margin-bottom: 25px; line-height: 1.4; }
+        
+        /* INCREASED PROMINENCE HERE */
+        .dialog-msg { font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 25px; line-height: 1.5; }
+        
         .dialog-actions { display: flex; gap: 10px; }
         .dialog-btn { flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; }
         .dialog-btn-cancel { background: #f1f5f9; color: var(--text-main); }
@@ -318,11 +323,12 @@
                 </div>
                 
                 <div style="padding: 20px; text-align: left;">
-                    <textarea id="ai-prompt-input" style="width:100%; height:80px; border:1px solid #e2e8f0; border-radius:12px; padding:12px; font-size:14px; background:#f8fafc; resize: none; outline:none;" placeholder="e.g., Ava is tossing and turning..."></textarea>
+                    <textarea id="ai-prompt-input" style="width:100%; height:80px; border:1px solid #e2e8f0; border-radius:12px; padding:12px; background:#f8fafc; resize: none; outline:none;" placeholder="e.g., Ava is tossing and turning..."></textarea>
                     
                     <button class="btn-main" style="background:#8b5cf6; padding:12px; width:100%; margin-top:10px;" onclick="fetchAITips()" id="btn-fetch-ai">Get Advice</button>
                     
-                    <div id="ai-results-area" style="display:none; margin-top:15px; padding:15px; background:#f5f3ff; border-radius:12px; font-size:14px; color:#4c1d95; max-height:180px; overflow-y:auto; border-left: 4px solid var(--ai-color);">
+                    <!-- INCREASED PROMINENCE HERE -->
+                    <div id="ai-results-area" style="display:none; margin-top:15px; padding:15px; background:#f5f3ff; border-radius:12px; font-size:16px; font-weight:600; color:#312e81; max-height:220px; overflow-y:auto; border-left: 4px solid var(--ai-color); line-height: 1.5;">
                         <div id="ai-output-text"></div>
                     </div>
                     
@@ -385,7 +391,6 @@
             showAppAlert("Session Expired", "Please tap 'Connect Google Calendar' to refresh your secure session.");
         }
 
-        // --- NEW: Universal Web Share Function ---
         async function shareViaWeb(textToShare, title) {
             if (navigator.share) {
                 try {
@@ -397,12 +402,10 @@
                     console.log('User cancelled share or it failed', err);
                 }
             } else {
-                // Fallback: If browser doesn't support native sharing, force open WhatsApp
                 window.open(`https://wa.me/?text=${encodeURIComponent(textToShare)}`);
             }
         }
 
-        // --- NEW: Share Today's Notes Button Logic ---
         function shareTodayNotes() {
             const dateStr = document.getElementById('modal-date').innerText;
             const fb = document.getElementById('modal-feedback').value.trim() || "No notes logged.";
@@ -410,14 +413,7 @@
             const bath = currentTrackers.bath || '?';
             const nap = currentTrackers.nap || '0';
             
-            const shareText = `👶 *Ava's Update: ${dateStr}*
-
-🍼 Ate well: ${eat}
-🛁 Bath done: ${bath}
-😴 Nap: ${nap} hrs
-
-*Notes:*
-${fb}`;
+            const shareText = `👶 *Ava's Update: ${dateStr}*\n\n🍼 Ate well: ${eat}\n🛁 Bath done: ${bath}\n😴 Nap: ${nap} hrs\n\n*Notes:*\n${fb}`;
             
             shareViaWeb(shareText, "Ava's Daily Update");
         }
@@ -505,8 +501,7 @@ ${fb}`;
                     deferredPrompt = null;
                 });
             } else if (isIOS) {
-                showAppAlert("Install App", "To install on iPhone:
-Tap the 'Share' icon at the bottom of Safari, then select 'Add to Home Screen'.");
+                showAppAlert("Install App", "To install on iPhone:\nTap the 'Share' icon at the bottom of Safari, then select 'Add to Home Screen'.");
             }
         }
 
@@ -757,9 +752,7 @@ Tap the 'Share' icon at the bottom of Safari, then select 'Add to Home Screen'."
 
         function deleteSpecificDay() {
             const dateFormatted = formatCustomDate(activeDateStr);
-            showAppConfirm("Clear Single Day", `Remove ${dateFormatted} from this shift block?
-
-(This will hide it in the app, but the rest of the 4-day block will remain).`, "Clear Day", () => {
+            showAppConfirm("Clear Single Day", `Remove ${dateFormatted} from this shift block?\n\n(This will hide it in the app, but the rest of the 4-day block will remain).`, "Clear Day", () => {
                 if(!activeAppData.swaps) activeAppData.swaps = {};
                 activeAppData.swaps[activeDateStr] = "DELETED";
                 saveDayUpdates();
@@ -767,9 +760,7 @@ Tap the 'Share' icon at the bottom of Safari, then select 'Add to Home Screen'."
         }
 
         function deleteEntireBlock() {
-            showAppConfirm("Delete Entire Block", "WARNING: This will permanently delete this entire 4-day shift from Google Calendar.
-
-Are you sure?", "Delete Entire Block", async () => {
+            showAppConfirm("Delete Entire Block", "WARNING: This will permanently delete this entire 4-day shift from Google Calendar.\n\nAre you sure?", "Delete Entire Block", async () => {
                 document.getElementById('modal-title').innerText = "Deleting Block...";
                 try {
                     await gapi.client.calendar.events.delete({ calendarId: CALENDAR_ID, eventId: activeEvent.id });
@@ -902,9 +893,7 @@ Are you sure?", "Delete Entire Block", async () => {
         function compileHandoffData() {
             if(!activeEvent || !activeAppData) return "No data available.";
             
-            let dataStr = `Please generate a warm, concise, bulleted 'Handoff Summary' for the parent taking over childcare for Ava based on the last few days. Highlight any patterns (sleep, eating, bath). Data:
-
-`;
+            let dataStr = `Please generate a warm, concise, bulleted 'Handoff Summary' for the parent taking over childcare for Ava based on the last few days. Highlight any patterns (sleep, eating, bath). Data:\n\n`;
             
             const s = new Date(activeEvent.start.date || activeEvent.start.dateTime);
             const endRaw = new Date(activeEvent.end.date || activeEvent.end.dateTime);
@@ -923,9 +912,7 @@ Are you sure?", "Delete Entire Block", async () => {
                 if(trks) {
                     trkStr = `(Ate: ${trks.eat || '?'}, Bath: ${trks.bath || '?'}, Nap: ${trks.nap}h) `;
                 }
-                dataStr += `- Date: ${dayStr} ${trkStr}
-  Notes: ${fb}
-`;
+                dataStr += `- Date: ${dayStr} ${trkStr}\n  Notes: ${fb}\n`;
             }
             return dataStr;
         }
@@ -978,16 +965,13 @@ Are you sure?", "Delete Entire Block", async () => {
                 const data = await response.json();
                 if (data.error) throw new Error(data.error.message);
                 
-                // --- THE BUG FIX IS HERE ---
-                // We make sure `data.candidates` actually exists before trying to read it
                 if (!data.candidates || !data.candidates[0].content || !data.candidates[0].content.parts) {
                     console.error("Unexpected API response. This might be due to safety filters or rate limiting:", data);
                     throw new Error("Invalid response from AI");
                 }
                 
                 rawAIResult = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
-                aiText.innerHTML = rawAIResult.replace(/
-/g, '<br>');
+                aiText.innerHTML = rawAIResult.replace(/\n/g, '<br>');
                 
                 if(currentAIMode === 'advice') {
                     document.getElementById('btn-copy-ai').style.display = 'block';
@@ -998,29 +982,22 @@ Are you sure?", "Delete Entire Block", async () => {
                 }
 
             } catch (err) {
-                // We print the exact error to the console here to make debugging easy
                 console.error("AI Fetch Error:", err);
                 aiText.innerHTML = `<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Could not reach AI. Check console for details.</span>`;
             }
         }
 
-        // --- NEW: Handle AI Button Click (Copy vs Share) ---
         function handleAIResult() {
             if (currentAIMode === 'advice') {
                 const feedbackBox = document.getElementById('modal-feedback');
                 const existingText = feedbackBox.value;
                 if (existingText.trim() === "") {
-                    feedbackBox.value = "AI Advice:
-" + rawAIResult;
+                    feedbackBox.value = "AI Advice:\n" + rawAIResult;
                 } else {
-                    feedbackBox.value = existingText + "
-
---- AI Advice ---
-" + rawAIResult;
+                    feedbackBox.value = existingText + "\n\n--- AI Advice ---\n" + rawAIResult;
                 }
                 closeAIDialog();
             } else {
-                // If it's a Handoff Summary, share it!
                 shareViaWeb(rawAIResult, "Ava's Shift Handoff");
             }
         }
