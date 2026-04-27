@@ -85,14 +85,28 @@
         .btn-swap:active { background: #e2e8f0; }
 
         .trackers-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 15px; margin-bottom: 15px; }
+        .tracker-category { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 800; margin: 15px 0 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; letter-spacing: 0.5px;}
+        .tracker-category:first-child { margin-top: 0; }
         .tracker-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .tracker-row:last-child { margin-bottom: 0; }
         .tracker-label { font-size: 14px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        
         .tracker-btn-group { display: flex; gap: 5px; }
         .tracker-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
         .tracker-btn.active-yes { background: #10b981; color: white; border-color: #10b981; }
         .tracker-btn.active-no { background: #ef4444; color: white; border-color: #ef4444; }
         .tracker-select { padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; font-weight: 600; background: white; outline: none; }
+        
+        /* NEW STYLES FOR FEATURES 1,2,4,5 */
+        .bedtime-suggestion { font-size: 13px; color: #047857; background: #d1fae5; padding: 10px; border-radius: 8px; font-weight: 700; text-align: center; margin-top: 5px; border: 1px solid #a7f3d0; display: none; }
+        .chk-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;}
+        .chk-btn { padding: 8px 12px; border-radius: 20px; border: 1px solid #cbd5e1; background: white; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s; user-select: none; }
+        .chk-btn.active { background: var(--text-main); color: white; border-color: var(--text-main); }
+        .sound-player { display: flex; gap: 10px; align-items: center; background: #f1f5f9; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0;}
+        .btn-play-sound { background: var(--ai-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 16px; transition: transform 0.2s;}
+        .btn-play-sound:active { transform: scale(0.9); }
+        .btn-play-sound.playing { background: #ef4444; animation: pulseSound 2s infinite ease-in-out;}
+        @keyframes pulseSound { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
         .feedback-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 15px; margin-bottom: 20px; position: relative; }
         .feedback-section label { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -232,18 +246,13 @@
 
                     <div id="interactive-content">
                         <div class="trackers-section">
+                            
+                            <div class="tracker-category">☀️ Daytime Tracking</div>
                             <div class="tracker-row">
                                 <span class="tracker-label">🍼 Ate Well?</span>
                                 <div class="tracker-btn-group">
                                     <button class="tracker-btn" id="trk-eat-yes" onclick="setTracker('eat', 'yes')">Yes</button>
                                     <button class="tracker-btn" id="trk-eat-no" onclick="setTracker('eat', 'no')">No</button>
-                                </div>
-                            </div>
-                            <div class="tracker-row">
-                                <span class="tracker-label">🛁 Bath Done?</span>
-                                <div class="tracker-btn-group">
-                                    <button class="tracker-btn" id="trk-bath-yes" onclick="setTracker('bath', 'yes')">Yes</button>
-                                    <button class="tracker-btn" id="trk-bath-no" onclick="setTracker('bath', 'no')">No</button>
                                 </div>
                             </div>
                             <div class="tracker-row">
@@ -255,6 +264,54 @@
                                     <option value="3+">3+ hrs</option>
                                 </select>
                             </div>
+                            <div class="tracker-row">
+                                <span class="tracker-label">⏰ Woke from Nap At</span>
+                                <input type="time" class="tracker-select" id="trk-wakeTime" onchange="updateWakeTime(this.value)">
+                            </div>
+                            <div id="bedtime-suggestion" class="bedtime-suggestion"></div>
+
+                            <div class="tracker-category">🌙 Wind-Down Routine</div>
+                            <div class="chk-group">
+                                <div class="chk-btn" id="chk-rtnBath" onclick="toggleRoutine('rtnBath')">🛁 Bath</div>
+                                <div class="chk-btn" id="chk-rtnBook" onclick="toggleRoutine('rtnBook')">📖 Read Book</div>
+                                <div class="chk-btn" id="chk-rtnLights" onclick="toggleRoutine('rtnLights')">💡 Dim Lights</div>
+                                <div class="chk-btn" id="chk-rtnScreen" onclick="toggleRoutine('rtnScreen')">🚫 Screen Off 1hr</div>
+                                <div class="chk-btn" id="chk-rtnTeeth" onclick="toggleRoutine('rtnTeeth')">🪥 Teeth</div>
+                            </div>
+
+                            <div class="tracker-category">🌌 Night Tracking</div>
+                            <div class="tracker-row">
+                                <span class="tracker-label">⏳ Time to Fall Asleep</span>
+                                <select class="tracker-select" id="trk-settle" onchange="setTracker('settle', this.value)">
+                                    <option value="Unknown">?</option>
+                                    <option value="<15m">&lt; 15 mins</option>
+                                    <option value="15-30m">15 - 30 mins</option>
+                                    <option value="30-60m">30 - 60 mins</option>
+                                    <option value="1hr+">1+ Hours</option>
+                                </select>
+                            </div>
+                            <div class="tracker-row">
+                                <span class="tracker-label">🥱 Night Wakings</span>
+                                <select class="tracker-select" id="trk-wakings" onchange="setTracker('wakings', this.value)">
+                                    <option value="0">None</option>
+                                    <option value="1">1 time</option>
+                                    <option value="2">2 times</option>
+                                    <option value="3">3 times</option>
+                                    <option value="4+">4+ times</option>
+                                </select>
+                            </div>
+                            
+                            <div class="tracker-category">🎵 Sleep Audio Player</div>
+                            <div class="sound-player">
+                                <button class="btn-play-sound" id="btn-sound" onclick="toggleAudio()"><i class="fa-solid fa-play"></i></button>
+                                <select class="tracker-select" style="flex:1;" id="sound-type" onchange="changeAudioType()">
+                                    <option value="white">White Noise (Static)</option>
+                                    <option value="pink">Pink Noise (Rain/Waterfall)</option>
+                                    <option value="womb">Womb (Deep Rumble)</option>
+                                    <option value="humming">Soft Humming</option>
+                                </select>
+                            </div>
+
                         </div>
 
                         <div class="feedback-section">
@@ -361,10 +418,106 @@
         let activeEvent = null; 
         let activeDateStr = null; 
         let activeAppData = null; 
-        let currentTrackers = { eat: null, bath: null, nap: '0' }; 
+        // UPDATED: Added new trackers for routines, wake time, and settling
+        let currentTrackers = { eat: null, nap: '0', wakeTime: '', rtnBath: false, rtnBook: false, rtnLights: false, rtnScreen: false, rtnTeeth: false, settle: 'Unknown', wakings: '0' }; 
         let deferredPrompt = null;
         let rawAIResult = ""; 
         let currentAIMode = "advice"; 
+
+        // --- WEB AUDIO API PLAYER ---
+        let audioCtx;
+        let activeSoundNode = null;
+        let isAudioPlaying = false;
+
+        function toggleAudio() {
+            if (isAudioPlaying) stopAudio();
+            else playAudio();
+        }
+
+        function changeAudioType() {
+            if (isAudioPlaying) { stopAudio(); playAudio(); }
+        }
+
+        function stopAudio() {
+            if (activeSoundNode) {
+                try { activeSoundNode.stop(); } catch(e){}
+                try { activeSoundNode.disconnect(); } catch(e){}
+                activeSoundNode = null;
+            }
+            isAudioPlaying = false;
+            document.getElementById('btn-sound').classList.remove('playing');
+            document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-play"></i>';
+        }
+
+        function playAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const type = document.getElementById('sound-type').value;
+            const bufferSize = audioCtx.sampleRate * 2; 
+            let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            let output = buffer.getChannelData(0);
+            
+            if (type === 'white') {
+                for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+                let noiseSrc = audioCtx.createBufferSource();
+                noiseSrc.buffer = buffer; noiseSrc.loop = true;
+                
+                let gainNode = audioCtx.createGain(); gainNode.gain.value = 0.05;
+                noiseSrc.connect(gainNode).connect(audioCtx.destination);
+                noiseSrc.start();
+                activeSoundNode = noiseSrc;
+                
+            } else if (type === 'pink' || type === 'womb') {
+                let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+                for (let i = 0; i < bufferSize; i++) {
+                    let white = Math.random() * 2 - 1;
+                    b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520;
+                    b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980;
+                    output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11; b6 = white * 0.115926;
+                }
+                let noiseSrc = audioCtx.createBufferSource();
+                noiseSrc.buffer = buffer; noiseSrc.loop = true;
+                
+                if (type === 'womb') {
+                    let filter = audioCtx.createBiquadFilter();
+                    filter.type = 'lowpass'; filter.frequency.value = 400; // Deep muffle rumble
+                    let gainNode = audioCtx.createGain(); gainNode.gain.value = 0.8;
+                    noiseSrc.connect(filter).connect(gainNode).connect(audioCtx.destination);
+                    activeSoundNode = { stop: () => noiseSrc.stop(), disconnect: () => { noiseSrc.disconnect(); filter.disconnect(); } };
+                } else {
+                    let gainNode = audioCtx.createGain(); gainNode.gain.value = 0.15;
+                    noiseSrc.connect(gainNode).connect(audioCtx.destination);
+                    activeSoundNode = noiseSrc;
+                }
+                noiseSrc.start();
+
+            } else if (type === 'humming') {
+                let osc1 = audioCtx.createOscillator(); osc1.type = 'triangle'; osc1.frequency.value = 130; 
+                let osc2 = audioCtx.createOscillator(); osc2.type = 'sine'; osc2.frequency.value = 132;
+                
+                let lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.2; // Slow breathing rhythm
+                let lfoGain = audioCtx.createGain(); lfoGain.gain.value = 0.5;
+                
+                let mainGain = audioCtx.createGain(); mainGain.gain.value = 0.3; 
+                let filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 300; 
+
+                lfo.connect(lfoGain.gain); // modulate gain to simulate breathing
+                osc1.connect(filter); osc2.connect(filter);
+                filter.connect(mainGain).connect(audioCtx.destination);
+                
+                osc1.start(); osc2.start(); lfo.start();
+                activeSoundNode = { 
+                    stop: () => { osc1.stop(); osc2.stop(); lfo.stop(); }, 
+                    disconnect: () => { osc1.disconnect(); osc2.disconnect(); filter.disconnect(); } 
+                };
+            }
+
+            isAudioPlaying = true;
+            document.getElementById('btn-sound').classList.add('playing');
+            document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-stop"></i>';
+        }
+        // -----------------------------
 
         function getLocalISODate(dateObj) {
             const y = dateObj.getFullYear();
@@ -391,14 +544,7 @@
 
         async function shareViaWeb(textToShare, title) {
             if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: title,
-                        text: textToShare
-                    });
-                } catch (err) {
-                    console.log('User cancelled share or it failed', err);
-                }
+                try { await navigator.share({ title: title, text: textToShare }); } catch (err) {}
             } else {
                 window.open(`https://wa.me/?text=${encodeURIComponent(textToShare)}`);
             }
@@ -408,11 +554,21 @@
             const dateStr = document.getElementById('modal-date').innerText;
             const fb = document.getElementById('modal-feedback').value.trim() || "No notes logged.";
             const eat = currentTrackers.eat || '?';
-            const bath = currentTrackers.bath || '?';
             const nap = currentTrackers.nap || '0';
+            const wake = currentTrackers.wakeTime || 'Unknown';
+            const settle = currentTrackers.settle || '?';
+            const wakes = currentTrackers.wakings || '0';
             
-            const shareText = `👶 *Ava's Update: ${dateStr}*\n\n🍼 Ate well: ${eat}\n🛁 Bath done: ${bath}\n😴 Nap: ${nap} hrs\n\n*Notes:*\n${fb}`;
+            // Build routines string
+            let rtns = [];
+            if(currentTrackers.rtnBath) rtns.push("Bath");
+            if(currentTrackers.rtnBook) rtns.push("Book");
+            if(currentTrackers.rtnLights) rtns.push("Dim Lights");
+            if(currentTrackers.rtnScreen) rtns.push("No Screens");
+            if(currentTrackers.rtnTeeth) rtns.push("Teeth");
+            const rtnStr = rtns.length > 0 ? rtns.join(', ') : 'None logged';
             
+            const shareText = `👶 *Ava's Update: ${dateStr}*\n\n🍼 Ate well: ${eat}\n😴 Nap: ${nap} hrs (Woke at ${wake})\n🌙 Routine: ${rtnStr}\n🌌 Time to settle: ${settle}\n🥱 Night Wakings: ${wakes}\n\n*Notes:*\n${fb}`;
             shareViaWeb(shareText, "Ava's Daily Update");
         }
 
@@ -680,22 +836,65 @@
             }
         }
 
+        // --- NEW TRACKER LOGIC ---
         function setTracker(type, val) {
             currentTrackers[type] = val;
-            if (type === 'eat' || type === 'bath') {
-                document.getElementById(`trk-${type}-yes`).className = `tracker-btn ${val === 'yes' ? 'active-yes' : ''}`;
-                document.getElementById(`trk-${type}-no`).className = `tracker-btn ${val === 'no' ? 'active-no' : ''}`;
+            if (type === 'eat') {
+                document.getElementById(`trk-eat-yes`).className = `tracker-btn ${val === 'yes' ? 'active-yes' : ''}`;
+                document.getElementById(`trk-eat-no`).className = `tracker-btn ${val === 'no' ? 'active-no' : ''}`;
             }
         }
 
+        function updateWakeTime(val) {
+            setTracker('wakeTime', val);
+            calculateBedtime(val);
+        }
+
+        function calculateBedtime(wakeTimeStr) {
+            const suggestionBox = document.getElementById('bedtime-suggestion');
+            if(!wakeTimeStr) { suggestionBox.style.display = 'none'; return; }
+            
+            const [hours, minutes] = wakeTimeStr.split(':').map(Number);
+            let wakeDate = new Date();
+            wakeDate.setHours(hours, minutes, 0);
+            
+            // Standard toddler wake window: ~5.5 hours 
+            wakeDate.setMinutes(wakeDate.getMinutes() + 330); 
+            
+            let bedH = String(wakeDate.getHours()).padStart(2, '0');
+            let bedM = String(wakeDate.getMinutes()).padStart(2, '0');
+            
+            suggestionBox.innerHTML = `<i class="fa-solid fa-lightbulb"></i> Suggested Bedtime: <b>${bedH}:${bedM}</b> <span style="font-weight:normal; opacity:0.8;">(5.5h window)</span>`;
+            suggestionBox.style.display = 'block';
+        }
+
+        function toggleRoutine(type) {
+            currentTrackers[type] = !currentTrackers[type];
+            const el = document.getElementById('chk-' + type);
+            if(currentTrackers[type]) el.classList.add('active');
+            else el.classList.remove('active');
+        }
+
         function loadTrackers(dateStr) {
-            const trks = activeAppData.trackers && activeAppData.trackers[dateStr] ? activeAppData.trackers[dateStr] : { eat: null, bath: null, nap: '0' };
-            currentTrackers = { ...trks }; 
+            const defTrks = { eat: null, nap: '0', wakeTime: '', rtnBath: false, rtnBook: false, rtnLights: false, rtnScreen: false, rtnTeeth: false, settle: 'Unknown', wakings: '0' };
+            const trks = activeAppData.trackers && activeAppData.trackers[dateStr] ? activeAppData.trackers[dateStr] : defTrks;
+            currentTrackers = { ...defTrks, ...trks }; 
             
             setTracker('eat', currentTrackers.eat);
-            setTracker('bath', currentTrackers.bath);
             document.getElementById('trk-nap').value = currentTrackers.nap || '0';
+            document.getElementById('trk-wakeTime').value = currentTrackers.wakeTime || '';
+            calculateBedtime(currentTrackers.wakeTime);
+            
+            ['rtnBath','rtnBook','rtnLights','rtnScreen','rtnTeeth'].forEach(t => {
+                const el = document.getElementById('chk-' + t);
+                if(currentTrackers[t]) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+            
+            document.getElementById('trk-settle').value = currentTrackers.settle || 'Unknown';
+            document.getElementById('trk-wakings').value = currentTrackers.wakings || '0';
         }
+        // -------------------------
 
         function openSpecificDay(eventId, clickedDateStr) {
             activeEvent = allEvents.find(e => e.id === eventId);
@@ -848,6 +1047,7 @@
         }
 
         function closeModal() {
+            stopAudio(); // Stop audio if closing modal
             const overlay = document.getElementById('event-modal');
             overlay.classList.remove('active');
             setTimeout(() => overlay.style.display = 'none', 300);
@@ -908,7 +1108,14 @@
                 
                 let trkStr = "";
                 if(trks) {
-                    trkStr = `(Ate: ${trks.eat || '?'}, Bath: ${trks.bath || '?'}, Nap: ${trks.nap}h) `;
+                    let rts = [];
+                    if(trks.rtnBath) rts.push("Bath");
+                    if(trks.rtnBook) rts.push("Book");
+                    if(trks.rtnLights) rts.push("Dim");
+                    if(trks.rtnScreen) rts.push("NoScreen");
+                    if(trks.rtnTeeth) rts.push("Teeth");
+                    
+                    trkStr = `(Ate: ${trks.eat || '?'}, Nap: ${trks.nap}h, Wake: ${trks.wakeTime || '?'}, Settle: ${trks.settle || '?'}, Wakings: ${trks.wakings || '0'}, Routine: [${rts.join(',')}]) `;
                 }
                 dataStr += `- Date: ${dayStr} ${trkStr}\n  Notes: ${fb}\n`;
             }
@@ -931,7 +1138,6 @@
             const aiText = document.getElementById('ai-output-text');
             const btnFetch = document.getElementById('btn-fetch-ai');
             
-            // PREVENT SPAM CLICKING
             btnFetch.disabled = true;
             btnFetch.style.opacity = '0.5';
             
@@ -943,7 +1149,8 @@
 
                 let prompt = "";
                 if (currentAIMode === 'advice') {
-                    prompt = `Alferenzo and Lesly are struggling to get their toddler, Ava, to sleep. Here are tonight's notes: "${currentNotes}". Give 2 short, highly practical, soothing tips to help her settle down. Keep it brief and encouraging. Format as a bulleted list. Do not use asterisks or bolding.`;
+                    // Update the prompt to give context on the new routines
+                    prompt = `Alferenzo and Lesly are struggling to get their toddler, Ava, to sleep. The app is tracking wake windows, settling time, night wakings, and bedtime routines. Here are tonight's notes: "${currentNotes}". Give 2 short, highly practical, soothing tips to help her settle down. Keep it brief and encouraging. Format as a bulleted list. Do not use asterisks or bolding.`;
                 } else {
                     prompt = currentNotes; 
                 }
@@ -990,7 +1197,6 @@
                         <span style="font-size:13px; font-weight:normal;"><b>Reason:</b> ${errMsg}</span>
                     </span>`;
             } finally {
-                // RE-ENABLE BUTTON
                 btnFetch.disabled = false;
                 btnFetch.style.opacity = '1';
                 btnFetch.innerText = currentAIMode === 'advice' ? 'Ask Again' : 'Regenerate Summary';
