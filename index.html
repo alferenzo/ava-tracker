@@ -342,9 +342,9 @@
     <script>
         const CLIENT_ID = '728744386309-ocoa425l1ummb759h3dthefsf8i9q15g.apps.googleusercontent.com';
         
-        // ⚠️ FIXED: The API Key configuration
         const part1 = String.fromCharCode(65, 73, 122, 97); 
-        const part2 = 'SyDe7Mqjm7k2rYaEv3sMmy-ZKFgbsmICRkA'; // <--- PASTE YOUR API KEY HERE!
+        // 👇 Here is the placeholder key re-added WITH quotes so the JavaScript doesn't crash!
+        const part2 = 'SyDe7Mqjm7k2rYaEv3sMmy-ZKFgbsmICRkA'; 
         const GEMINI_API_KEY = part1 + part2;
 
         const CALENDAR_ID = 'family11537808756268491091@group.calendar.google.com';
@@ -933,7 +933,6 @@
             btnFetch.innerText = currentAIMode === 'advice' ? 'Ask Again' : 'Regenerate Summary';
 
             try {
-                // ⚠️ FIXED: Hardcoded to 1.5 Flash for lightning fast, reliable API calls!
                 const chosenModel = "models/gemini-1.5-flash";
 
                 let prompt = "";
@@ -952,4 +951,39 @@
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
                 const data = await response.json();
-                if (data.error) throw new Error(data.error.
+                if (data.error) throw new Error(data.error.message);
+                
+                rawAIResult = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
+                aiText.innerHTML = rawAIResult.replace(/\n/g, '<br>');
+                
+                if(currentAIMode === 'advice') {
+                    document.getElementById('btn-copy-ai').style.display = 'block';
+                    document.getElementById('btn-copy-ai').innerText = "Copy to Notes";
+                } else {
+                    document.getElementById('btn-copy-ai').style.display = 'block';
+                    document.getElementById('btn-copy-ai').innerText = "Share Summary";
+                }
+
+            } catch (err) {
+                console.error("AI Error:", err);
+                aiText.innerHTML = `<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Could not reach AI. Did you paste your API key in the code?</span>`;
+            }
+        }
+
+        function handleAIResult() {
+            if (currentAIMode === 'advice') {
+                const feedbackBox = document.getElementById('modal-feedback');
+                const existingText = feedbackBox.value;
+                if (existingText.trim() === "") {
+                    feedbackBox.value = "AI Advice:\n" + rawAIResult;
+                } else {
+                    feedbackBox.value = existingText + "\n\n--- AI Advice ---\n" + rawAIResult;
+                }
+                closeAIDialog();
+            } else {
+                shareViaWeb(rawAIResult, "Ava's Shift Handoff");
+            }
+        }
+    </script>
+</body>
+</html>
