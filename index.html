@@ -22,31 +22,30 @@
             --input-bg: #f8fafc;
         }
 
-        /* TRUE NIGHT VISION MODE */
+        /* IMPROVED TRUE NIGHT VISION MODE (OLED Warm Amber) */
         body.night-vision {
-            --alf-color: #ff3333; 
-            --alf-bg: #1a0000;
-            --lesly-color: #ff3333; 
-            --lesly-bg: #1a0000;
+            --alf-color: #ff9d5c; 
+            --alf-bg: #1a0f0a;
+            --lesly-color: #ff9d5c; 
+            --lesly-bg: #1a0f0a;
             --bg-color: #000000;
-            --card-bg: #0a0000;
-            --text-main: #ff4444;
-            --text-muted: #aa2222;
-            --ai-color: #ff2222;
-            --border-color: #330000;
-            --input-bg: #110000;
+            --card-bg: #0c0806;
+            --text-main: #ff9d5c;
+            --text-muted: #a65c32;
+            --ai-color: #ffb732;
+            --border-color: #26140a;
+            --input-bg: #000000;
             background: #000000;
         }
-        body.night-vision * { border-color: var(--border-color) !important; box-shadow: none !important; }
+        body.night-vision * { box-shadow: none !important; }
         body.night-vision .header { background: #000; border-bottom: 1px solid var(--border-color); }
-        body.night-vision .cal-cell.today::after { background-color: #ff4444; }
-        body.night-vision .btn-main, body.night-vision .btn-save, body.night-vision .btn-pill { background: #220000; color: #ff4444; border: 1px solid #ff4444; }
-        body.night-vision .tracker-btn.active-yes, body.night-vision .chk-btn.active { background: #330000; color: #ff4444; border-color: #ff4444; }
-        body.night-vision .tracker-btn.active-no { background: #330000; color: #ff4444; border-color: #ff4444; }
-        body.night-vision .tracker-select, body.night-vision input, body.night-vision textarea, body.night-vision select { background: var(--input-bg); color: var(--text-main); }
-        body.night-vision .sound-player { background: var(--input-bg); }
-        body.night-vision .tracker-category { color: var(--text-muted); border-bottom-color: var(--border-color); }
-        body.night-vision .global-player { background: #1a0000; border: 1px solid #ff4444; color: #ff4444; }
+        body.night-vision .cal-cell.today::after { background-color: var(--text-main); }
+        body.night-vision .btn-main, body.night-vision .btn-save, body.night-vision .btn-pill { background: #1a0f0a; color: var(--text-main); border: 1px solid var(--text-main); }
+        body.night-vision .tracker-btn.active-yes, body.night-vision .chk-btn.active { background: #1a0f0a; color: var(--text-main); border-color: var(--text-main); }
+        body.night-vision .tracker-btn.active-no { background: #1a0f0a; color: var(--text-main); border-color: var(--text-main); }
+        body.night-vision .tracker-select, body.night-vision input, body.night-vision textarea, body.night-vision select { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); }
+        body.night-vision .sound-player { background: var(--input-bg); border-color: var(--border-color); }
+        body.night-vision .global-player { background: var(--card-bg); border: 1px solid var(--text-muted); color: var(--text-main); }
 
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; }
 
@@ -78,16 +77,16 @@
         .sidebar-item:active { background: var(--input-bg); }
         .sidebar-item i { width: 20px; text-align: center; color: var(--text-muted); font-size: 18px; }
 
-        /* GLOBAL MINI PLAYER */
-        .global-player { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%) translateY(150px); background: var(--text-main); color: white; padding: 10px 15px 10px 20px; border-radius: 50px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 30px rgba(30, 41, 59, 0.4); z-index: 90000; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); width: 90%; max-width: 350px; justify-content: space-between;}
-        .global-player.visible { transform: translateX(-50%) translateY(0); }
-        .gp-info { display: flex; flex-direction: column; overflow: hidden;}
-        .gp-title { font-size: 14px; font-weight: 700; white-space: nowrap; }
-        .gp-subtitle { font-size: 11px; font-weight: 500; opacity: 0.7; }
-        .gp-controls { display: flex; gap: 10px; align-items: center; }
-        .gp-btn { background: rgba(255,255,255,0.2); border: none; width: 36px; height: 36px; border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; font-size: 14px; cursor: pointer; transition: transform 0.2s; }
+        /* IMPROVED GLOBAL MINI PLAYER */
+        .global-player { position: fixed; bottom: 20px; right: 20px; left: auto; transform: translateY(150px); background: var(--card-bg); border: 2px solid var(--border-color); color: var(--text-main); border-radius: 40px; padding: 6px 6px 6px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); z-index: 999999; width: auto; max-width: 250px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .global-player.visible { transform: translateY(0); }
+        .gp-info { display: flex; flex-direction: column; overflow: hidden; flex: 1; }
+        .gp-title { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--ai-color); letter-spacing: 0.5px;}
+        .gp-subtitle { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .gp-controls { display: flex; gap: 6px; align-items: center; }
+        .gp-btn { background: var(--input-bg); border: 1px solid var(--border-color); width: 34px; height: 34px; border-radius: 50%; color: var(--text-main); display: flex; justify-content: center; align-items: center; font-size: 14px; cursor: pointer; transition: transform 0.2s; }
+        .gp-btn.stop { background: #ef4444; color: white; border-color: #ef4444; }
         .gp-btn:active { transform: scale(0.9); }
-        .gp-btn.stop { background: #ef4444; }
 
         #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 30px; text-align: center; }
         .hero-icon { font-size: 70px; color: var(--alf-color); margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
@@ -119,21 +118,33 @@
         .btn-pill { background: var(--text-main); color: white; border: none; padding: 15px 35px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; pointer-events: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 10px; }
 
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: flex-end; z-index: 100; opacity: 0; transition: opacity 0.3s; }
-        .modal-content { background: var(--card-bg); width: 100%; padding: 30px 25px 40px; border-radius: 30px 30px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); max-height: 85vh; overflow-y: auto; border-top: 1px solid var(--border-color); }
+        
+        /* ADDED Extra padding-bottom so save button isn't blocked by audio */
+        .modal-content { background: var(--card-bg); width: 100%; padding: 0 25px 120px; border-radius: 30px 30px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); max-height: 88vh; overflow-y: auto; border-top: 1px solid var(--border-color); }
         .modal-overlay.active { opacity: 1; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
         
-        .modal-drag-bar { width: 40px; height: 5px; background: var(--text-muted); border-radius: 5px; margin: 0 auto 20px; opacity: 0.5; }
-        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        /* NEW STICKY HEADER FOR MODAL */
+        .modal-header-sticky { position: sticky; top: 0; background: var(--card-bg); z-index: 10; padding-top: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
+        .modal-drag-bar { width: 40px; height: 5px; background: var(--text-muted); border-radius: 5px; margin: 0 auto 15px; opacity: 0.5; }
+        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .modal-header h2 { font-size: 22px; color: var(--text-main); margin-bottom: 5px; }
         .modal-date { font-size: 13px; font-weight: 600; display: inline-block; padding: 4px 10px; border-radius: 12px; margin-top: 5px; }
         
         .action-row { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn-swap { flex: 1; background: var(--input-bg); border: 1px solid var(--border-color); padding: 14px; border-radius: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-swap { flex: 1; background: var(--input-bg); border: 2px solid var(--border-color); padding: 14px; border-radius: 14px; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s;}
+        .btn-swap:active { transform: scale(0.95); }
 
-        .trackers-section { background: transparent; border: 1px solid var(--border-color); border-radius: 20px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
-        .tracker-category { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 800; margin: 15px 0 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; letter-spacing: 0.5px;}
-        .tracker-category:first-child { margin-top: 0; }
+        /* NEW ACCORDION TRACKERS (Declutter UI) */
+        details.tracker-group { background: var(--input-bg); border: 2px solid var(--border-color); border-radius: 16px; margin-bottom: 12px; transition: all 0.2s; }
+        details.tracker-group[open] { background: transparent; }
+        details.tracker-group summary { padding: 15px; font-size: 15px; font-weight: 800; color: var(--text-main); cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; user-select: none; }
+        details.tracker-group summary::-webkit-details-marker { display: none; }
+        details.tracker-group summary::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: var(--text-muted); transition: transform 0.2s; }
+        details.tracker-group[open] summary::after { transform: rotate(180deg); }
+        details.tracker-group .tracker-content { padding: 0 15px 15px 15px; animation: slideDown 0.3s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
         .tracker-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         .tracker-row:last-child { margin-bottom: 0; }
         .tracker-label { font-size: 14px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
@@ -143,54 +154,30 @@
         .tracker-btn.active-yes { background: #10b981; color: white; border-color: #10b981; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
         .tracker-btn.active-no { background: #ef4444; color: white; border-color: #ef4444; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
         
-        /* IMPROVED INPUT STYLING */
         .tracker-select, .form-group input, .form-group select { 
-            padding: 10px 14px; 
-            border-radius: 12px; 
-            border: 2px solid var(--border-color); 
-            font-size: 14px; 
-            font-weight: 600; 
-            background: var(--input-bg); 
-            color: var(--text-main); 
-            outline: none; 
-            transition: all 0.2s;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            padding: 10px 14px; border-radius: 12px; border: 2px solid var(--border-color); font-size: 14px; font-weight: 600; 
+            background: var(--input-bg); color: var(--text-main); outline: none; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
         .tracker-select:focus, .form-group input:focus, .form-group select:focus, textarea:focus {
-            border-color: var(--ai-color);
-            background: var(--card-bg);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02), 0 0 0 4px rgba(139, 92, 246, 0.1);
+            border-color: var(--ai-color); background: var(--card-bg); box-shadow: inset 0 2px 4px rgba(0,0,0,0.02), 0 0 0 4px rgba(139, 92, 246, 0.1);
         }
         
         .bedtime-suggestion { font-size: 13px; color: #047857; background: #d1fae5; padding: 10px; border-radius: 12px; font-weight: 700; text-align: center; margin-top: 5px; border: 1px solid #a7f3d0; display: none; }
-        .chk-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;}
+        .chk-group { display: flex; flex-wrap: wrap; gap: 8px;}
         .chk-btn { padding: 10px 14px; border-radius: 20px; border: 2px solid var(--border-color); background: var(--input-bg); font-size: 13px; font-weight: 700; color: var(--text-main); cursor: pointer; transition: all 0.2s; user-select: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         .chk-btn.active { background: var(--text-main); color: var(--card-bg); border-color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
-        .sound-player { display: flex; gap: 10px; align-items: center; background: var(--input-bg); padding: 12px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);}
-        .btn-play-sound { background: var(--ai-color); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; transition: transform 0.2s; flex-shrink: 0;}
-        .btn-play-sound.playing { background: #ef4444; animation: pulseSound 2s infinite ease-in-out;}
+        .sound-player { display: flex; gap: 10px; align-items: center; background: transparent; padding: 0; border-radius: 0; border: none; box-shadow: none;}
+        .btn-play-sound { background: var(--ai-color); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; transition: transform 0.2s; flex-shrink: 0; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);}
+        .btn-play-sound.playing { background: #ef4444; animation: pulseSound 2s infinite ease-in-out; box-shadow: none;}
         @keyframes pulseSound { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-        .feedback-section { background: transparent; border: 1px solid var(--border-color); border-radius: 20px; padding: 18px; margin-bottom: 20px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .feedback-section { background: transparent; border: 2px solid var(--border-color); border-radius: 20px; padding: 18px; margin-bottom: 20px; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
         .feedback-section label { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 800; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* IMPROVED TEXTAREA */
         textarea { 
-            width: 100%; 
-            border: 2px solid var(--border-color); 
-            background: var(--input-bg); 
-            border-radius: 16px; 
-            resize: none; 
-            font-size: 15px; 
-            font-weight: 500; 
-            color: var(--text-main); 
-            min-height: 100px; 
-            padding: 16px; 
-            outline: none; 
-            line-height: 1.6; 
-            transition: all 0.2s;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            width: 100%; border: 2px solid var(--border-color); background: var(--input-bg); border-radius: 16px; resize: none; 
+            font-size: 15px; font-weight: 500; color: var(--text-main); min-height: 100px; padding: 16px; outline: none; line-height: 1.6; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
         textarea::placeholder { color: var(--text-muted); font-weight: 500; opacity: 0.7; }
 
@@ -200,13 +187,11 @@
         .ai-btn { background: var(--input-bg); color: var(--ai-color); border: 2px solid var(--border-color); padding: 12px; border-radius: 16px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 100%; gap: 8px; margin-top: 15px; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         .ai-btn:active { background: var(--border-color); }
 
-        .handoff-btn { background: var(--input-bg); color: #d97706; border: 2px solid var(--border-color); padding: 14px; border-radius: 16px; font-size: 15px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 100%; gap: 10px; margin-bottom: 15px; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);}
-
-        .create-form { display: none; }
+        .create-form { display: none; padding-top: 20px;}
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 5px; font-weight: 600;}
 
-        .btn-save { background: var(--text-main); color: var(--card-bg); border: none; padding: 16px; border-radius: 16px; width: 100%; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 5px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: transform 0.2s;}
+        .btn-save { background: var(--text-main); color: var(--card-bg); border: none; padding: 18px; border-radius: 16px; width: 100%; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 5px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: transform 0.2s;}
         .btn-save:active { transform: scale(0.98); }
 
         .dialog-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 999999; opacity: 0; transition: opacity 0.2s; backdrop-filter: blur(2px); }
@@ -260,10 +245,10 @@
         </div>
     </div>
 
-    <!-- GLOBAL AUDIO PLAYER -->
+    <!-- IMPROVED COMPACT GLOBAL MINI PLAYER -->
     <div class="global-player" id="global-player">
         <div class="gp-info">
-            <div class="gp-title">Sleep Audio Playing</div>
+            <div class="gp-title">Playing Audio</div>
             <div class="gp-subtitle" id="gp-track-name">Background Noise</div>
         </div>
         <div class="gp-controls">
@@ -312,32 +297,32 @@
             </button>
         </div>
 
-        <!-- MAIN EVENT MODAL -->
+        <!-- MAIN EVENT MODAL (Uncluttered) -->
         <div class="modal-overlay" id="event-modal">
             <div class="modal-content">
-                <div class="modal-drag-bar"></div>
                 
                 <div id="modal-view-mode">
-                    <div class="modal-header">
-                        <div style="width: 100%;">
-                            <h2 id="modal-title">Shift Details</h2>
-                            <p id="modal-subtitle" style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;"></p>
-                            <span class="modal-date" id="modal-date">Specific Date</span>
-                        </div>
-                        
-                        <div style="display:flex; gap:15px; align-items:flex-start;">
-                            <button onclick="shareTodayNotes()" id="btn-share-today" style="background:none; border:none; font-size:20px; color:var(--text-main); cursor:pointer;"><i class="fa-solid fa-share-nodes"></i></button>
-                            <button onclick="closeModal()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
+                    <!-- STICKY HEADER -->
+                    <div class="modal-header-sticky">
+                        <div class="modal-drag-bar"></div>
+                        <div class="modal-header">
+                            <div style="width: 100%;">
+                                <h2 id="modal-title">Shift Details</h2>
+                                <p id="modal-subtitle" style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;"></p>
+                                <span class="modal-date" id="modal-date">Specific Date</span>
+                            </div>
+                            
+                            <div style="display:flex; gap:15px; align-items:flex-start;">
+                                <button onclick="shareTodayNotes()" id="btn-share-today" style="background:none; border:none; font-size:20px; color:var(--text-main); cursor:pointer;"><i class="fa-solid fa-share-nodes"></i></button>
+                                <button onclick="closeModal()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- REPORT BUTTON MOVED UP -->
                     <div class="action-row">
-                        <button class="btn-swap" onclick="swapSpecificDay()">
-                            <i class="fa-solid fa-arrows-rotate"></i> Swap Day
-                        </button>
-                        <button class="btn-swap" onclick="deleteSpecificDay()" style="color: #ef4444; flex: 0.6;">
-                            <i class="fa-regular fa-calendar-xmark"></i> Clear
-                        </button>
+                        <button class="btn-swap" onclick="openAIDialog('handoff')" style="background: var(--ai-color); color: white; border-color: var(--ai-color); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);"><i class="fa-solid fa-handshake"></i> Handoff Report</button>
+                        <button class="btn-swap" onclick="swapSpecificDay()"><i class="fa-solid fa-arrows-rotate"></i> Swap Day</button>
                     </div>
 
                     <div id="future-lock-msg">
@@ -346,79 +331,93 @@
                     </div>
 
                     <div id="interactive-content">
-                        <div class="trackers-section">
-                            
-                            <div class="tracker-category">☀️ Daytime Tracking</div>
-                            <div class="tracker-row">
-                                <span class="tracker-label">🍼 Ate Well?</span>
-                                <div class="tracker-btn-group">
-                                    <button class="tracker-btn" id="trk-eat-yes" onclick="setTracker('eat', 'yes')">Yes</button>
-                                    <button class="tracker-btn" id="trk-eat-no" onclick="setTracker('eat', 'no')">No</button>
+                        
+                        <!-- ACCORDION TRACKERS FOR DECLUTTERING -->
+                        <details class="tracker-group" open>
+                            <summary><i class="fa-regular fa-sun" style="width:25px; color: #f59e0b;"></i> Daytime Tracking</summary>
+                            <div class="tracker-content">
+                                <div class="tracker-row">
+                                    <span class="tracker-label">🍼 Ate Well?</span>
+                                    <div class="tracker-btn-group">
+                                        <button class="tracker-btn" id="trk-eat-yes" onclick="setTracker('eat', 'yes')">Yes</button>
+                                        <button class="tracker-btn" id="trk-eat-no" onclick="setTracker('eat', 'no')">No</button>
+                                    </div>
+                                </div>
+                                <div class="tracker-row">
+                                    <span class="tracker-label">😴 Nap Duration</span>
+                                    <select class="tracker-select" id="trk-nap" onchange="setTracker('nap', this.value)">
+                                        <option value="0">None</option>
+                                        <option value="1">~1 hr</option>
+                                        <option value="2">~2 hrs</option>
+                                        <option value="3+">3+ hrs</option>
+                                    </select>
+                                </div>
+                                <div class="tracker-row">
+                                    <span class="tracker-label">⏰ Woke from Nap</span>
+                                    <input type="time" class="tracker-select" id="trk-wakeTime" onchange="updateWakeTime(this.value)">
+                                </div>
+                                <div id="bedtime-suggestion" class="bedtime-suggestion"></div>
+                            </div>
+                        </details>
+
+                        <details class="tracker-group">
+                            <summary><i class="fa-solid fa-bath" style="width:25px; color: #3b82f6;"></i> Wind-Down Routine</summary>
+                            <div class="tracker-content">
+                                <div class="chk-group">
+                                    <div class="chk-btn" id="chk-rtnBath" onclick="toggleRoutine('rtnBath')">🛁 Bath</div>
+                                    <div class="chk-btn" id="chk-rtnBook" onclick="toggleRoutine('rtnBook')">📖 Book</div>
+                                    <div class="chk-btn" id="chk-rtnLights" onclick="toggleRoutine('rtnLights')">💡 Dim Lights</div>
+                                    <div class="chk-btn" id="chk-rtnScreen" onclick="toggleRoutine('rtnScreen')">🚫 Screen Off</div>
+                                    <div class="chk-btn" id="chk-rtnTeeth" onclick="toggleRoutine('rtnTeeth')">🪥 Teeth</div>
                                 </div>
                             </div>
-                            <div class="tracker-row">
-                                <span class="tracker-label">😴 Nap Duration</span>
-                                <select class="tracker-select" id="trk-nap" onchange="setTracker('nap', this.value)">
-                                    <option value="0">None</option>
-                                    <option value="1">~1 hr</option>
-                                    <option value="2">~2 hrs</option>
-                                    <option value="3+">3+ hrs</option>
-                                </select>
-                            </div>
-                            <div class="tracker-row">
-                                <span class="tracker-label">⏰ Woke from Nap</span>
-                                <input type="time" class="tracker-select" id="trk-wakeTime" onchange="updateWakeTime(this.value)">
-                            </div>
-                            <div id="bedtime-suggestion" class="bedtime-suggestion"></div>
+                        </details>
 
-                            <div class="tracker-category">🌙 Wind-Down Routine</div>
-                            <div class="chk-group">
-                                <div class="chk-btn" id="chk-rtnBath" onclick="toggleRoutine('rtnBath')">🛁 Bath</div>
-                                <div class="chk-btn" id="chk-rtnBook" onclick="toggleRoutine('rtnBook')">📖 Book</div>
-                                <div class="chk-btn" id="chk-rtnLights" onclick="toggleRoutine('rtnLights')">💡 Dim Lights</div>
-                                <div class="chk-btn" id="chk-rtnScreen" onclick="toggleRoutine('rtnScreen')">🚫 Screen Off</div>
-                                <div class="chk-btn" id="chk-rtnTeeth" onclick="toggleRoutine('rtnTeeth')">🪥 Teeth</div>
+                        <details class="tracker-group" open>
+                            <summary><i class="fa-solid fa-moon" style="width:25px; color: var(--ai-color);"></i> Night Tracking</summary>
+                            <div class="tracker-content">
+                                <div class="tracker-row">
+                                    <span class="tracker-label">⏰ Time Fell Asleep</span>
+                                    <input type="time" class="tracker-select" id="trk-asleepTime" onchange="setTracker('asleepTime', this.value)">
+                                </div>
+                                <div class="tracker-row">
+                                    <span class="tracker-label">⏳ Time to Settle</span>
+                                    <select class="tracker-select" id="trk-settle" onchange="setTracker('settle', this.value)">
+                                        <option value="Unknown">?</option>
+                                        <option value="<15m">&lt; 15 mins</option>
+                                        <option value="15-30m">15 - 30 mins</option>
+                                        <option value="30-60m">30 - 60 mins</option>
+                                        <option value="1hr+">1+ Hours</option>
+                                    </select>
+                                </div>
+                                <div class="tracker-row">
+                                    <span class="tracker-label">🥱 Night Wakings</span>
+                                    <select class="tracker-select" id="trk-wakings" onchange="setTracker('wakings', this.value)">
+                                        <option value="0">None</option>
+                                        <option value="1">1 time</option>
+                                        <option value="2">2 times</option>
+                                        <option value="3">3 times</option>
+                                        <option value="4+">4+ times</option>
+                                    </select>
+                                </div>
                             </div>
+                        </details>
 
-                            <div class="tracker-category">🌌 Night Tracking</div>
-                            <div class="tracker-row">
-                                <span class="tracker-label">⏰ Time Fell Asleep</span>
-                                <input type="time" class="tracker-select" id="trk-asleepTime" onchange="setTracker('asleepTime', this.value)">
+                        <details class="tracker-group" id="audio-section-scroll">
+                            <summary><i class="fa-solid fa-music" style="width:25px; color: #ec4899;"></i> Sleep Audio Player</summary>
+                            <div class="tracker-content">
+                                <div class="sound-player">
+                                    <button class="btn-play-sound" id="btn-sound" onclick="toggleAudio()"><i class="fa-solid fa-play"></i></button>
+                                    <select class="tracker-select" style="flex:1;" id="sound-type" onchange="changeAudioType()">
+                                        <option value="womb">Heartbeat & Womb (Deep)</option>
+                                        <option value="brown">Deep Brown Noise</option>
+                                        <option value="pink">Pink Noise (Rain/Waterfall)</option>
+                                        <option value="humming">Soft Humming Rhythm</option>
+                                        <option value="white">White Noise (Static)</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="tracker-row">
-                                <span class="tracker-label">⏳ Time to Settle</span>
-                                <select class="tracker-select" id="trk-settle" onchange="setTracker('settle', this.value)">
-                                    <option value="Unknown">?</option>
-                                    <option value="<15m">&lt; 15 mins</option>
-                                    <option value="15-30m">15 - 30 mins</option>
-                                    <option value="30-60m">30 - 60 mins</option>
-                                    <option value="1hr+">1+ Hours</option>
-                                </select>
-                            </div>
-                            <div class="tracker-row">
-                                <span class="tracker-label">🥱 Night Wakings</span>
-                                <select class="tracker-select" id="trk-wakings" onchange="setTracker('wakings', this.value)">
-                                    <option value="0">None</option>
-                                    <option value="1">1 time</option>
-                                    <option value="2">2 times</option>
-                                    <option value="3">3 times</option>
-                                    <option value="4+">4+ times</option>
-                                </select>
-                            </div>
-                            
-                            <div class="tracker-category" id="audio-section-scroll">🎵 Sleep Audio Player (Background Play)</div>
-                            <div class="sound-player">
-                                <button class="btn-play-sound" id="btn-sound" onclick="toggleAudio()"><i class="fa-solid fa-play"></i></button>
-                                <select class="tracker-select" style="flex:1;" id="sound-type" onchange="changeAudioType()">
-                                    <option value="womb">Heartbeat & Womb (Deep)</option>
-                                    <option value="brown">Deep Brown Noise</option>
-                                    <option value="pink">Pink Noise (Rain/Waterfall)</option>
-                                    <option value="humming">Soft Humming Rhythm</option>
-                                    <option value="white">White Noise (Static)</option>
-                                </select>
-                            </div>
-
-                        </div>
+                        </details>
 
                         <div class="feedback-section">
                             <label>
@@ -430,16 +429,23 @@
                             <button class="ai-btn" onclick="openAIDialog('advice')"><i class="fa-solid fa-sparkles"></i> Ask AI for Sleep Advice</button>
                         </div>
 
-                        <button class="handoff-btn" onclick="openAIDialog('handoff')"><i class="fa-solid fa-handshake"></i> Generate Shift Handoff</button>
-
                         <button class="btn-save" onclick="saveDayUpdates()">Save Updates</button>
+                        
+                        <!-- Destructive actions moved to bottom to prevent accidental clicks -->
+                        <div style="text-align:center; margin-top: 25px; display: flex; flex-direction: column; gap: 15px;">
+                            <button onclick="deleteSpecificDay()" style="background:none; border:none; color:var(--text-muted); font-size:13px; font-weight:600; text-decoration:underline; cursor:pointer;">Clear This Day</button>
+                            <button onclick="deleteEntireBlock()" style="background:none; border:none; color:#ef4444; font-size:13px; font-weight:600; text-decoration:underline; cursor:pointer;">Delete Entire 4-Day Block</button>
+                        </div>
                     </div>
                 </div>
 
                 <div id="modal-create-mode" class="create-form">
-                    <div class="modal-header">
-                        <h2>Add New Shift</h2>
-                        <button onclick="closeModal()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
+                    <div class="modal-header-sticky">
+                        <div class="modal-drag-bar"></div>
+                        <div class="modal-header">
+                            <h2>Add New Shift</h2>
+                            <button onclick="closeModal()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -464,13 +470,16 @@
 
         <!-- AI DASHBOARD MODAL -->
         <div class="modal-overlay" id="dashboard-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div>
-                        <h2 style="color: var(--ai-color);"><i class="fa-solid fa-chart-line"></i> AI Analytics</h2>
-                        <p style="font-size: 13px; color: var(--text-muted);">Database Trend Analysis (Last 30 Days)</p>
+            <div class="modal-content" style="padding-bottom: 50px;">
+                <div class="modal-header-sticky">
+                    <div class="modal-drag-bar"></div>
+                    <div class="modal-header">
+                        <div>
+                            <h2 style="color: var(--ai-color);"><i class="fa-solid fa-chart-line"></i> AI Analytics</h2>
+                            <p style="font-size: 13px; color: var(--text-muted);">Database Trend Analysis</p>
+                        </div>
+                        <button onclick="closeDashboard()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
                     </div>
-                    <button onclick="closeDashboard()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
                 </div>
                 
                 <div id="dashboard-content">
@@ -650,9 +659,7 @@
         function toggleSidebarAudioMenu() {
             // If modal is closed, open it to the audio section
             if(!activeDateStr) {
-                // If they have no day selected, just open today
                 const localTodayStr = getLocalISODate(new Date());
-                // Find today's event
                 let targetEvent = null;
                 for (let e of allEvents) {
                     const s = new Date(e.start.date || e.start.dateTime); const endRaw = new Date(e.end.date || e.end.dateTime);
@@ -663,13 +670,19 @@
                 }
                 if(targetEvent) {
                     openSpecificDay(targetEvent.id, localTodayStr);
-                    setTimeout(() => { document.getElementById('audio-section-scroll').scrollIntoView({behavior: "smooth", block: "center"}); }, 400);
+                    setTimeout(() => { 
+                        document.getElementById('audio-section-scroll').open = true;
+                        document.getElementById('audio-section-scroll').scrollIntoView({behavior: "smooth", block: "center"}); 
+                    }, 400);
                 } else {
                     showAppAlert("No Shift Active", "Please select a shift on the calendar to change audio settings.");
                 }
             } else {
                 showModal();
-                setTimeout(() => { document.getElementById('audio-section-scroll').scrollIntoView({behavior: "smooth", block: "center"}); }, 400);
+                setTimeout(() => { 
+                    document.getElementById('audio-section-scroll').open = true;
+                    document.getElementById('audio-section-scroll').scrollIntoView({behavior: "smooth", block: "center"}); 
+                }, 400);
             }
         }
 
@@ -710,11 +723,9 @@
                     if (type === 'white') {
                         output[i] = white;
                     } else if (type === 'brown') {
-                        // Deep brown noise algorithm
                         b0 = (b0 + (0.02 * white)) / 1.02;
                         output[i] = b0 * 3.5; 
                     } else {
-                        // Pink noise base
                         b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520;
                         b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980;
                         output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11; b6 = white * 0.115926;
@@ -724,9 +735,8 @@
                 noiseSrc.buffer = buffer; noiseSrc.loop = true;
                 
                 if (type === 'womb') {
-                    // Added a slow LFO filter to make it sound like a heartbeat/blood flow
                     let filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 350; 
-                    let lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 1.2; // Heartbeat rate
+                    let lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 1.2;
                     let lfoGain = audioCtx.createGain(); lfoGain.gain.value = 150;
                     lfo.connect(lfoGain); lfoGain.connect(filter.frequency);
                     
@@ -744,7 +754,6 @@
                     noiseSrc.start(); activeSoundNode = noiseSrc;
                 }
             } else if (type === 'humming') {
-                // Dual oscillators with slow organic breathing LFO
                 let osc1 = audioCtx.createOscillator(); osc1.type = 'triangle'; osc1.frequency.value = 140; 
                 let osc2 = audioCtx.createOscillator(); osc2.type = 'sine'; osc2.frequency.value = 142;
                 let lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.25; 
@@ -765,7 +774,6 @@
             document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-stop"></i>';
             updateGlobalPlayer();
             
-            // Register with OS Media Session to keep it alive in background
             if ('mediaSession' in navigator) {
                 const select = document.getElementById('sound-type');
                 navigator.mediaSession.metadata = new MediaMetadata({
@@ -1073,7 +1081,6 @@
             setTimeout(() => overlay.classList.add('active'), 10);
         }
         function closeModal() {
-            // Audio no longer stops here!
             const overlay = document.getElementById('event-modal');
             overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 300);
         }
