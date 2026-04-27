@@ -97,7 +97,6 @@
         .feedback-section label { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         
         textarea { width: 100%; border: none; background: transparent; resize: none; font-size: 16px; font-weight: 600; color: var(--text-main); min-height: 80px; outline: none; line-height: 1.6; }
-        /* MUCH DARKER PLACEHOLDER TEXT */
         textarea::placeholder { color: #64748b; font-weight: 600; opacity: 1; }
 
         .mic-btn { background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; transition: color 0.2s; }
@@ -936,8 +935,8 @@
             btnFetch.innerText = currentAIMode === 'advice' ? 'Ask Again' : 'Regenerate Summary';
 
             try {
-                // FIXED: Hardcode the AI model name directly to bypass the initial model fetch that might have been failing
-                const chosenModel = 'models/gemini-1.5-flash';
+                // FIXED: Changed to the current active model, as 1.5-flash was retired/deprecated.
+                const chosenModel = 'models/gemini-2.5-flash';
 
                 let prompt = "";
                 if (currentAIMode === 'advice') {
@@ -975,7 +974,6 @@
             } catch (err) {
                 console.error("AI Fetch Error:", err);
                 
-                // Print the exact error on the screen so you don't have to check the console!
                 let errMsg = err.message;
                 if(errMsg.includes("Failed to fetch")) errMsg = "Network blocked. Check internet or Ad-Blocker.";
                 
