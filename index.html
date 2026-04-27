@@ -22,30 +22,31 @@
             --input-bg: #f8fafc;
         }
 
-        /* IMPROVED TRUE NIGHT VISION MODE (OLED Warm Amber) */
+        /* IMPROVED TRUE NIGHT VISION MODE (Midnight Slate) */
         body.night-vision {
-            --alf-color: #ff9d5c; 
-            --alf-bg: #1a0f0a;
-            --lesly-color: #ff9d5c; 
-            --lesly-bg: #1a0f0a;
-            --bg-color: #000000;
-            --card-bg: #0c0806;
-            --text-main: #ff9d5c;
-            --text-muted: #a65c32;
-            --ai-color: #ffb732;
-            --border-color: #26140a;
-            --input-bg: #000000;
-            background: #000000;
+            --alf-color: #38bdf8; 
+            --alf-bg: #1e293b;
+            --lesly-color: #f472b6; 
+            --lesly-bg: #1e293b;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --ai-color: #a78bfa;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+            background: #0f172a;
         }
         body.night-vision * { box-shadow: none !important; }
-        body.night-vision .header { background: #000; border-bottom: 1px solid var(--border-color); }
+        body.night-vision .header { background: #0f172a; border-bottom: 1px solid var(--border-color); }
         body.night-vision .cal-cell.today::after { background-color: var(--text-main); }
-        body.night-vision .btn-main, body.night-vision .btn-save, body.night-vision .btn-pill { background: #1a0f0a; color: var(--text-main); border: 1px solid var(--text-main); }
-        body.night-vision .tracker-btn.active-yes, body.night-vision .chk-btn.active { background: #1a0f0a; color: var(--text-main); border-color: var(--text-main); }
-        body.night-vision .tracker-btn.active-no { background: #1a0f0a; color: var(--text-main); border-color: var(--text-main); }
+        body.night-vision .btn-main, body.night-vision .btn-save, body.night-vision .btn-pill { background: #0f172a; color: var(--text-main); border: 1px solid var(--text-main); }
+        body.night-vision .tracker-btn.active-yes, body.night-vision .chk-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
+        body.night-vision .tracker-btn.active-no { background: #ef4444; color: white; border-color: #ef4444; }
         body.night-vision .tracker-select, body.night-vision input, body.night-vision textarea, body.night-vision select { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); }
         body.night-vision .sound-player { background: var(--input-bg); border-color: var(--border-color); }
-        body.night-vision .global-player { background: var(--card-bg); border: 1px solid var(--text-muted); color: var(--text-main); }
+        body.night-vision .global-player { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); }
+        body.night-vision .ai-chat-submit { background: var(--ai-color); color: #0f172a; }
 
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; }
 
@@ -77,7 +78,7 @@
         .sidebar-item:active { background: var(--input-bg); }
         .sidebar-item i { width: 20px; text-align: center; color: var(--text-muted); font-size: 18px; }
 
-        /* IMPROVED GLOBAL MINI PLAYER */
+        /* COMPACT GLOBAL MINI PLAYER */
         .global-player { position: fixed; bottom: 20px; right: 20px; left: auto; transform: translateY(150px); background: var(--card-bg); border: 2px solid var(--border-color); color: var(--text-main); border-radius: 40px; padding: 6px 6px 6px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); z-index: 999999; width: auto; max-width: 250px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .global-player.visible { transform: translateY(0); }
         .gp-info { display: flex; flex-direction: column; overflow: hidden; flex: 1; }
@@ -119,14 +120,14 @@
 
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: flex-end; z-index: 100; opacity: 0; transition: opacity 0.3s; }
         
-        /* ADDED Extra padding-bottom so save button isn't blocked by audio */
+        /* Modal Content handles padding to avoid audio blocking */
         .modal-content { background: var(--card-bg); width: 100%; padding: 0 25px 120px; border-radius: 30px 30px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); max-height: 88vh; overflow-y: auto; border-top: 1px solid var(--border-color); }
         .modal-overlay.active { opacity: 1; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
         
-        /* NEW STICKY HEADER FOR MODAL */
-        .modal-header-sticky { position: sticky; top: 0; background: var(--card-bg); z-index: 10; padding-top: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
-        .modal-drag-bar { width: 40px; height: 5px; background: var(--text-muted); border-radius: 5px; margin: 0 auto 15px; opacity: 0.5; }
+        /* STICKY HEADER FOR MODAL (Includes drag bar area) */
+        .modal-header-sticky { position: sticky; top: 0; background: var(--card-bg); z-index: 10; padding-top: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; touch-action: pan-y; }
+        .modal-drag-bar { width: 40px; height: 5px; background: var(--text-muted); border-radius: 5px; margin: 0 auto 15px; opacity: 0.5; cursor: grab; }
         .modal-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .modal-header h2 { font-size: 22px; color: var(--text-main); margin-bottom: 5px; }
         .modal-date { font-size: 13px; font-weight: 600; display: inline-block; padding: 4px 10px; border-radius: 12px; margin-top: 5px; }
@@ -135,7 +136,7 @@
         .btn-swap { flex: 1; background: var(--input-bg); border: 2px solid var(--border-color); padding: 14px; border-radius: 14px; font-weight: 700; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s;}
         .btn-swap:active { transform: scale(0.95); }
 
-        /* NEW ACCORDION TRACKERS (Declutter UI) */
+        /* ACCORDION TRACKERS */
         details.tracker-group { background: var(--input-bg); border: 2px solid var(--border-color); border-radius: 16px; margin-bottom: 12px; transition: all 0.2s; }
         details.tracker-group[open] { background: transparent; }
         details.tracker-group summary { padding: 15px; font-size: 15px; font-weight: 800; color: var(--text-main); cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; user-select: none; }
@@ -206,7 +207,7 @@
         .dialog-btn-cancel { background: var(--input-bg); color: var(--text-main); border: 2px solid var(--border-color);}
         .dialog-btn-confirm { background: var(--text-main); color: var(--card-bg); }
 
-        #dashboard-modal .modal-content { max-height: 90vh; }
+        #dashboard-modal .modal-content { max-height: 90vh; padding-bottom: 50px; }
         .stat-card { background: var(--input-bg); padding: 18px; border-radius: 16px; margin-bottom: 15px; border: 2px solid var(--border-color); text-align: left; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);}
         .stat-card h4 { color: var(--text-muted); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; font-weight: 800;}
         .stat-card p { color: var(--text-main); font-size: 15px; font-weight: 600; line-height: 1.5; }
@@ -245,7 +246,7 @@
         </div>
     </div>
 
-    <!-- IMPROVED COMPACT GLOBAL MINI PLAYER -->
+    <!-- COMPACT GLOBAL MINI PLAYER -->
     <div class="global-player" id="global-player">
         <div class="gp-info">
             <div class="gp-title">Playing Audio</div>
@@ -297,12 +298,12 @@
             </button>
         </div>
 
-        <!-- MAIN EVENT MODAL (Uncluttered) -->
+        <!-- MAIN EVENT MODAL -->
         <div class="modal-overlay" id="event-modal">
             <div class="modal-content">
                 
                 <div id="modal-view-mode">
-                    <!-- STICKY HEADER -->
+                    <!-- STICKY HEADER (Swipe Down Target) -->
                     <div class="modal-header-sticky">
                         <div class="modal-drag-bar"></div>
                         <div class="modal-header">
@@ -319,7 +320,6 @@
                         </div>
                     </div>
 
-                    <!-- REPORT BUTTON MOVED UP -->
                     <div class="action-row">
                         <button class="btn-swap" onclick="openAIDialog('handoff')" style="background: var(--ai-color); color: white; border-color: var(--ai-color); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);"><i class="fa-solid fa-handshake"></i> Handoff Report</button>
                         <button class="btn-swap" onclick="swapSpecificDay()"><i class="fa-solid fa-arrows-rotate"></i> Swap Day</button>
@@ -332,8 +332,8 @@
 
                     <div id="interactive-content">
                         
-                        <!-- ACCORDION TRACKERS FOR DECLUTTERING -->
-                        <details class="tracker-group" open>
+                        <!-- ACCORDION TRACKERS (COLLAPSED BY DEFAULT) -->
+                        <details class="tracker-group">
                             <summary><i class="fa-regular fa-sun" style="width:25px; color: #f59e0b;"></i> Daytime Tracking</summary>
                             <div class="tracker-content">
                                 <div class="tracker-row">
@@ -373,15 +373,15 @@
                             </div>
                         </details>
 
-                        <details class="tracker-group" open>
+                        <details class="tracker-group">
                             <summary><i class="fa-solid fa-moon" style="width:25px; color: var(--ai-color);"></i> Night Tracking</summary>
                             <div class="tracker-content">
                                 <div class="tracker-row">
-                                    <span class="tracker-label">⏰ Time Fell Asleep</span>
+                                    <span class="tracker-label">⏰ Time Finally Asleep (Clock)</span>
                                     <input type="time" class="tracker-select" id="trk-asleepTime" onchange="setTracker('asleepTime', this.value)">
                                 </div>
                                 <div class="tracker-row">
-                                    <span class="tracker-label">⏳ Time to Settle</span>
+                                    <span class="tracker-label">⏳ Time Tossed/Struggled</span>
                                     <select class="tracker-select" id="trk-settle" onchange="setTracker('settle', this.value)">
                                         <option value="Unknown">?</option>
                                         <option value="<15m">&lt; 15 mins</option>
@@ -431,7 +431,6 @@
 
                         <button class="btn-save" onclick="saveDayUpdates()">Save Updates</button>
                         
-                        <!-- Destructive actions moved to bottom to prevent accidental clicks -->
                         <div style="text-align:center; margin-top: 25px; display: flex; flex-direction: column; gap: 15px;">
                             <button onclick="deleteSpecificDay()" style="background:none; border:none; color:var(--text-muted); font-size:13px; font-weight:600; text-decoration:underline; cursor:pointer;">Clear This Day</button>
                             <button onclick="deleteEntireBlock()" style="background:none; border:none; color:#ef4444; font-size:13px; font-weight:600; text-decoration:underline; cursor:pointer;">Delete Entire 4-Day Block</button>
@@ -470,7 +469,7 @@
 
         <!-- AI DASHBOARD MODAL -->
         <div class="modal-overlay" id="dashboard-modal">
-            <div class="modal-content" style="padding-bottom: 50px;">
+            <div class="modal-content">
                 <div class="modal-header-sticky">
                     <div class="modal-drag-bar"></div>
                     <div class="modal-header">
@@ -483,12 +482,14 @@
                 </div>
                 
                 <div id="dashboard-content">
+                    
+                    <!-- BUTTON MOVED UP -->
+                    <button class="btn-main" style="background: var(--ai-color); margin-bottom: 15px;" id="btn-run-analytics" onclick="runAnalytics()">Generate AI Deep-Dive Report</button>
+                    
                     <div class="stat-card">
                         <h4>Database Status</h4>
                         <p id="db-stat-text">Local Architecture Sync: OK<br>Records Found: Scanning...</p>
                     </div>
-                    
-                    <button class="btn-main" style="background: var(--ai-color);" id="btn-run-analytics" onclick="runAnalytics()">Generate AI Deep-Dive Report</button>
                     
                     <div id="analytics-results" style="display:none; margin-top:20px;">
                         <div class="stat-card" style="border-left: 4px solid var(--ai-color);">
@@ -546,6 +547,52 @@
     <script src="https://accounts.google.com/gsi/client"></script>
 
     <script>
+        // --- SWIPE TO CLOSE LOGIC (PULL DOWN MODALS) ---
+        function setupSwipeToClose() {
+            const modals = document.querySelectorAll('.modal-overlay');
+            modals.forEach(overlay => {
+                const content = overlay.querySelector('.modal-content');
+                if(!content) return;
+                const dragArea = content.querySelector('.modal-header-sticky');
+                if(!dragArea) return;
+
+                let startY = 0;
+                let currentY = 0;
+                let isDragging = false;
+
+                dragArea.addEventListener('touchstart', (e) => {
+                    if (content.scrollTop <= 0) {
+                        startY = e.touches[0].clientY;
+                        isDragging = true;
+                        content.style.transition = 'none';
+                    }
+                }, {passive: true});
+
+                dragArea.addEventListener('touchmove', (e) => {
+                    if (!isDragging) return;
+                    currentY = e.touches[0].clientY - startY;
+                    if (currentY > 0) {
+                        content.style.transform = `translateY(${currentY}px)`;
+                        if (e.cancelable) e.preventDefault();
+                    }
+                }, {passive: false});
+
+                dragArea.addEventListener('touchend', (e) => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    content.style.transition = ''; 
+                    if (currentY > 80) {
+                        content.style.transform = ''; 
+                        if(overlay.id === 'event-modal') closeModal();
+                        else if(overlay.id === 'dashboard-modal') closeDashboard();
+                    } else {
+                        content.style.transform = '';
+                    }
+                    currentY = 0;
+                });
+            });
+        }
+
         // --- SIDEBAR UI LOGIC ---
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -640,7 +687,7 @@
         let currentAIMode = "advice"; 
         let rawAIResult = ""; 
 
-        // --- IMPROVED BACKGROUND AUDIO PLAYER (Web Audio + Media Session) ---
+        // --- BACKGROUND AUDIO PLAYER ---
         let audioCtx;
         let activeSoundNode = null;
         let isAudioPlaying = false;
@@ -657,7 +704,6 @@
         }
 
         function toggleSidebarAudioMenu() {
-            // If modal is closed, open it to the audio section
             if(!activeDateStr) {
                 const localTodayStr = getLocalISODate(new Date());
                 let targetEvent = null;
@@ -804,6 +850,7 @@
 
         // --- APP INIT ---
         window.onload = async function() {
+            setupSwipeToClose();
             try { await appDB.init(); } catch(e) { console.error("Local DB Init Failed", e); }
             if (typeof gapi !== 'undefined') {
                 gapi.load('client', { callback: initializeGapiClient, onerror: () => { hideLoader(); showAppAlert("Error", "Google Library failed to load."); }});
@@ -1012,6 +1059,7 @@
         function closeDashboard() {
             const modal = document.getElementById('dashboard-modal');
             modal.classList.remove('active'); setTimeout(() => modal.style.display = 'none', 300);
+            setTimeout(() => { document.querySelector('#dashboard-modal .modal-content').style.transform = ''; }, 300);
         }
         
         async function runAnalytics() {
@@ -1083,6 +1131,7 @@
         function closeModal() {
             const overlay = document.getElementById('event-modal');
             overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 300);
+            setTimeout(() => { document.querySelector('#event-modal .modal-content').style.transform = ''; }, 300);
         }
 
         function showAppConfirm(title, msg, confirmText, callback) {
