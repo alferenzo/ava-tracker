@@ -96,9 +96,9 @@
         .feedback-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 15px; margin-bottom: 20px; position: relative; }
         .feedback-section label { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* INCREASED PROMINENCE HERE */
         textarea { width: 100%; border: none; background: transparent; resize: none; font-size: 16px; font-weight: 600; color: var(--text-main); min-height: 80px; outline: none; line-height: 1.6; }
-        textarea::placeholder { color: #cbd5e1; font-weight: 500; }
+        /* MUCH DARKER PLACEHOLDER TEXT */
+        textarea::placeholder { color: #64748b; font-weight: 600; opacity: 1; }
 
         .mic-btn { background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; transition: color 0.2s; }
         .mic-btn.recording { color: #ef4444; animation: pulse 1.5s infinite; }
@@ -113,7 +113,7 @@
         .create-form { display: none; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 5px; font-weight: 600;}
-        .form-group input, .form-group select { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 15px; background: #f8fafc; outline: none; }
+        .form-group input, .form-group select { width: 100%; padding: 14px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--text-main); background: #f8fafc; outline: none; }
 
         .btn-save { background: var(--text-main); color: white; border: none; padding: 16px; border-radius: 16px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 5px; }
 
@@ -123,7 +123,6 @@
         .dialog-overlay.active .dialog-box { transform: scale(1); }
         .dialog-title { font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
         
-        /* INCREASED PROMINENCE HERE */
         .dialog-msg { font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 25px; line-height: 1.5; }
         
         .dialog-actions { display: flex; gap: 10px; }
@@ -327,7 +326,6 @@
                     
                     <button class="btn-main" style="background:#8b5cf6; padding:12px; width:100%; margin-top:10px;" onclick="fetchAITips()" id="btn-fetch-ai">Get Advice</button>
                     
-                    <!-- INCREASED PROMINENCE HERE -->
                     <div id="ai-results-area" style="display:none; margin-top:15px; padding:15px; background:#f5f3ff; border-radius:12px; font-size:16px; font-weight:600; color:#312e81; max-height:220px; overflow-y:auto; border-left: 4px solid var(--ai-color); line-height: 1.5;">
                         <div id="ai-output-text"></div>
                     </div>
@@ -938,14 +936,8 @@
             btnFetch.innerText = currentAIMode === 'advice' ? 'Ask Again' : 'Regenerate Summary';
 
             try {
-                const modelsResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
-                if (!modelsResp.ok) throw new Error(`Model Check Failed`);
-                
-                const modelsData = await modelsResp.json();
-                
-                let chosenModel = modelsData.models.find(m => m.name.includes('flash') && m.supportedGenerationMethods.includes('generateContent'))?.name;
-                if (!chosenModel) chosenModel = modelsData.models.find(m => m.supportedGenerationMethods.includes('generateContent'))?.name;
-                if (!chosenModel) throw new Error("No text models found.");
+                // FIXED: Hardcode the AI model name directly to bypass the initial model fetch that might have been failing
+                const chosenModel = 'models/gemini-1.5-flash';
 
                 let prompt = "";
                 if (currentAIMode === 'advice') {
@@ -966,8 +958,7 @@
                 if (data.error) throw new Error(data.error.message);
                 
                 if (!data.candidates || !data.candidates[0].content || !data.candidates[0].content.parts) {
-                    console.error("Unexpected API response. This might be due to safety filters or rate limiting:", data);
-                    throw new Error("Invalid response from AI");
+                    throw new Error("Invalid response from AI (Possible rate limit or safety filter)");
                 }
                 
                 rawAIResult = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
@@ -983,7 +974,16 @@
 
             } catch (err) {
                 console.error("AI Fetch Error:", err);
-                aiText.innerHTML = `<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Could not reach AI. Check console for details.</span>`;
+                
+                // Print the exact error on the screen so you don't have to check the console!
+                let errMsg = err.message;
+                if(errMsg.includes("Failed to fetch")) errMsg = "Network blocked. Check internet or Ad-Blocker.";
+                
+                aiText.innerHTML = `
+                    <span style="color:#ef4444; display:flex; flex-direction:column; gap:8px;">
+                        <span><i class="fa-solid fa-triangle-exclamation"></i> <b>Could not reach AI.</b></span>
+                        <span style="font-size:13px; font-weight:normal;"><b>Reason:</b> ${errMsg}</span>
+                    </span>`;
             }
         }
 
