@@ -410,7 +410,14 @@
             const bath = currentTrackers.bath || '?';
             const nap = currentTrackers.nap || '0';
             
-            const shareText = `👶 *Ava's Update: ${dateStr}*\n\n🍼 Ate well: ${eat}\n🛁 Bath done: ${bath}\n😴 Nap: ${nap} hrs\n\n*Notes:*\n${fb}`;
+            const shareText = `👶 *Ava's Update: ${dateStr}*
+
+🍼 Ate well: ${eat}
+🛁 Bath done: ${bath}
+😴 Nap: ${nap} hrs
+
+*Notes:*
+${fb}`;
             
             shareViaWeb(shareText, "Ava's Daily Update");
         }
@@ -498,7 +505,8 @@
                     deferredPrompt = null;
                 });
             } else if (isIOS) {
-                showAppAlert("Install App", "To install on iPhone:\nTap the 'Share' icon at the bottom of Safari, then select 'Add to Home Screen'.");
+                showAppAlert("Install App", "To install on iPhone:
+Tap the 'Share' icon at the bottom of Safari, then select 'Add to Home Screen'.");
             }
         }
 
@@ -749,7 +757,9 @@
 
         function deleteSpecificDay() {
             const dateFormatted = formatCustomDate(activeDateStr);
-            showAppConfirm("Clear Single Day", `Remove ${dateFormatted} from this shift block?\n\n(This will hide it in the app, but the rest of the 4-day block will remain).`, "Clear Day", () => {
+            showAppConfirm("Clear Single Day", `Remove ${dateFormatted} from this shift block?
+
+(This will hide it in the app, but the rest of the 4-day block will remain).`, "Clear Day", () => {
                 if(!activeAppData.swaps) activeAppData.swaps = {};
                 activeAppData.swaps[activeDateStr] = "DELETED";
                 saveDayUpdates();
@@ -757,7 +767,9 @@
         }
 
         function deleteEntireBlock() {
-            showAppConfirm("Delete Entire Block", "WARNING: This will permanently delete this entire 4-day shift from Google Calendar.\n\nAre you sure?", "Delete Entire Block", async () => {
+            showAppConfirm("Delete Entire Block", "WARNING: This will permanently delete this entire 4-day shift from Google Calendar.
+
+Are you sure?", "Delete Entire Block", async () => {
                 document.getElementById('modal-title').innerText = "Deleting Block...";
                 try {
                     await gapi.client.calendar.events.delete({ calendarId: CALENDAR_ID, eventId: activeEvent.id });
@@ -890,7 +902,9 @@
         function compileHandoffData() {
             if(!activeEvent || !activeAppData) return "No data available.";
             
-            let dataStr = `Please generate a warm, concise, bulleted 'Handoff Summary' for the parent taking over childcare for Ava based on the last few days. Highlight any patterns (sleep, eating, bath). Data:\n\n`;
+            let dataStr = `Please generate a warm, concise, bulleted 'Handoff Summary' for the parent taking over childcare for Ava based on the last few days. Highlight any patterns (sleep, eating, bath). Data:
+
+`;
             
             const s = new Date(activeEvent.start.date || activeEvent.start.dateTime);
             const endRaw = new Date(activeEvent.end.date || activeEvent.end.dateTime);
@@ -909,7 +923,9 @@
                 if(trks) {
                     trkStr = `(Ate: ${trks.eat || '?'}, Bath: ${trks.bath || '?'}, Nap: ${trks.nap}h) `;
                 }
-                dataStr += `- Date: ${dayStr} ${trkStr}\n  Notes: ${fb}\n`;
+                dataStr += `- Date: ${dayStr} ${trkStr}
+  Notes: ${fb}
+`;
             }
             return dataStr;
         }
@@ -962,8 +978,16 @@
                 const data = await response.json();
                 if (data.error) throw new Error(data.error.message);
                 
+                // --- THE BUG FIX IS HERE ---
+                // We make sure `data.candidates` actually exists before trying to read it
+                if (!data.candidates || !data.candidates[0].content || !data.candidates[0].content.parts) {
+                    console.error("Unexpected API response. This might be due to safety filters or rate limiting:", data);
+                    throw new Error("Invalid response from AI");
+                }
+                
                 rawAIResult = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
-                aiText.innerHTML = rawAIResult.replace(/\n/g, '<br>');
+                aiText.innerHTML = rawAIResult.replace(/
+/g, '<br>');
                 
                 if(currentAIMode === 'advice') {
                     document.getElementById('btn-copy-ai').style.display = 'block';
@@ -974,7 +998,9 @@
                 }
 
             } catch (err) {
-                aiText.innerHTML = `<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Could not reach AI.</span>`;
+                // We print the exact error to the console here to make debugging easy
+                console.error("AI Fetch Error:", err);
+                aiText.innerHTML = `<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Could not reach AI. Check console for details.</span>`;
             }
         }
 
@@ -984,9 +1010,13 @@
                 const feedbackBox = document.getElementById('modal-feedback');
                 const existingText = feedbackBox.value;
                 if (existingText.trim() === "") {
-                    feedbackBox.value = "AI Advice:\n" + rawAIResult;
+                    feedbackBox.value = "AI Advice:
+" + rawAIResult;
                 } else {
-                    feedbackBox.value = existingText + "\n\n--- AI Advice ---\n" + rawAIResult;
+                    feedbackBox.value = existingText + "
+
+--- AI Advice ---
+" + rawAIResult;
                 }
                 closeAIDialog();
             } else {
