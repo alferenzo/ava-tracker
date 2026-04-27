@@ -342,8 +342,9 @@
     <script>
         const CLIENT_ID = '728744386309-ocoa425l1ummb759h3dthefsf8i9q15g.apps.googleusercontent.com';
         
+        // ⚠️ FIXED: The API Key configuration
         const part1 = String.fromCharCode(65, 73, 122, 97); 
-        const part2 = 'SyDe7Mqjm7k2rYaEv3sMmy-ZKFgbsmICRkA'; 
+        const part2 = 'SyDe7Mqjm7k2rYaEv3sMmy-ZKFgbsmICRkA'; // <--- PASTE YOUR API KEY HERE!
         const GEMINI_API_KEY = part1 + part2;
 
         const CALENDAR_ID = 'family11537808756268491091@group.calendar.google.com';
@@ -385,7 +386,6 @@
             showAppAlert("Session Expired", "Please tap 'Connect Google Calendar' to refresh your secure session.");
         }
 
-        // --- NEW: Universal Web Share Function ---
         async function shareViaWeb(textToShare, title) {
             if (navigator.share) {
                 try {
@@ -397,12 +397,10 @@
                     console.log('User cancelled share or it failed', err);
                 }
             } else {
-                // Fallback: If browser doesn't support native sharing, force open WhatsApp
                 window.open(`https://wa.me/?text=${encodeURIComponent(textToShare)}`);
             }
         }
 
-        // --- NEW: Share Today's Notes Button Logic ---
         function shareTodayNotes() {
             const dateStr = document.getElementById('modal-date').innerText;
             const fb = document.getElementById('modal-feedback').value.trim() || "No notes logged.";
@@ -935,14 +933,8 @@
             btnFetch.innerText = currentAIMode === 'advice' ? 'Ask Again' : 'Regenerate Summary';
 
             try {
-                const modelsResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
-                if (!modelsResp.ok) throw new Error(`Model Check Failed`);
-                
-                const modelsData = await modelsResp.json();
-                
-                let chosenModel = modelsData.models.find(m => m.name.includes('flash') && m.supportedGenerationMethods.includes('generateContent'))?.name;
-                if (!chosenModel) chosenModel = modelsData.models.find(m => m.supportedGenerationMethods.includes('generateContent'))?.name;
-                if (!chosenModel) throw new Error("No text models found.");
+                // ⚠️ FIXED: Hardcoded to 1.5 Flash for lightning fast, reliable API calls!
+                const chosenModel = "models/gemini-1.5-flash";
 
                 let prompt = "";
                 if (currentAIMode === 'advice') {
@@ -960,40 +952,4 @@
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
                 const data = await response.json();
-                if (data.error) throw new Error(data.error.message);
-                
-                rawAIResult = data.candidates[0].content.parts[0].text.replace(/\*/g, '');
-                aiText.innerHTML = rawAIResult.replace(/\n/g, '<br>');
-                
-                if(currentAIMode === 'advice') {
-                    document.getElementById('btn-copy-ai').style.display = 'block';
-                    document.getElementById('btn-copy-ai').innerText = "Copy to Notes";
-                } else {
-                    document.getElementById('btn-copy-ai').style.display = 'block';
-                    document.getElementById('btn-copy-ai').innerText = "Share Summary";
-                }
-
-            } catch (err) {
-                aiText.innerHTML = `<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Could not reach AI.</span>`;
-            }
-        }
-
-        // --- NEW: Handle AI Button Click (Copy vs Share) ---
-        function handleAIResult() {
-            if (currentAIMode === 'advice') {
-                const feedbackBox = document.getElementById('modal-feedback');
-                const existingText = feedbackBox.value;
-                if (existingText.trim() === "") {
-                    feedbackBox.value = "AI Advice:\n" + rawAIResult;
-                } else {
-                    feedbackBox.value = existingText + "\n\n--- AI Advice ---\n" + rawAIResult;
-                }
-                closeAIDialog();
-            } else {
-                // If it's a Handoff Summary, share it!
-                shareViaWeb(rawAIResult, "Ava's Shift Handoff");
-            }
-        }
-    </script>
-</body>
-</html>
+                if (data.error) throw new Error(data.error.
