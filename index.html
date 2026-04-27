@@ -343,7 +343,6 @@
         const CLIENT_ID = '728744386309-ocoa425l1ummb759h3dthefsf8i9q15g.apps.googleusercontent.com';
         
         const part1 = String.fromCharCode(65, 73, 122, 97); 
-        // 👇 Here is the placeholder key re-added WITH quotes so the JavaScript doesn't crash!
         const part2 = 'SyDe7Mqjm7k2rYaEv3sMmy-ZKFgbsmICRkA'; 
         const GEMINI_API_KEY = part1 + part2;
 
@@ -386,6 +385,7 @@
             showAppAlert("Session Expired", "Please tap 'Connect Google Calendar' to refresh your secure session.");
         }
 
+        // --- NEW: Universal Web Share Function ---
         async function shareViaWeb(textToShare, title) {
             if (navigator.share) {
                 try {
@@ -397,10 +397,12 @@
                     console.log('User cancelled share or it failed', err);
                 }
             } else {
+                // Fallback: If browser doesn't support native sharing, force open WhatsApp
                 window.open(`https://wa.me/?text=${encodeURIComponent(textToShare)}`);
             }
         }
 
+        // --- NEW: Share Today's Notes Button Logic ---
         function shareTodayNotes() {
             const dateStr = document.getElementById('modal-date').innerText;
             const fb = document.getElementById('modal-feedback').value.trim() || "No notes logged.";
@@ -933,7 +935,14 @@
             btnFetch.innerText = currentAIMode === 'advice' ? 'Ask Again' : 'Regenerate Summary';
 
             try {
-                const chosenModel = "models/gemini-1.5-flash";
+                const modelsResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
+                if (!modelsResp.ok) throw new Error(`Model Check Failed`);
+                
+                const modelsData = await modelsResp.json();
+                
+                let chosenModel = modelsData.models.find(m => m.name.includes('flash') && m.supportedGenerationMethods.includes('generateContent'))?.name;
+                if (!chosenModel) chosenModel = modelsData.models.find(m => m.supportedGenerationMethods.includes('generateContent'))?.name;
+                if (!chosenModel) throw new Error("No text models found.");
 
                 let prompt = "";
                 if (currentAIMode === 'advice') {
@@ -965,11 +974,11 @@
                 }
 
             } catch (err) {
-                console.error("AI Error:", err);
-                aiText.innerHTML = `<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Could not reach AI. Did you paste your API key in the code?</span>`;
+                aiText.innerHTML = `<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Could not reach AI.</span>`;
             }
         }
 
+        // --- NEW: Handle AI Button Click (Copy vs Share) ---
         function handleAIResult() {
             if (currentAIMode === 'advice') {
                 const feedbackBox = document.getElementById('modal-feedback');
@@ -981,6 +990,7 @@
                 }
                 closeAIDialog();
             } else {
+                // If it's a Handoff Summary, share it!
                 shareViaWeb(rawAIResult, "Ava's Shift Handoff");
             }
         }
