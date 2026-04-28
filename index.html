@@ -252,6 +252,7 @@
         </div>
         <div class="sidebar-menu">
             <div class="sidebar-item" onclick="toggleSidebar(); openCreateMode();"><i class="fa-solid fa-plus-circle" style="color:var(--text-main);"></i> Add New Shift</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); setupNotifications();"><i class="fa-solid fa-bell" style="color: #f59e0b;"></i> Enable Smart Alerts</div>
             <div class="sidebar-item" onclick="openDashboard(); toggleSidebar();"><i class="fa-solid fa-chart-pie"></i> AI Analytics</div>
             <div class="sidebar-item" onclick="toggleNightVision()"><i class="fa-solid fa-moon"></i> Toggle Night Vision</div>
             <div class="sidebar-item" onclick="toggleSidebar(); forceReAuth();"><i class="fa-solid fa-rotate"></i> Re-Sync DB</div>
@@ -319,8 +320,8 @@
                         <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-top: 4px;" id="ov-nap">--</div>
                     </div>
                     <div style="flex: 1; background: var(--input-bg); border-radius: 12px; padding: 10px 5px; border: 1px solid var(--border-color); text-align: center;">
-                        <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-utensils" style="color: #10b981;"></i> Ate</div>
-                        <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-top: 4px;" id="ov-ate">--</div>
+                        <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-bath" style="color: #3b82f6;"></i> Bath</div>
+                        <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-top: 4px;" id="ov-bath">--</div>
                     </div>
                 </div>
 
@@ -597,6 +598,68 @@
     <script src="https://accounts.google.com/gsi/client"></script>
 
     <script>
+        // --- SMART NOTIFICATIONS BACKGROUND LOGIC ---
+        let notificationsEnabled = localStorage.getItem('ava_alerts_enabled') === 'true';
+        let lastAlertDate = localStorage.getItem('ava_last_alert_date') || "";
+
+        async function setupNotifications() {
+            if (!("Notification" in window)) {
+                showAppAlert("Not Supported", "Your browser does not support notifications.");
+                return;
+            }
+            if (Notification.permission === "granted") {
+                notificationsEnabled = true;
+                localStorage.setItem('ava_alerts_enabled', 'true');
+                showAppAlert("Enabled", "Smart Alerts are already active.");
+            } else if (Notification.permission !== "denied") {
+                const permission = await Notification.requestPermission();
+                if (permission === "granted") {
+                    notificationsEnabled = true;
+                    localStorage.setItem('ava_alerts_enabled', 'true');
+                    showAppAlert("Enabled", "Smart Alerts active! We will remind you 15 mins before Ava's calculated bedtime.");
+                } else {
+                    showAppAlert("Denied", "Notification permission was denied.");
+                }
+            } else {
+                showAppAlert("Denied", "Notifications are currently blocked by your browser settings.");
+            }
+        }
+
+        setInterval(() => {
+            if (notificationsEnabled && Notification.permission === "granted") {
+                const now = new Date();
+                const todayStr = getLocalISODate(now);
+                if (lastAlertDate === todayStr) return; 
+                
+                const targetTextElem = document.getElementById('overview-target-time');
+                if(!targetTextElem) return;
+                
+                const targetText = targetTextElem.innerText;
+                if(!targetText || targetText.includes("Scanning")) return;
+                
+                const timeMatch = targetText.match(/(\d{2}):(\d{2})/);
+                if (timeMatch) {
+                    let targetHr = parseInt(timeMatch[1]);
+                    let targetMin = parseInt(timeMatch[2]);
+                    
+                    let targetDate = new Date();
+                    targetDate.setHours(targetHr, targetMin, 0, 0);
+                    
+                    let diffMinutes = (targetDate - now) / 60000;
+                    if (diffMinutes > 0 && diffMinutes <= 15) {
+                        try {
+                            new Notification("Ava's Sleep Assistant", {
+                                body: `It's ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}. Time to start Ava's wind-down routine for her ${targetHr}:${String(targetMin).padStart(2,'0')} bedtime!`,
+                                icon: "https://cdn-icons-png.flaticon.com/512/3094/3094142.png"
+                            });
+                            lastAlertDate = todayStr;
+                            localStorage.setItem('ava_last_alert_date', todayStr);
+                        } catch(e) {}
+                    }
+                }
+            }
+        }, 60000); 
+
         // --- CUSTOM TIME PICKER GENERATION ---
         function createTimePickerHTML(id) {
             let hrOpts = '<option value="">--</option>';
@@ -657,7 +720,7 @@
                 const content = overlay.querySelector('.modal-content');
                 if(!content) return;
                 
-                // Fetch ALL drag areas inside this modal (crucial for modals with multiple views like event-modal)
+                // Fetch ALL drag areas inside this modal
                 const dragAreas = content.querySelectorAll('.modal-header-sticky');
                 
                 dragAreas.forEach(dragArea => {
@@ -990,7 +1053,6 @@
         function showAppUI() {
             document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-header').style.display = 'flex';
             document.getElementById('app-content').style.display = 'block'; 
-            // Pill container removed
         }
 
         async function fetchEvents() {
@@ -1062,7 +1124,7 @@
             }
         }
 
-        // --- NEW: TODAY OVERVIEW WIDGET ---
+        // --- TODAY OVERVIEW WIDGET ---
         async function updateTodayOverview() {
             const localTodayStr = getLocalISODate(new Date());
             let targetEvent = null;
@@ -1099,12 +1161,10 @@
             ownerBadge.style.backgroundColor = isAlf ? 'var(--alf-bg)' : 'var(--lesly-bg)';
             ownerBadge.style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
 
-            // Fetch today's bedtime target directly from local record or event payload
             const localRec = await appDB.getRecord(localTodayStr);
             const appData = getAppData(targetEvent);
             let trks = localRec?.trackers || (appData.trackers && appData.trackers[localTodayStr]) || {};
             
-            // Populating the summary blocks
             document.getElementById('ov-morning').innerText = trks.morningWake || '--:--';
             
             let napText = "--";
@@ -1114,10 +1174,10 @@
             else if(trks.nap === '3+') napText = "3+ hrs";
             document.getElementById('ov-nap').innerText = napText;
 
-            let ateText = "--";
-            if(trks.eat === 'yes') ateText = "Good";
-            else if(trks.eat === 'no') ateText = "Poor";
-            document.getElementById('ov-ate').innerText = ateText;
+            let bathText = "--";
+            if(trks.rtnBath === true) bathText = "Done";
+            else if(trks.rtnBath === false) bathText = "Pending";
+            document.getElementById('ov-bath').innerText = bathText;
 
             let targetText = "19:00 (Standard)";
             if (trks.wakeTime) {
@@ -1243,7 +1303,7 @@
             try {
                 await gapi.client.calendar.events.patch({ calendarId: CALENDAR_ID, eventId: activeEvent.id, resource: { description: activeEvent.description } });
                 closeModal(); 
-                await fetchEvents(); // Note: This will refresh UI and today overview automatically
+                await fetchEvents(); 
             } catch (err) { 
                 document.getElementById('modal-title').innerText = "Shift Details";
                 if(err.status === 401) forceReAuth(); else showAppAlert("Error", "Saved locally, but Google Cloud Sync failed."); 
