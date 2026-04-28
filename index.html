@@ -96,7 +96,7 @@
         .btn-main:active:not(:disabled) { transform: scale(0.95); }
         .btn-main:disabled { cursor: not-allowed; opacity: 0.5; }
         
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 140px; display: none; animation: fadeIn 0.5s; }
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; display: none; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .cal-wrapper { background: var(--card-bg); border-radius: 24px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); backdrop-filter: blur(10px); border: 1px solid var(--border-color); }
@@ -115,8 +115,11 @@
         .cal-cell.lesly-shift { background: var(--lesly-bg); color: var(--lesly-color); border: 2px solid rgba(219, 39, 119, 0.2); }
         .cal-cell.today::after { content: ''; position: absolute; bottom: 4px; width: 6px; height: 6px; border-radius: 50%; background-color: var(--text-main); }
 
-        .pill-container { position: absolute; bottom: 90px; width: 100%; display: flex; justify-content: center; pointer-events: none; z-index: 50; display: none; }
-        .btn-pill { background: var(--text-main); color: white; border: none; padding: 15px 35px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; pointer-events: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 10px; }
+        .overview-card { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-top: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); border: 1px solid var(--border-color); display: none; }
+        .overview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .overview-title { font-size: 16px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .overview-badge { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 10px; }
+        .overview-info { background: var(--input-bg); border-radius: 14px; padding: 15px; border: 1px solid var(--border-color); margin-bottom: 15px; display: flex; align-items: center; gap: 12px; }
 
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: flex-end; z-index: 100; opacity: 0; transition: opacity 0.3s; }
         
@@ -248,9 +251,10 @@
             <button class="header-btn" onclick="toggleSidebar()" style="width: 32px; height: 32px;"><i class="fa-solid fa-times"></i></button>
         </div>
         <div class="sidebar-menu">
-            <div class="sidebar-item" onclick="openDashboard(); toggleSidebar();"><i class="fa-solid fa-chart-pie"></i> AI Analytics Dashboard</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); openCreateMode();"><i class="fa-solid fa-plus-circle" style="color:var(--text-main);"></i> Add New Shift</div>
+            <div class="sidebar-item" onclick="openDashboard(); toggleSidebar();"><i class="fa-solid fa-chart-pie"></i> AI Analytics</div>
             <div class="sidebar-item" onclick="toggleNightVision()"><i class="fa-solid fa-moon"></i> Toggle Night Vision</div>
-            <div class="sidebar-item" onclick="toggleSidebar(); forceReAuth();"><i class="fa-solid fa-rotate"></i> Re-Sync Database</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); forceReAuth();"><i class="fa-solid fa-rotate"></i> Re-Sync DB</div>
         </div>
     </div>
 
@@ -297,13 +301,24 @@
                 </div>
                 <div id="cal-days" class="cal-grid"></div>
             </div>
-            <p id="loading-txt" style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 14px;"></p>
-        </div>
+            
+            <!-- NEW TODAY OVERVIEW WIDGET -->
+            <div class="overview-card" id="today-overview-card">
+                <div class="overview-header">
+                    <div class="overview-title"><i class="fa-solid fa-clock"></i> Today's Overview</div>
+                    <div class="overview-badge" id="overview-owner-badge">Owner</div>
+                </div>
+                <div class="overview-info">
+                    <i class="fa-solid fa-moon" style="font-size:24px; color:var(--ai-color);"></i>
+                    <div style="flex:1;">
+                        <div style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Recommended Bedtime</div>
+                        <div style="font-size:16px; font-weight:800; color:var(--text-main);" id="overview-target-time">Scanning...</div>
+                    </div>
+                </div>
+                <button class="btn-main" id="btn-quick-log" style="padding: 14px; font-size: 15px;"><i class="fa-solid fa-pen-to-square"></i> Open Today's Log</button>
+            </div>
 
-        <div class="pill-container" id="fab-pill">
-            <button class="btn-pill" onclick="openCreateMode()">
-                <i class="fa-solid fa-plus"></i> New Shift
-            </button>
+            <p id="loading-txt" style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 14px;"></p>
         </div>
 
         <!-- MAIN EVENT MODAL -->
@@ -735,6 +750,7 @@
             localStorage.setItem('ava_night_vision', isNightVision);
             if(isNightVision) document.body.classList.add('night-vision');
             else document.body.classList.remove('night-vision');
+            updateTodayOverview();
         }
 
         const CLIENT_ID = '728744386309-ocoa425l1ummb759h3dthefsf8i9q15g.apps.googleusercontent.com';
@@ -885,7 +901,7 @@
 
             isAudioPlaying = true;
             document.getElementById('btn-sound').classList.add('playing');
-            document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-play"></i>';
+            document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-stop"></i>';
             updateGlobalPlayer();
             
             if ('mediaSession' in navigator) {
@@ -955,7 +971,8 @@
 
         function showAppUI() {
             document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-header').style.display = 'flex';
-            document.getElementById('app-content').style.display = 'block'; document.getElementById('fab-pill').style.display = 'flex';
+            document.getElementById('app-content').style.display = 'block'; 
+            // Pill container removed
         }
 
         async function fetchEvents() {
@@ -979,7 +996,10 @@
                     } catch(err){}
                 }
 
-                document.getElementById('loading-txt').innerText = ""; renderCalendar(); hideLoader();
+                document.getElementById('loading-txt').innerText = ""; 
+                renderCalendar(); 
+                updateTodayOverview();
+                hideLoader();
             } catch (err) { hideLoader(); forceReAuth(); }
         }
 
@@ -1024,7 +1044,63 @@
             }
         }
 
-        // --- INSTANT SMART BEDTIME CALCULATION ---
+        // --- NEW: TODAY OVERVIEW WIDGET ---
+        async function updateTodayOverview() {
+            const localTodayStr = getLocalISODate(new Date());
+            let targetEvent = null;
+            let activeOwner = '';
+
+            for (let e of allEvents) {
+                const s = new Date(e.start.date || e.start.dateTime);
+                const endRaw = new Date(e.end.date || e.end.dateTime);
+                const eEnd = e.start.date ? new Date(endRaw.setDate(endRaw.getDate() - 1)) : endRaw;
+                s.setHours(0,0,0,0); eEnd.setHours(23,59,59,999);
+                const cellDate = new Date(); cellDate.setHours(12,0,0,0);
+                
+                if(cellDate >= s && cellDate <= eEnd) {
+                    const appData = getAppData(e);
+                    activeOwner = appData.swaps && appData.swaps[localTodayStr] ? appData.swaps[localTodayStr] : e.summary;
+                    if (activeOwner !== "DELETED") {
+                        targetEvent = e;
+                        break;
+                    }
+                }
+            }
+
+            const overviewCard = document.getElementById('today-overview-card');
+            if(!targetEvent) {
+                overviewCard.style.display = 'none';
+                return;
+            }
+
+            overviewCard.style.display = 'block';
+            const ownerBadge = document.getElementById('overview-owner-badge');
+            const isAlf = activeOwner.toLowerCase().includes('alferenzo');
+            
+            ownerBadge.innerText = isAlf ? "Alferenzo's Turn" : "Lesly's Turn";
+            ownerBadge.style.backgroundColor = isAlf ? 'var(--alf-bg)' : 'var(--lesly-bg)';
+            ownerBadge.style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
+
+            // Fetch today's bedtime target directly from local record or event payload
+            const localRec = await appDB.getRecord(localTodayStr);
+            const appData = getAppData(targetEvent);
+            let trks = localRec?.trackers || (appData.trackers && appData.trackers[localTodayStr]) || {};
+            
+            let targetText = "19:00 (Standard)";
+            if (trks.wakeTime) {
+                const [hours, minutes] = trks.wakeTime.split(':').map(Number);
+                let wakeDate = new Date(); 
+                wakeDate.setHours(hours, minutes, 0); 
+                wakeDate.setMinutes(wakeDate.getMinutes() + 330); 
+                targetText = `${String(wakeDate.getHours()).padStart(2, '0')}:${String(wakeDate.getMinutes()).padStart(2, '0')}`;
+            } else if (trks.nap === '0') {
+                targetText = "18:30 (Early)";
+            }
+            
+            document.getElementById('overview-target-time').innerText = targetText;
+            document.getElementById('btn-quick-log').onclick = () => openSpecificDay(targetEvent.id, localTodayStr);
+        }
+
         function updateSmartBedtimeBadge() {
             const badge = document.getElementById('modal-target-bedtime');
             if(!badge) return;
@@ -1134,7 +1210,8 @@
             
             try {
                 await gapi.client.calendar.events.patch({ calendarId: CALENDAR_ID, eventId: activeEvent.id, resource: { description: activeEvent.description } });
-                closeModal(); await fetchEvents();
+                closeModal(); 
+                await fetchEvents(); // Note: This will refresh UI and today overview automatically
             } catch (err) { 
                 document.getElementById('modal-title').innerText = "Shift Details";
                 if(err.status === 401) forceReAuth(); else showAppAlert("Error", "Saved locally, but Google Cloud Sync failed."); 
@@ -1211,7 +1288,7 @@
             const settle = currentTrackers.settle || '?'; const wakes = currentTrackers.wakings || '0';
             let rtns = [];
             if(currentTrackers.rtnBath) rtns.push("Bath"); if(currentTrackers.rtnBook) rtns.push("Book");
-            if(currentTrackers.rtnLights) rtns.push("Dim Lights"); if(currentTrackers.rtnScreen) rtns.push("No Screens");
+            if(currentTrackers.rtnLights) rtns.push("Dim Lights"); if(currentTrackers.rtnScreen) push("No Screens");
             if(currentTrackers.rtnTeeth) rtns.push("Teeth");
             const rtnStr = rtns.length > 0 ? rtns.join(', ') : 'None';
             const shareText = `👶 *Ava's Update: ${dateStr}*\n\n☀️ Morning Wake: ${mWake}\n🍼 Ate well: ${eat}\n😴 Nap: ${nap}h (Woke: ${wake})\n🌙 Routine: ${rtnStr}\n🌙 Bedtime Started: ${bStart}\n⏰ Fell Asleep: ${asleep}\n🌌 Settled in: ${settle}\n🥱 Wakings: ${wakes}\n\n*Notes:*\n${fb}`;
@@ -1263,7 +1340,7 @@
             showAppConfirm("Delete Entire Block", "WARNING: Permanently delete this 4-day shift?", "Delete Block", async () => {
                 document.getElementById('modal-title').innerText = "Deleting Block...";
                 try { await gapi.client.calendar.events.delete({ calendarId: CALENDAR_ID, eventId: activeEvent.id });
-                    allEvents = allEvents.filter(e => e.id !== activeEvent.id); renderCalendar(); closeModal(); fetchEvents();
+                    allEvents = allEvents.filter(e => e.id !== activeEvent.id); renderCalendar(); updateTodayOverview(); closeModal(); fetchEvents();
                 } catch (err) { if(err.status === 401) forceReAuth(); else showAppAlert("Error", "Failed to delete."); }
             });
         }
