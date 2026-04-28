@@ -76,7 +76,6 @@
         .sidebar-menu { padding: 20px 0; flex: 1; overflow-y: auto; }
         .sidebar-item { padding: 15px 25px; display: flex; align-items: center; gap: 15px; color: var(--text-main); font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         .sidebar-item:active { background: var(--input-bg); }
-        .sidebar-item i { width: 20px; text-align: center; color: var(--text-muted); font-size: 18px; }
 
         /* COMPACT GLOBAL MINI PLAYER */
         .global-player { position: fixed; bottom: 20px; right: 20px; left: auto; transform: translateY(150px); background: var(--card-bg); border: 2px solid var(--border-color); color: var(--text-main); border-radius: 40px; padding: 6px 6px 6px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); z-index: 999999; width: auto; max-width: 250px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -254,7 +253,7 @@
         <h3 style="color: var(--text-main); font-weight: 700; margin: 0;">Loading Ava's Secure Database...</h3>
     </div>
 
-    <!-- SIDEBAR UI -->
+    <!-- SIDEBAR UI (ICONS REMOVED & SORTED A-Z) -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -262,12 +261,12 @@
             <button class="header-btn" onclick="toggleSidebar()" style="width: 32px; height: 32px;"><i class="fa-solid fa-times"></i></button>
         </div>
         <div class="sidebar-menu">
-            <div class="sidebar-item" onclick="toggleSidebar(); openCreateMode();"><i class="fa-solid fa-plus-circle" style="color:var(--text-main);"></i> Add New Shift</div>
-            <div class="sidebar-item" onclick="toggleSidebar(); openPottyTracker();"><i class="fa-solid fa-toilet" style="color: #06b6d4;"></i> Potty Training Pro</div>
-            <div class="sidebar-item" onclick="toggleSidebar(); openQuickShareModal();"><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Share Quick Milestone</div>
-            <div class="sidebar-item" onclick="openDashboard(); toggleSidebar();"><i class="fa-solid fa-chart-pie"></i> AI Analytics</div>
-            <div class="sidebar-item" onclick="toggleNightVision()"><i class="fa-solid fa-moon"></i> Toggle Night Vision</div>
-            <div class="sidebar-item" onclick="toggleSidebar(); forceReAuth();"><i class="fa-solid fa-rotate"></i> Re-Sync DB</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); openCreateMode();">Add New Shift</div>
+            <div class="sidebar-item" onclick="openDashboard(); toggleSidebar();">AI Analytics</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); openPottyTracker();">Potty Training Pro</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); forceReAuth();">Re-Sync DB</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); openQuickShareModal();">Share Quick Milestone</div>
+            <div class="sidebar-item" onclick="toggleNightVision()">Toggle Night Vision</div>
         </div>
     </div>
 
@@ -566,9 +565,21 @@
                     </div>
                 </div>
                 <div style="padding-top: 10px;">
+                    <!-- Daily Scoreboard -->
+                    <div style="display:flex; gap:10px; margin-bottom: 15px;">
+                        <div class="stat-card" style="flex:1; padding: 12px; text-align:center; border-left: 4px solid #f59e0b;">
+                            <h4>Pees Today</h4>
+                            <p id="potty-pee-count" style="font-size: 24px; color: var(--text-main); font-weight:800;">0</p>
+                        </div>
+                        <div class="stat-card" style="flex:1; padding: 12px; text-align:center; border-left: 4px solid #8b5cf6;">
+                            <h4>Poops Today</h4>
+                            <p id="potty-poop-count" style="font-size: 24px; color: var(--text-main); font-weight:800;">0</p>
+                        </div>
+                    </div>
+
                     <!-- Stats -->
                     <div style="display:flex; gap:10px; margin-bottom: 15px;">
-                        <div class="stat-card" style="flex:1; padding: 12px;">
+                        <div class="stat-card" style="flex:1; padding: 12px; border-left: 4px solid var(--border-color);">
                             <h4>Time Since Last</h4>
                             <p id="potty-time-since" style="font-size: 18px;">--</p>
                         </div>
@@ -633,6 +644,12 @@
                         <div class="stat-card" style="border-left: 4px solid var(--ai-color);">
                             <h4>AI Insights</h4>
                             <p id="analytics-text" style="font-size: 14px; font-weight:normal; line-height:1.6;"></p>
+                        </div>
+                        
+                        <!-- AI SHARE OPTIONS -->
+                        <div style="display:flex; gap:10px; margin-top:15px;">
+                            <button class="wa-btn" style="margin-top:0;" onclick="shareAnalyticsWA()"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+                            <button class="pdf-btn" style="margin-top:0;" onclick="shareAnalyticsPDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
                         </div>
                     </div>
                 </div>
@@ -722,6 +739,16 @@
             let logs = JSON.parse(localStorage.getItem('ava_potty_logs') || '[]');
             logs.sort((a,b) => b.timestamp - a.timestamp); // newest first
             
+            // Today's Scoreboard
+            const startOfDay = new Date();
+            startOfDay.setHours(0,0,0,0);
+            const todayLogs = logs.filter(l => l.timestamp >= startOfDay.getTime());
+            
+            const peeCount = todayLogs.filter(l => l.type === 'pee').length;
+            const poopCount = todayLogs.filter(l => l.type === 'poop').length;
+            document.getElementById('potty-pee-count').innerText = peeCount;
+            document.getElementById('potty-poop-count').innerText = poopCount;
+
             // Time since last
             const timeSinceEl = document.getElementById('potty-time-since');
             if (logs.length === 0) {
@@ -1557,6 +1584,29 @@
             }
         }
 
+        // --- AI DASHBOARD SHARE ---
+        function shareAnalyticsWA() {
+            let text = stripEmojis(document.getElementById('analytics-text').innerText);
+            let message = `*Ava's AI Analytics Report*\n\n${text}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        function shareAnalyticsPDF() {
+            let text = stripEmojis(document.getElementById('analytics-text').innerText).replace(/\n/g, '<br>').replace(/\*/g, '<strong>').replace(/<strong>(.*?)<\/strong>/g, '<strong>$1</strong>');
+            const printContent = `
+                <div style="padding: 40px; font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
+                    <h1 style="color: #8b5cf6; margin-bottom: 20px;">Ava's AI Analytics Report</h1>
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; line-height: 1.8;">
+                        ${text}
+                    </div>
+                </div>
+            `;
+            const originalBody = document.body.innerHTML;
+            document.body.innerHTML = printContent;
+            window.print();
+            setTimeout(() => location.reload(), 500);
+        }
+
         // --- NEW SHARE LOGIC ---
         function openShareDialog() {
             const overlay = document.getElementById('share-dialog');
@@ -1713,7 +1763,7 @@
 
         function compileHandoffData() {
             if(!activeEvent || !activeAppData) return "No data available.";
-            let dataStr = `Generate a bulleted 'Handoff Summary' for the parent taking over childcare for Ava based on the last few days. Highlight any patterns. Data:\n\n`;
+            let dataStr = `Raw Data:\n\n`;
             const s = new Date(activeEvent.start.date || activeEvent.start.dateTime); const endRaw = new Date(activeEvent.end.date || activeEvent.end.dateTime);
             const eEnd = activeEvent.start.date ? new Date(endRaw.setDate(endRaw.getDate() - 1)) : endRaw; const localTodayStr = getLocalISODate(new Date());
             for (let d = new Date(s); d <= eEnd; d.setDate(d.getDate() + 1)) {
@@ -1723,9 +1773,9 @@
                 let trkStr = "";
                 if(trks) {
                     let rts = []; if(trks.rtnBath) rts.push("Bath"); if(trks.rtnBook) rts.push("Book"); if(trks.rtnLights) rts.push("Dim"); if(trks.rtnScreen) rts.push("NoScreen"); if(trks.rtnTeeth) rts.push("Teeth");
-                    trkStr = `(Morning: ${trks.morningWake||'?'}, Ate: ${trks.eat||'?'}, Nap: ${trks.nap}h, Bedtime Started: ${trks.bedtimeStart||'?'}, Asleep at: ${trks.asleepTime||'?'}, Settle: ${trks.settle||'?'}, Wakings: ${trks.wakings||'0'}, Routine: [${rts.join(',')}]) `;
+                    trkStr = `Morning Wake: ${trks.morningWake||'?'}, Ate: ${trks.eat||'?'}, Nap: ${trks.nap}h, Bedtime Started: ${trks.bedtimeStart||'?'}, Asleep at: ${trks.asleepTime||'?'}, Settle Time: ${trks.settle||'?'}, Wakings: ${trks.wakings||'0'}, Routine Done: [${rts.join(',')}]`;
                 }
-                dataStr += `- Date: ${dayStr} ${trkStr}\n  Notes: ${fb}\n`;
+                dataStr += `Date: ${dayStr}\nTrackers: ${trkStr}\nNotes: ${fb}\n\n`;
             }
             return dataStr;
         }
@@ -1743,7 +1793,12 @@
             btnFetch.disabled = true; btnFetch.style.opacity = '0.5'; aiBox.style.display = 'block'; aiText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
             try {
                 const chosenModel = 'models/gemini-2.5-flash';
-                let prompt = currentAIMode === 'advice' ? `Ava's parents are struggling to get her to sleep. Here are tonight's notes: "${currentNotes}". Give 2 short, highly practical tips. Format as bulleted list.` : currentNotes;
+                
+                // Advanced prompt for better AI Handoff bullet rendering
+                let prompt = currentAIMode === 'advice' ? 
+                    `Ava's parents are struggling to get her to sleep. Here are tonight's notes: "${currentNotes}". Give 2 short, highly practical tips. Format as bulleted list.` 
+                    : `You are creating a shift handoff report for a childcare handoff. Analyze the following raw data and format it beautifully. \n\nRULES:\n1. Separate each date clearly with a bold header (e.g. **Date: YYYY-MM-DD**).\n2. Under each date, provide a concise bulleted list of events/stats.\n3. Add a brief "**Overall Patterns**" section at the end if you notice anything (like nap lengths correlating with sleep time).\n\n${currentNotes}`;
+                
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${chosenModel}:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
