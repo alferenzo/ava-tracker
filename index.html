@@ -305,17 +305,32 @@
             <!-- NEW TODAY OVERVIEW WIDGET -->
             <div class="overview-card" id="today-overview-card">
                 <div class="overview-header">
-                    <div class="overview-title"><i class="fa-solid fa-clock"></i> Today's Overview</div>
+                    <div class="overview-title"><i class="fa-solid fa-clock"></i> Today's Summary</div>
                     <div class="overview-badge" id="overview-owner-badge">Owner</div>
                 </div>
-                <div class="overview-info">
+                
+                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                    <div style="flex: 1; background: var(--input-bg); border-radius: 12px; padding: 10px 5px; border: 1px solid var(--border-color); text-align: center;">
+                        <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-sun" style="color: #f59e0b;"></i> Woke</div>
+                        <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-top: 4px;" id="ov-morning">--:--</div>
+                    </div>
+                    <div style="flex: 1; background: var(--input-bg); border-radius: 12px; padding: 10px 5px; border: 1px solid var(--border-color); text-align: center;">
+                        <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-bed" style="color: #3b82f6;"></i> Nap</div>
+                        <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-top: 4px;" id="ov-nap">--</div>
+                    </div>
+                    <div style="flex: 1; background: var(--input-bg); border-radius: 12px; padding: 10px 5px; border: 1px solid var(--border-color); text-align: center;">
+                        <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-utensils" style="color: #10b981;"></i> Ate</div>
+                        <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-top: 4px;" id="ov-ate">--</div>
+                    </div>
+                </div>
+
+                <div class="overview-info" style="margin-bottom: 0;">
                     <i class="fa-solid fa-moon" style="font-size:24px; color:var(--ai-color);"></i>
                     <div style="flex:1;">
-                        <div style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Recommended Bedtime</div>
+                        <div style="font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Recommended Bedtime</div>
                         <div style="font-size:16px; font-weight:800; color:var(--text-main);" id="overview-target-time">Scanning...</div>
                     </div>
                 </div>
-                <button class="btn-main" id="btn-quick-log" style="padding: 14px; font-size: 15px;"><i class="fa-solid fa-pen-to-square"></i> Open Today's Log</button>
             </div>
 
             <p id="loading-txt" style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 14px;"></p>
@@ -641,42 +656,45 @@
             modals.forEach(overlay => {
                 const content = overlay.querySelector('.modal-content');
                 if(!content) return;
-                const dragArea = content.querySelector('.modal-header-sticky');
-                if(!dragArea) return;
+                
+                // Fetch ALL drag areas inside this modal (crucial for modals with multiple views like event-modal)
+                const dragAreas = content.querySelectorAll('.modal-header-sticky');
+                
+                dragAreas.forEach(dragArea => {
+                    let startY = 0;
+                    let currentY = 0;
+                    let isDragging = false;
 
-                let startY = 0;
-                let currentY = 0;
-                let isDragging = false;
+                    dragArea.addEventListener('touchstart', (e) => {
+                        if (content.scrollTop <= 0) {
+                            startY = e.touches[0].clientY;
+                            isDragging = true;
+                            content.style.transition = 'none';
+                        }
+                    }, {passive: true});
 
-                dragArea.addEventListener('touchstart', (e) => {
-                    if (content.scrollTop <= 0) {
-                        startY = e.touches[0].clientY;
-                        isDragging = true;
-                        content.style.transition = 'none';
-                    }
-                }, {passive: true});
+                    dragArea.addEventListener('touchmove', (e) => {
+                        if (!isDragging) return;
+                        currentY = e.touches[0].clientY - startY;
+                        if (currentY > 0) {
+                            content.style.transform = `translateY(${currentY}px)`;
+                            if (e.cancelable) e.preventDefault();
+                        }
+                    }, {passive: false});
 
-                dragArea.addEventListener('touchmove', (e) => {
-                    if (!isDragging) return;
-                    currentY = e.touches[0].clientY - startY;
-                    if (currentY > 0) {
-                        content.style.transform = `translateY(${currentY}px)`;
-                        if (e.cancelable) e.preventDefault();
-                    }
-                }, {passive: false});
-
-                dragArea.addEventListener('touchend', (e) => {
-                    if (!isDragging) return;
-                    isDragging = false;
-                    content.style.transition = ''; 
-                    if (currentY > 80) {
-                        content.style.transform = ''; 
-                        if(overlay.id === 'event-modal') closeModal();
-                        else if(overlay.id === 'dashboard-modal') closeDashboard();
-                    } else {
-                        content.style.transform = '';
-                    }
-                    currentY = 0;
+                    dragArea.addEventListener('touchend', (e) => {
+                        if (!isDragging) return;
+                        isDragging = false;
+                        content.style.transition = ''; 
+                        if (currentY > 80) {
+                            content.style.transform = ''; 
+                            if(overlay.id === 'event-modal') closeModal();
+                            else if(overlay.id === 'dashboard-modal') closeDashboard();
+                        } else {
+                            content.style.transform = '';
+                        }
+                        currentY = 0;
+                    });
                 });
             });
         }
@@ -901,7 +919,7 @@
 
             isAudioPlaying = true;
             document.getElementById('btn-sound').classList.add('playing');
-            document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-stop"></i>';
+            document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-play"></i>';
             updateGlobalPlayer();
             
             if ('mediaSession' in navigator) {
@@ -1086,6 +1104,21 @@
             const appData = getAppData(targetEvent);
             let trks = localRec?.trackers || (appData.trackers && appData.trackers[localTodayStr]) || {};
             
+            // Populating the summary blocks
+            document.getElementById('ov-morning').innerText = trks.morningWake || '--:--';
+            
+            let napText = "--";
+            if(trks.nap === '0') napText = "None";
+            else if(trks.nap === '1') napText = "1 hr";
+            else if(trks.nap === '2') napText = "2 hrs";
+            else if(trks.nap === '3+') napText = "3+ hrs";
+            document.getElementById('ov-nap').innerText = napText;
+
+            let ateText = "--";
+            if(trks.eat === 'yes') ateText = "Good";
+            else if(trks.eat === 'no') ateText = "Poor";
+            document.getElementById('ov-ate').innerText = ateText;
+
             let targetText = "19:00 (Standard)";
             if (trks.wakeTime) {
                 const [hours, minutes] = trks.wakeTime.split(':').map(Number);
@@ -1098,7 +1131,6 @@
             }
             
             document.getElementById('overview-target-time').innerText = targetText;
-            document.getElementById('btn-quick-log').onclick = () => openSpecificDay(targetEvent.id, localTodayStr);
         }
 
         function updateSmartBedtimeBadge() {
