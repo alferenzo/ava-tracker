@@ -218,7 +218,7 @@
         .dialog-btn-cancel { background: var(--input-bg); color: var(--text-main); border: 2px solid var(--border-color);}
         .dialog-btn-confirm { background: var(--text-main); color: var(--card-bg); }
 
-        #dashboard-modal .modal-content { max-height: 90vh; padding-bottom: 50px; }
+        #dashboard-modal .modal-content, #potty-modal .modal-content, #quick-share-modal .modal-content { max-height: 90vh; padding-bottom: 50px; }
         .stat-card { background: var(--input-bg); padding: 18px; border-radius: 16px; margin-bottom: 15px; border: 2px solid var(--border-color); text-align: left; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);}
         .stat-card h4 { color: var(--text-muted); font-size: 12px; text-transform: uppercase; margin-bottom: 8px; font-weight: 800;}
         .stat-card p { color: var(--text-main); font-size: 15px; font-weight: 600; line-height: 1.5; }
@@ -240,6 +240,11 @@
         .wa-btn:active { transform: scale(0.95); }
         .pdf-btn { background: var(--input-bg); color: var(--text-main); border: 2px solid var(--border-color); padding: 12px; border-radius: 14px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; transition: transform 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px;}
         .pdf-btn:active { transform: scale(0.95); }
+        
+        /* POTTY HISTORY */
+        .potty-log-item { background: var(--input-bg); padding: 12px 15px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border-color); font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .potty-log-item .time { color: var(--text-muted); font-size: 12px; }
+        .potty-delete { color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 5px; }
     </style>
 </head>
 <body>
@@ -258,6 +263,8 @@
         </div>
         <div class="sidebar-menu">
             <div class="sidebar-item" onclick="toggleSidebar(); openCreateMode();"><i class="fa-solid fa-plus-circle" style="color:var(--text-main);"></i> Add New Shift</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); openPottyTracker();"><i class="fa-solid fa-toilet" style="color: #06b6d4;"></i> Potty Training Pro</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); openQuickShareModal();"><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Share Quick Milestone</div>
             <div class="sidebar-item" onclick="openDashboard(); toggleSidebar();"><i class="fa-solid fa-chart-pie"></i> AI Analytics</div>
             <div class="sidebar-item" onclick="toggleNightVision()"><i class="fa-solid fa-moon"></i> Toggle Night Vision</div>
             <div class="sidebar-item" onclick="toggleSidebar(); forceReAuth();"><i class="fa-solid fa-rotate"></i> Re-Sync DB</div>
@@ -336,17 +343,6 @@
                         <div style="font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Recommended Bedtime</div>
                         <div style="font-size:16px; font-weight:800; color:var(--text-main);" id="overview-target-time">Scanning...</div>
                     </div>
-                </div>
-            </div>
-            
-            <!-- NEW QUICK SHARE WIDGET -->
-            <div class="overview-card" id="milestone-card" style="display: none; padding-top: 15px;">
-                <div class="overview-header" style="margin-bottom: 8px;">
-                    <div class="overview-title" style="font-size: 14px;"><i class="fa-brands fa-whatsapp" style="color: #25D366; font-size: 18px;"></i> Share Quick Milestone</div>
-                </div>
-                <textarea id="quick-milestone-text" placeholder="e.g., Ava fell asleep instantly tonight! She did so well." style="min-height: 60px; font-size: 14px; padding: 12px;"></textarea>
-                <div style="display: flex; gap: 10px;">
-                    <button class="wa-btn" onclick="shareQuickUpdateWA()"><i class="fa-brands fa-whatsapp"></i> Send to WhatsApp</button>
                 </div>
             </div>
 
@@ -536,6 +532,71 @@
             </div>
         </div>
 
+        <!-- QUICK SHARE MODAL -->
+        <div class="modal-overlay" id="quick-share-modal">
+            <div class="modal-content">
+                <div class="modal-header-sticky">
+                    <div class="modal-drag-bar"></div>
+                    <div class="modal-header">
+                        <div>
+                            <h2><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Quick Share</h2>
+                            <p style="font-size: 13px; color: var(--text-muted);">Send an instant update</p>
+                        </div>
+                        <button onclick="closeQuickShareModal()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
+                    </div>
+                </div>
+                <div style="padding-top: 10px;">
+                    <textarea id="quick-milestone-text" placeholder="e.g., Ava fell asleep instantly tonight! She did so well." style="min-height: 100px; font-size: 15px; padding: 15px; margin-bottom: 15px;"></textarea>
+                    <button class="wa-btn" onclick="shareQuickUpdateWA()"><i class="fa-brands fa-whatsapp"></i> Send to WhatsApp</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- POTTY TRAINING PRO MODAL -->
+        <div class="modal-overlay" id="potty-modal">
+            <div class="modal-content">
+                <div class="modal-header-sticky">
+                    <div class="modal-drag-bar"></div>
+                    <div class="modal-header">
+                        <div>
+                            <h2><i class="fa-solid fa-toilet" style="color: #06b6d4;"></i> Potty Pro</h2>
+                            <p style="font-size: 13px; color: var(--text-muted);">Ava's Potty Training Tracker</p>
+                        </div>
+                        <button onclick="closePottyTracker()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
+                    </div>
+                </div>
+                <div style="padding-top: 10px;">
+                    <!-- Stats -->
+                    <div style="display:flex; gap:10px; margin-bottom: 15px;">
+                        <div class="stat-card" style="flex:1; padding: 12px;">
+                            <h4>Time Since Last</h4>
+                            <p id="potty-time-since" style="font-size: 18px;">--</p>
+                        </div>
+                        <div class="stat-card" style="flex:1; padding: 12px; border-left: 4px solid #10b981;">
+                            <h4>24h Success Rate</h4>
+                            <p id="potty-success-rate" style="font-size: 18px;">--%</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Log Entry -->
+                    <div class="form-group" style="background: var(--card-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--border-color);">
+                        <label style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-bottom: 10px;">Log a Potty Event</label>
+                        <div class="tracker-btn-group" style="flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
+                            <button class="tracker-btn active-yes" onclick="selectPottyType('pee')" id="btn-potty-pee">Pee</button>
+                            <button class="tracker-btn" onclick="selectPottyType('poop')" id="btn-potty-poop">Poop</button>
+                            <button class="tracker-btn" onclick="selectPottyType('dry')" id="btn-potty-dry">Tried (Dry)</button>
+                            <button class="tracker-btn" onclick="selectPottyType('accident')" id="btn-potty-accident">Accident</button>
+                        </div>
+                        <button class="btn-save" style="padding: 14px; font-size: 15px;" onclick="savePottyLog()">Save Potty Log</button>
+                    </div>
+
+                    <!-- History -->
+                    <h4 style="margin-top: 25px; color: var(--text-muted); font-size: 12px; font-weight: 800; text-transform: uppercase;">Recent Logs</h4>
+                    <div id="potty-history-list" style="margin-top: 10px; max-height: 250px; overflow-y: auto;"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- SHARE OPTIONS DIALOG -->
         <div class="dialog-overlay" id="share-dialog">
             <div class="dialog-box" style="padding: 25px;">
@@ -624,6 +685,114 @@
     <script src="https://accounts.google.com/gsi/client"></script>
 
     <script>
+        // --- EMOJI REMOVAL HELPER ---
+        function stripEmojis(str) {
+            return str.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim();
+        }
+
+        // --- POTTY TRACKER LOGIC ---
+        let selectedPottyType = 'pee';
+        function selectPottyType(type) {
+            selectedPottyType = type;
+            ['pee','poop','dry','accident'].forEach(t => {
+                document.getElementById('btn-potty-'+t).classList.remove('active-yes', 'active-no');
+            });
+            if(type === 'accident') {
+                document.getElementById('btn-potty-'+type).classList.add('active-no');
+            } else {
+                document.getElementById('btn-potty-'+type).classList.add('active-yes');
+            }
+        }
+        
+        function savePottyLog() {
+            let logs = JSON.parse(localStorage.getItem('ava_potty_logs') || '[]');
+            logs.push({ timestamp: Date.now(), type: selectedPottyType });
+            localStorage.setItem('ava_potty_logs', JSON.stringify(logs));
+            renderPottyTracker();
+        }
+        
+        function deletePottyLog(index) {
+            let logs = JSON.parse(localStorage.getItem('ava_potty_logs') || '[]');
+            logs.splice(index, 1);
+            localStorage.setItem('ava_potty_logs', JSON.stringify(logs));
+            renderPottyTracker();
+        }
+
+        function renderPottyTracker() {
+            let logs = JSON.parse(localStorage.getItem('ava_potty_logs') || '[]');
+            logs.sort((a,b) => b.timestamp - a.timestamp); // newest first
+            
+            // Time since last
+            const timeSinceEl = document.getElementById('potty-time-since');
+            if (logs.length === 0) {
+                timeSinceEl.innerText = "--";
+            } else {
+                const diffMs = Date.now() - logs[0].timestamp;
+                const diffMins = Math.floor(diffMs / 60000);
+                if (diffMins < 60) timeSinceEl.innerText = `${diffMins} mins`;
+                else timeSinceEl.innerText = `${Math.floor(diffMins/60)}h ${diffMins%60}m`;
+            }
+
+            // Success Rate (Last 24h)
+            const successEl = document.getElementById('potty-success-rate');
+            const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+            const recentLogs = logs.filter(l => l.timestamp >= oneDayAgo);
+            if (recentLogs.length === 0) {
+                successEl.innerText = "--%";
+            } else {
+                const successes = recentLogs.filter(l => l.type === 'pee' || l.type === 'poop' || l.type === 'dry').length;
+                successEl.innerText = `${Math.round((successes / recentLogs.length) * 100)}%`;
+            }
+
+            // Render List
+            const listEl = document.getElementById('potty-history-list');
+            listEl.innerHTML = '';
+            if (logs.length === 0) {
+                listEl.innerHTML = '<p style="color:var(--text-muted); font-size:13px;">No logs yet. Try saving one above!</p>';
+            } else {
+                logs.forEach((log, index) => {
+                    const d = new Date(log.timestamp);
+                    const timeStr = `${d.toLocaleDateString(undefined, {month:'short', day:'numeric'})} at ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                    let typeDisplay = log.type.charAt(0).toUpperCase() + log.type.slice(1);
+                    if (log.type === 'dry') typeDisplay = 'Tried (Dry)';
+                    
+                    let color = 'var(--text-main)';
+                    if(log.type === 'accident') color = '#ef4444';
+                    else if (log.type === 'poop' || log.type === 'pee') color = '#10b981';
+
+                    listEl.innerHTML += `
+                        <div class="potty-log-item">
+                            <div>
+                                <span style="color: ${color};">${typeDisplay}</span>
+                                <div class="time">${timeStr}</div>
+                            </div>
+                            <button class="potty-delete" onclick="deletePottyLog(${index})"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function openPottyTracker() {
+            renderPottyTracker();
+            const overlay = document.getElementById('potty-modal');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+        }
+        function closePottyTracker() {
+            const overlay = document.getElementById('potty-modal');
+            overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 300);
+        }
+
+        function openQuickShareModal() {
+            const overlay = document.getElementById('quick-share-modal');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+        }
+        function closeQuickShareModal() {
+            const overlay = document.getElementById('quick-share-modal');
+            overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 300);
+        }
 
         // --- CUSTOM TIME PICKER GENERATION ---
         function createTimePickerHTML(id) {
@@ -685,7 +854,6 @@
                 const content = overlay.querySelector('.modal-content');
                 if(!content) return;
                 
-                // Fetch ALL drag areas inside this modal
                 const dragAreas = content.querySelectorAll('.modal-header-sticky');
                 
                 dragAreas.forEach(dragArea => {
@@ -718,6 +886,8 @@
                             content.style.transform = ''; 
                             if(overlay.id === 'event-modal') closeModal();
                             else if(overlay.id === 'dashboard-modal') closeDashboard();
+                            else if(overlay.id === 'quick-share-modal') closeQuickShareModal();
+                            else if(overlay.id === 'potty-modal') closePottyTracker();
                         } else {
                             content.style.transform = '';
                         }
@@ -1113,16 +1283,13 @@
             }
 
             const overviewCard = document.getElementById('today-overview-card');
-            const milestoneCard = document.getElementById('milestone-card');
             
             if(!targetEvent) {
                 overviewCard.style.display = 'none';
-                milestoneCard.style.display = 'none';
                 return;
             }
 
             overviewCard.style.display = 'block';
-            milestoneCard.style.display = 'block';
             
             const ownerBadge = document.getElementById('overview-owner-badge');
             const isAlf = activeOwner.toLowerCase().includes('alferenzo');
@@ -1163,7 +1330,7 @@
             document.getElementById('overview-target-time').innerText = targetText;
         }
 
-        // --- NEW: QUICK SHARE WIDGET LOGIC ---
+        // --- QUICK SHARE WIDGET LOGIC ---
         async function shareQuickUpdateWA() {
             const note = document.getElementById('quick-milestone-text').value.trim();
             const dateStr = getLocalISODate(new Date());
@@ -1175,19 +1342,23 @@
                     const t = localRec.trackers;
                     let napText = (t.nap === '0' || !t.nap) ? 'None' : t.nap + 'h';
                     let bathText = t.rtnBath ? 'Done' : 'Pending';
-                    statsStr = `\n\n*Today's Quick Stats:*\n☀️ Woke: ${t.morningWake || '--'}\n😴 Nap: ${napText}\n🛁 Bath: ${bathText}\n🌌 Settled: ${t.settle || '--'}`;
+                    statsStr = `\n\n*Today's Quick Stats:*\nWoke: ${t.morningWake || '--'}\nNap: ${napText}\nBath: ${bathText}\nSettled: ${t.settle || '--'}`;
                 }
             } catch(e) {}
 
-            let message = `👶 *Ava Update:*\n${note}`;
-            if(note === "") message = `👶 *Ava Update:*`;
+            let message = `*Ava Update:*\n${note}`;
+            if(note === "") message = `*Ava Update:*`;
             message += statsStr;
+
+            // Strip Emojis
+            message = stripEmojis(message);
 
             const encoded = encodeURIComponent(message);
             window.open(`https://wa.me/?text=${encoded}`, '_blank');
             
             // Clear box after clicking
             document.getElementById('quick-milestone-text').value = "";
+            closeQuickShareModal();
         }
 
         function updateSmartBedtimeBadge() {
@@ -1285,6 +1456,26 @@
         }
 
         async function saveDayUpdates() {
+            
+            // ERROR LOGIC: Check Time Fall Asleep vs Bedtime Started
+            if (currentTrackers.bedtimeStart && currentTrackers.asleepTime) {
+                let startParts = currentTrackers.bedtimeStart.split(':').map(Number);
+                let endParts = currentTrackers.asleepTime.split(':').map(Number);
+                
+                let startMins = startParts[0] * 60 + startParts[1];
+                let endMins = endParts[0] * 60 + endParts[1];
+
+                // If sleep time is between 00:00 and 06:00, but bedtime started > 12:00, it crossed midnight.
+                if (endParts[0] <= 6 && startParts[0] >= 12) {
+                    endMins += 24 * 60;
+                }
+
+                if (endMins < startMins) {
+                    showAppAlert("Time Error", "Ava cannot fall asleep before her bedtime routine starts! Please fix the times.");
+                    return; // ABORT SAVE
+                }
+            }
+        
             const feedbackText = document.getElementById('modal-feedback').value;
             if(!activeAppData.feedback) activeAppData.feedback = {};
             activeAppData.feedback[activeDateStr] = feedbackText;
@@ -1392,20 +1583,21 @@
             if(currentTrackers.rtnTeeth) rtns.push("Teeth");
             const rtnStr = rtns.length > 0 ? rtns.join(', ') : 'None';
             
-            return `👶 *Ava's Update: ${dateStr}*\n\n☀️ Morning Wake: ${mWake}\n🍼 Ate well: ${eat}\n😴 Nap: ${nap}h (Woke: ${wake})\n🌙 Routine: ${rtnStr}\n🌙 Bedtime Started: ${bStart}\n⏰ Fell Asleep: ${asleep}\n🌌 Settled in: ${settle}\n🥱 Wakings: ${wakes}\n\n*Notes:*\n${fb}`;
+            // Cleaned template with no emojis natively
+            return `*Ava's Update: ${dateStr}*\n\nMorning Wake: ${mWake}\nAte well: ${eat}\nNap: ${nap}h (Woke: ${wake})\nRoutine: ${rtnStr}\nBedtime Started: ${bStart}\nFell Asleep: ${asleep}\nSettled in: ${settle}\nWakings: ${wakes}\n\n*Notes:*\n${fb}`;
         }
 
         function shareTodayWA() {
-            const shareText = formatShareText();
+            // Apply stripEmojis to catch anything the user typed in the Notes box
+            const shareText = stripEmojis(formatShareText());
             const encoded = encodeURIComponent(shareText);
             window.open(`https://wa.me/?text=${encoded}`, '_blank');
             closeShareDialog();
         }
 
         function shareTodayPDF() {
-            // A quick native print-to-PDF workaround
-            const originalBody = document.body.innerHTML;
-            const shareText = formatShareText().replace(/\n/g, '<br>').replace(/\*/g, '<strong>').replace(/<strong>(.*?)<\/strong>/g, '<strong>$1</strong>');
+            // Remove emojis and format for PDF
+            const shareText = stripEmojis(formatShareText()).replace(/\n/g, '<br>').replace(/\*/g, '<strong>').replace(/<strong>(.*?)<\/strong>/g, '<strong>$1</strong>');
             
             const printContent = `
                 <div style="padding: 40px; font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
@@ -1426,8 +1618,9 @@
         }
 
         function shareViaWeb(text, title) {
-            // Helper for the handoff report
-            const encoded = encodeURIComponent(text);
+            // Clean AI handoff emojis before sharing
+            const cleanText = stripEmojis(text);
+            const encoded = encodeURIComponent(cleanText);
             window.open(`https://wa.me/?text=${encoded}`, '_blank');
         }
 
