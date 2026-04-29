@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Ava's Four Day Care</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ffffff">
@@ -58,7 +58,7 @@
         .loader-icon { font-size: 50px; color: var(--alf-color); margin-bottom: 20px; animation: float 2s ease-in-out infinite; }
 
         /* HEADER UI */
-        .header { padding: 40px 20px 15px; text-align: center; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.5); z-index: 10; display: flex; justify-content: space-between; align-items: center; position: relative; }
+        .header { padding: 60px 20px 15px; text-align: center; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.5); z-index: 10; display: flex; justify-content: space-between; align-items: center; position: relative; }
         .header-text { display: flex; flex-direction: column; align-items: center; flex: 1; }
         .header h1 { font-size: 22px; color: var(--text-main); font-weight: 800; letter-spacing: -0.5px; }
         .header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; font-weight: 500; }
@@ -71,14 +71,14 @@
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
         .sidebar { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--card-bg); z-index: 99999; transition: left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); box-shadow: 5px 0 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; border-right: 1px solid var(--border-color); }
         .sidebar.active { left: 0; }
-        .sidebar-header { padding: 40px 20px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-header { padding: 60px 20px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .sidebar-header h2 { font-size: 20px; color: var(--text-main); font-weight: 800; }
         .sidebar-menu { padding: 20px 0; flex: 1; overflow-y: auto; }
         .sidebar-item { padding: 15px 25px; display: flex; align-items: center; gap: 15px; color: var(--text-main); font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         .sidebar-item:active { background: var(--input-bg); }
 
         /* FIXED BOTTOM DASHBOARD PLAYER */
-        .fixed-bottom-player { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--card-bg); border-top: 1px solid var(--border-color); padding: 12px 20px 20px; z-index: 50; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); backdrop-filter: blur(10px); display: flex; align-items: center; }
+        .fixed-bottom-player { position: absolute; bottom: 30px; left: 20px; right: 20px; width: auto; background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 20px; padding: 12px 15px; z-index: 50; box-shadow: 0 10px 30px rgba(0,0,0,0.15); backdrop-filter: blur(10px); display: flex; align-items: center; }
 
         #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 30px; text-align: center; }
         .hero-icon { font-size: 70px; color: var(--alf-color); margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
@@ -87,7 +87,7 @@
         .btn-main:active:not(:disabled) { transform: scale(0.95); }
         .btn-main:disabled { cursor: not-allowed; opacity: 0.5; }
         
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 130px; display: none; animation: fadeIn 0.5s; }
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 150px; display: none; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .cal-wrapper { background: var(--card-bg); border-radius: 24px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); backdrop-filter: blur(10px); border: 1px solid var(--border-color); }
@@ -1523,11 +1523,21 @@
 
                 const prompt = `You are a pediatric sleep analyst. Analyze this data. Give a concise trend analysis: 1. Key Pattern Spotted. 2. Correlation between routine and settling time/wakings. 3. One actionable tip. Keep it very short and analytical. Data:\n\n${dataStr}`;
 
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-                
+                let response;
+                let retries = 2;
+                while(retries > 0) {
+                    response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    if (response.status === 503) {
+                        retries--;
+                        if (retries === 0) throw new Error("The AI server is experiencing heavy traffic (Error 503). Please tap to retry.");
+                        await new Promise(r => setTimeout(r, 2000));
+                    } else {
+                        break;
+                    }
+                }
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const data = await response.json();
                 
@@ -1755,9 +1765,20 @@
                     `Ava's parents are struggling to get her to sleep. Here are tonight's notes: "${currentNotes}". Give 2 short, highly practical tips. Format as bulleted list.` 
                     : `You are creating a shift handoff report for a childcare handoff. Analyze the following raw data and format it beautifully. \n\nRULES:\n1. Separate each date clearly with a bold header (e.g. **Date: YYYY-MM-DD**).\n2. Under each date, provide a concise bulleted list of events/stats.\n3. Add a brief "**Overall Patterns**" section at the end if you notice anything (like nap lengths correlating with sleep time).\n\n${currentNotes}`;
                 
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${chosenModel}:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
+                let response;
+                let retries = 2;
+                while(retries > 0) {
+                    response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${chosenModel}:generateContent?key=${GEMINI_API_KEY}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    if (response.status === 503) {
+                        retries--;
+                        if (retries === 0) throw new Error("The AI server is experiencing heavy traffic (Error 503). Please tap the button to retry.");
+                        await new Promise(r => setTimeout(r, 2000)); // Auto-retry after 2 seconds
+                    } else {
+                        break;
+                    }
+                }
                 if (response.status === 429) throw new Error("Too Many Requests! Wait 1 minute before clicking again.");
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const data = await response.json(); if (data.error) throw new Error(data.error.message);
