@@ -77,16 +77,8 @@
         .sidebar-item { padding: 15px 25px; display: flex; align-items: center; gap: 15px; color: var(--text-main); font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         .sidebar-item:active { background: var(--input-bg); }
 
-        /* COMPACT GLOBAL MINI PLAYER */
-        .global-player { position: fixed; bottom: 20px; right: 20px; left: auto; transform: translateY(150px); background: var(--card-bg); border: 2px solid var(--border-color); color: var(--text-main); border-radius: 40px; padding: 6px 6px 6px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); z-index: 999999; width: auto; max-width: 250px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .global-player.visible { transform: translateY(0); }
-        .gp-info { display: flex; flex-direction: column; overflow: hidden; flex: 1; }
-        .gp-title { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--ai-color); letter-spacing: 0.5px;}
-        .gp-subtitle { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .gp-controls { display: flex; gap: 6px; align-items: center; }
-        .gp-btn { background: var(--input-bg); border: 1px solid var(--border-color); width: 34px; height: 34px; border-radius: 50%; color: var(--text-main); display: flex; justify-content: center; align-items: center; font-size: 14px; cursor: pointer; transition: transform 0.2s; }
-        .gp-btn.stop { background: #ef4444; color: white; border-color: #ef4444; }
-        .gp-btn:active { transform: scale(0.9); }
+        /* FIXED BOTTOM DASHBOARD PLAYER */
+        .fixed-bottom-player { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--card-bg); border-top: 1px solid var(--border-color); padding: 12px 20px 20px; z-index: 50; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); backdrop-filter: blur(10px); display: flex; align-items: center; }
 
         #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 30px; text-align: center; }
         .hero-icon { font-size: 70px; color: var(--alf-color); margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
@@ -95,7 +87,7 @@
         .btn-main:active:not(:disabled) { transform: scale(0.95); }
         .btn-main:disabled { cursor: not-allowed; opacity: 0.5; }
         
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; display: none; animation: fadeIn 0.5s; }
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 130px; display: none; animation: fadeIn 0.5s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .cal-wrapper { background: var(--card-bg); border-radius: 24px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); backdrop-filter: blur(10px); border: 1px solid var(--border-color); }
@@ -270,12 +262,7 @@
         </div>
     </div>
 
-    <!-- COMPACT GLOBAL MINI PLAYER -->
-    <div class="global-player" id="global-player">
-        <div class="gp-info">
-            <div class="gp-title">Playing Audio</div>
-            <div class="gp-subtitle" id="gp-track-name">Background Noise</div>
-        </div>
+    
         <div class="gp-controls">
             <button class="gp-btn" onclick="toggleSidebarAudioMenu()"><i class="fa-solid fa-sliders"></i></button>
             <button class="gp-btn stop" onclick="stopAudio()"><i class="fa-solid fa-stop"></i></button>
@@ -467,21 +454,7 @@
                             </div>
                         </details>
 
-                        <details class="tracker-group" id="audio-section-scroll">
-                            <summary><i class="fa-solid fa-music" style="width:25px; color: #ec4899;"></i> Sleep Audio Player</summary>
-                            <div class="tracker-content">
-                                <div class="sound-player">
-                                    <button class="btn-play-sound" id="btn-sound" onclick="toggleAudio()"><i class="fa-solid fa-play"></i></button>
-                                    <select class="tracker-select" style="flex:1;" id="sound-type" onchange="changeAudioType()">
-                                        <option value="womb">Heartbeat & Womb (Deep)</option>
-                                        <option value="brown">Deep Brown Noise</option>
-                                        <option value="pink">Pink Noise (Rain/Waterfall)</option>
-                                        <option value="humming">Soft Humming Rhythm</option>
-                                        <option value="white">White Noise (Static)</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </details>
+                        
 
                         <div class="feedback-section">
                             <label>
@@ -696,6 +669,26 @@
             </div>
         </div>
 
+
+        <!-- FIXED BOTTOM AUDIO PLAYER -->
+        <div class="fixed-bottom-player" id="dashboard-audio-player" style="display: none;">
+            <div class="sound-player" style="width: 100%;">
+                <button class="btn-play-sound" id="btn-sound" onclick="toggleAudio()"><i class="fa-solid fa-play"></i></button>
+                <div style="flex:1;">
+                    <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; margin-left: 5px;">Sleep Audio Player</div>
+                    <select class="tracker-select" style="width: 100%; padding: 8px 12px;" id="sound-type" onchange="changeAudioType()">
+                        <option value="womb">Heartbeat & Womb (Deep)</option>
+                        <option value="brown">Deep Brown Noise</option>
+                        <option value="pink">Pink Noise (Rain/Waterfall)</option>
+                        <option value="humming">Soft Humming Rhythm</option>
+                        <option value="white">White Noise (Static)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- SILENT KEEP-ALIVE AUDIO (Forces Background Execution on Mobile) -->
+        <audio id="keep-alive-audio" loop playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
     </div>
 
     <script src="https://apis.google.com/js/api.js"></script>
@@ -1019,45 +1012,7 @@
         let activeSoundNode = null;
         let isAudioPlaying = false;
 
-        function updateGlobalPlayer() {
-            const gp = document.getElementById('global-player');
-            const select = document.getElementById('sound-type');
-            if (isAudioPlaying) {
-                gp.classList.add('visible');
-                document.getElementById('gp-track-name').innerText = select.options[select.selectedIndex].text;
-            } else {
-                gp.classList.remove('visible');
-            }
-        }
-
-        function toggleSidebarAudioMenu() {
-            if(!activeDateStr) {
-                const localTodayStr = getLocalISODate(new Date());
-                let targetEvent = null;
-                for (let e of allEvents) {
-                    const s = new Date(e.start.date || e.start.dateTime); const endRaw = new Date(e.end.date || e.end.dateTime);
-                    const eEnd = e.start.date ? new Date(endRaw.setDate(endRaw.getDate() - 1)) : endRaw;
-                    s.setHours(0,0,0,0); eEnd.setHours(23,59,59,999);
-                    const cellDate = new Date(); cellDate.setHours(12,0,0,0);
-                    if(cellDate >= s && cellDate <= eEnd) { targetEvent = e; break; }
-                }
-                if(targetEvent) {
-                    openSpecificDay(targetEvent.id, localTodayStr);
-                    setTimeout(() => { 
-                        document.getElementById('audio-section-scroll').open = true;
-                        document.getElementById('audio-section-scroll').scrollIntoView({behavior: "smooth", block: "center"}); 
-                    }, 400);
-                } else {
-                    showAppAlert("No Shift Active", "Please select a shift on the calendar to change audio settings.");
-                }
-            } else {
-                showModal();
-                setTimeout(() => { 
-                    document.getElementById('audio-section-scroll').open = true;
-                    document.getElementById('audio-section-scroll').scrollIntoView({behavior: "smooth", block: "center"}); 
-                }, 400);
-            }
-        }
+        
 
         function toggleAudio() {
             if (isAudioPlaying) stopAudio();
@@ -1077,12 +1032,13 @@
             isAudioPlaying = false;
             document.getElementById('btn-sound').classList.remove('playing');
             document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-play"></i>';
-            updateGlobalPlayer();
+            try { document.getElementById('keep-alive-audio').pause(); } catch(e){}
         }
 
         function playAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
+            try { document.getElementById('keep-alive-audio').play(); } catch(e){}
             
             const type = document.getElementById('sound-type').value;
             const bufferSize = audioCtx.sampleRate * 2; 
@@ -1144,8 +1100,7 @@
 
             isAudioPlaying = true;
             document.getElementById('btn-sound').classList.add('playing');
-            document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-play"></i>';
-            updateGlobalPlayer();
+            document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-stop"></i>';
             
             if ('mediaSession' in navigator) {
                 const select = document.getElementById('sound-type');
@@ -1215,6 +1170,7 @@
         function showAppUI() {
             document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-header').style.display = 'flex';
             document.getElementById('app-content').style.display = 'block'; 
+            document.getElementById('dashboard-audio-player').style.display = 'flex';
         }
 
         async function fetchEvents() {
