@@ -257,7 +257,7 @@
             <div class="sidebar-item" onclick="toggleSidebar(); openCreateMode();">Add New Shift</div>
             <div class="sidebar-item" onclick="openDashboard(); toggleSidebar();">AI Analytics</div>
             <div class="sidebar-item" onclick="toggleSidebar(); openPottyTracker();">Potty Training Pro</div>
-            <div class="sidebar-item" onclick="toggleSidebar(); forceReAuth();">Re-Sync DB</div>
+            
             <div class="sidebar-item" onclick="toggleSidebar(); openQuickShareModal();">Share Quick Milestone</div>
             <div class="sidebar-item" onclick="toggleNightVision()">Toggle Night Vision</div>
         </div>
@@ -276,13 +276,7 @@
             <button class="header-btn" onclick="toggleNightVision()"><i class="fa-solid fa-moon"></i></button>
         </div>
 
-        <div id="login-screen" style="display: none;">
-            <i class="fa-solid fa-database hero-icon"></i>
-            <h2 style="margin-bottom: 10px; color: var(--text-main);">Ava's Care App</h2>
-            <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 14px;">Syncing with Cloud & Local DB</p>
-            <button id="authorize_button" class="btn-main" onclick="handleAuthClick()">Connect Google Calendar</button>
-            <div id="status-msg" style="margin-top: 15px; font-size: 13px; color: var(--text-muted);">Initializing DB Architecture...</div>
-        </div>
+
 
         <div id="app-content" class="content-area">
             <div class="cal-wrapper">
@@ -688,8 +682,7 @@
         <audio id="keep-alive-audio" loop playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
     </div>
 
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
+    
 
     <script>
         // --- EMOJI REMOVAL HELPER ---
@@ -926,54 +919,81 @@
             }
         }
 
-        class DatabaseManager {
+        class GitHubDBManager {
             constructor() {
-                this.dbName = 'AvaCareDB';
-                this.dbVersion = 1;
-                this.db = null;
+                // ⚠️ SETUP REQUIRED: Fill these in with your GitHub details!
+                this.token = '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'; 
+                this.owner = 'alferenzo'; 
+                this.repo = 'ava-tracker'; 
+                this.path = 'db.json';
+                this.sha = null;
+                this.data = { daily_records: {}, shifts: [] };
+            }
+            get apiUrl() {
+                return `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${this.path}`;
             }
             async init() {
-                return new Promise((resolve, reject) => {
-                    let request = indexedDB.open(this.dbName, this.dbVersion);
-                    request.onupgradeneeded = (e) => {
-                        this.db = e.target.result;
-                        if (!this.db.objectStoreNames.contains('daily_records')) {
-                            this.db.createObjectStore('daily_records', { keyPath: 'dateStr' });
-                        }
-                    };
-                    request.onsuccess = (e) => { this.db = e.target.result; resolve(); };
-                    request.onerror = (e) => reject(e);
-                });
+                if(this.token === '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') {
+                    console.warn("GitHub credentials not set. Running in temporary memory mode.");
+                    return; // Will just use local volatile memory until you put your token in
+                }
+                try {
+                    let res = await fetch(this.apiUrl, { headers: { 'Authorization': `Bearer ${this.token}` }});
+                    if (res.status === 404) {
+                        // File doesn't exist yet, let's create it
+                        await this._pushToGithub();
+                    } else if (res.ok) {
+                        let json = await res.json();
+                        this.sha = json.sha;
+                        // Robust base64 decode that handles emojis safely
+                        this.data = JSON.parse(decodeURIComponent(escape(atob(json.content))));
+                    }
+                } catch(e) { console.error("GitHub Sync failed", e); }
             }
-            async saveRecord(dateStr, dataObj) {
-                return new Promise((resolve, reject) => {
-                    let tx = this.db.transaction('daily_records', 'readwrite');
-                    let store = tx.objectStore('daily_records');
-                    store.put({ dateStr: dateStr, payload: dataObj });
-                    tx.oncomplete = () => resolve();
-                    tx.onerror = (e) => reject(e);
+            async _pushToGithub() {
+                if(this.token === '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') return;
+                // Robust base64 encode that handles emojis safely
+                let content = btoa(unescape(encodeURIComponent(JSON.stringify(this.data, null, 2))));
+                let body = { message: "Ava App Auto-Save", content: content };
+                if (this.sha) body.sha = this.sha;
+                
+                let res = await fetch(this.apiUrl, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${this.token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
                 });
+                if(res.ok) {
+                    let json = await res.json();
+                    this.sha = json.content.sha;
+                }
+            }
+
+            // --- MAPPED DB FUNCTIONS ---
+            async saveRecord(dateStr, dataObj) {
+                this.data.daily_records[dateStr] = dataObj;
+                await this._pushToGithub();
             }
             async getRecord(dateStr) {
-                return new Promise((resolve, reject) => {
-                    let tx = this.db.transaction('daily_records', 'readonly');
-                    let store = tx.objectStore('daily_records');
-                    let request = store.get(dateStr);
-                    request.onsuccess = (e) => resolve(request.result ? request.result.payload : null);
-                    request.onerror = (e) => reject(e);
-                });
+                return this.data.daily_records[dateStr] || null;
+            }
+            async saveShift(shiftObj) {
+                let idx = this.data.shifts.findIndex(s => s.id === shiftObj.id);
+                if(idx >= 0) this.data.shifts[idx] = shiftObj;
+                else this.data.shifts.push(shiftObj);
+                await this._pushToGithub();
+            }
+            async deleteShift(id) {
+                this.data.shifts = this.data.shifts.filter(s => s.id !== id);
+                await this._pushToGithub();
+            }
+            async getAllShifts() {
+                return this.data.shifts || [];
             }
             async exportAllRecords() {
-                return new Promise((resolve, reject) => {
-                    let tx = this.db.transaction('daily_records', 'readonly');
-                    let store = tx.objectStore('daily_records');
-                    let request = store.getAll();
-                    request.onsuccess = () => resolve(request.result);
-                    request.onerror = (e) => reject(e);
-                });
+                return Object.keys(this.data.daily_records).map(k => ({dateStr: k, payload: this.data.daily_records[k]}));
             }
         }
-        const appDB = new DatabaseManager();
+        const appDB = new GitHubDBManager();
 
         let isNightVision = localStorage.getItem('ava_night_vision') === 'true';
         if(isNightVision) document.body.classList.add('night-vision');
@@ -986,15 +1006,9 @@
             updateTodayOverview();
         }
 
-        const CLIENT_ID = '728744386309-ocoa425l1ummb759h3dthefsf8i9q15g.apps.googleusercontent.com';
         const part1 = String.fromCharCode(65, 73, 122, 97); 
         const part2 = 'SyDe7Mqjm7k2rYaEv3sMmy-ZKFgbsmICRkA'; 
         const GEMINI_API_KEY = part1 + part2;
-        const CALENDAR_ID = 'family11537808756268491091@group.calendar.google.com';
-        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
-        const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
-
-        let tokenClient;
         let allEvents = [];
         let currentMonth = new Date();
         
@@ -1127,42 +1141,20 @@
         }
 
         window.onload = async function() {
-            // Inject Custom Time Pickers
             document.getElementById('picker-morningWake').innerHTML = createTimePickerHTML('trk-morningWake');
             document.getElementById('picker-wakeTime').innerHTML = createTimePickerHTML('trk-wakeTime');
             document.getElementById('picker-bedtimeStart').innerHTML = createTimePickerHTML('trk-bedtimeStart');
             document.getElementById('picker-asleepTime').innerHTML = createTimePickerHTML('trk-asleepTime');
 
             setupSwipeToClose();
-            try { await appDB.init(); } catch(e) { console.error("Local DB Init Failed", e); }
-            if (typeof gapi !== 'undefined') {
-                gapi.load('client', { callback: initializeGapiClient, onerror: () => { hideLoader(); showAppAlert("Error", "Google Library failed to load."); }});
-            } else { hideLoader(); }
+            try { 
+                await appDB.init(); 
+                showAppUI(); 
+                await fetchEvents();
+            } catch(e) { 
+                hideLoader(); showAppAlert("Error", "Failed to load local database."); 
+            }
         };
-
-        async function initializeGapiClient() {
-            try {
-                await gapi.client.init({ discoveryDocs: [DISCOVERY_DOC] });
-                tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: '' });
-                const savedToken = localStorage.getItem('ava_app_token'); const tokenExp = localStorage.getItem('ava_app_token_exp');
-                if (savedToken && tokenExp && Date.now() < parseInt(tokenExp)) {
-                    gapi.client.setToken({ access_token: savedToken });
-                    showAppUI(); await fetchEvents();
-                } else {
-                    document.getElementById('login-screen').style.display = 'flex'; hideLoader();
-                }
-            } catch (err) { hideLoader(); document.getElementById('status-msg').innerText = "Init Error: " + err.message; }
-        }
-
-        function handleAuthClick() {
-            document.getElementById('global-loader').style.display = 'flex'; document.getElementById('global-loader').style.opacity = '1';
-            tokenClient.callback = async (resp) => {
-                if (resp.error !== undefined) { hideLoader(); throw (resp); }
-                localStorage.setItem('ava_app_token', resp.access_token); localStorage.setItem('ava_app_token_exp', Date.now() + ((resp.expires_in - 60) * 1000));
-                showAppUI(); await fetchEvents();
-            };
-            tokenClient.requestAccessToken({prompt: ''}); 
-        }
 
         function showAppUI() {
             document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-header').style.display = 'flex';
@@ -1171,15 +1163,11 @@
         }
 
         async function fetchEvents() {
-            document.getElementById('loading-txt').innerText = "Syncing database & calendar...";
+            document.getElementById('loading-txt').innerText = "Syncing with GitHub...";
             try {
-                let minDate = new Date(); minDate.setMonth(minDate.getMonth() - 2);
-                let maxDate = new Date(); maxDate.setMonth(maxDate.getMonth() + 3);
-                const response = await gapi.client.calendar.events.list({
-                    'calendarId': CALENDAR_ID, 'q': 'turn with Ava', 'timeMin': minDate.toISOString(), 'timeMax': maxDate.toISOString(), 'showDeleted': false, 'singleEvents': true, 'orderBy': 'startTime'
-                });
-                allEvents = response.result.items || [];
-                
+                allEvents = await appDB.getAllShifts();
+                if (!allEvents) allEvents = [];
+                // Ensure all shifts have description parsed
                 for (let e of allEvents) {
                     try {
                         const parsed = JSON.parse(e.description || "{}");
@@ -1195,7 +1183,7 @@
                 renderCalendar(); 
                 updateTodayOverview();
                 hideLoader();
-            } catch (err) { hideLoader(); forceReAuth(); }
+            } catch (err) { hideLoader(); showAppAlert("Database Error", "Failed to load events."); }
         }
 
         function getAppData(event) {
@@ -1486,12 +1474,12 @@
             document.getElementById('modal-title').innerText = "Saving...";
             
             try {
-                await gapi.client.calendar.events.patch({ calendarId: CALENDAR_ID, eventId: activeEvent.id, resource: { description: activeEvent.description } });
+                await appDB.saveShift(activeEvent);
                 closeModal(); 
                 await fetchEvents(); 
             } catch (err) { 
                 document.getElementById('modal-title').innerText = "Shift Details";
-                if(err.status === 401) forceReAuth(); else showAppAlert("Error", "Saved locally, but Google Cloud Sync failed."); 
+                showAppAlert("Error", "Failed to save to local database."); 
             }
         }
 
@@ -1698,9 +1686,11 @@
         function deleteEntireBlock() {
             showAppConfirm("Delete Entire Block", "WARNING: Permanently delete this 4-day shift?", "Delete Block", async () => {
                 document.getElementById('modal-title').innerText = "Deleting Block...";
-                try { await gapi.client.calendar.events.delete({ calendarId: CALENDAR_ID, eventId: activeEvent.id });
-                    allEvents = allEvents.filter(e => e.id !== activeEvent.id); renderCalendar(); updateTodayOverview(); closeModal(); fetchEvents();
-                } catch (err) { if(err.status === 401) forceReAuth(); else showAppAlert("Error", "Failed to delete."); }
+                try { 
+                    await appDB.deleteShift(activeEvent.id);
+                    allEvents = allEvents.filter(e => e.id !== activeEvent.id); 
+                    renderCalendar(); updateTodayOverview(); closeModal(); fetchEvents();
+                } catch (err) { showAppAlert("Error", "Failed to delete shift."); }
             });
         }
         function openCreateMode() { openCreateModeFromDate(getLocalISODate(new Date())); }
@@ -1715,9 +1705,17 @@
             if(!startVal || !endVal) return showAppAlert("Required", "Select both dates.");
             const parts = endVal.split('-'); let endObj = new Date(parts[0], parts[1] - 1, parts[2]); endObj.setDate(endObj.getDate() + 1);
             closeModal(); document.getElementById('loading-txt').innerText = "Creating shift...";
-            try { await gapi.client.calendar.events.insert({ calendarId: CALENDAR_ID, resource: { summary: summary, start: { date: startVal }, end: { date: getLocalISODate(endObj) }, description: "{}" } });
+            try { 
+                const newShift = {
+                    id: "shift_" + Date.now(),
+                    summary: summary,
+                    start: { date: startVal },
+                    end: { date: getLocalISODate(endObj) },
+                    description: "{}"
+                };
+                await appDB.saveShift(newShift);
                 await fetchEvents();
-            } catch (err) { document.getElementById('loading-txt').innerText = ""; if(err.status === 401) forceReAuth(); else showAppAlert("Error", "Failed to create."); }
+            } catch (err) { document.getElementById('loading-txt').innerText = ""; showAppAlert("Error", "Failed to create shift in database."); }
         }
 
         function openAIDialog(mode) {
