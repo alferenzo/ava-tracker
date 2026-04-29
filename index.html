@@ -78,7 +78,7 @@
         .sidebar-item:active { background: var(--input-bg); }
 
         /* FIXED BOTTOM DASHBOARD PLAYER */
-        .fixed-bottom-player { position: absolute; bottom: 30px; left: 20px; right: 20px; width: auto; background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 20px; padding: 12px 15px; z-index: 50; box-shadow: 0 10px 30px rgba(0,0,0,0.15); backdrop-filter: blur(10px); display: flex; align-items: center; }
+        .fixed-bottom-player { position: fixed; bottom: calc(env(safe-area-inset-bottom, 15px) + 15px); left: 15px; right: 15px; width: auto; background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 20px; padding: 12px 15px; z-index: 99999; box-shadow: 0 10px 30px rgba(0,0,0,0.15); backdrop-filter: blur(10px); display: flex; align-items: center; }
 
         #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 30px; text-align: center; }
         .hero-icon { font-size: 70px; color: var(--alf-color); margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
@@ -263,11 +263,7 @@
     </div>
 
     
-        <div class="gp-controls">
-            <button class="gp-btn" onclick="toggleSidebarAudioMenu()"><i class="fa-solid fa-sliders"></i></button>
-            <button class="gp-btn stop" onclick="stopAudio()"><i class="fa-solid fa-stop"></i></button>
-        </div>
-    </div>
+
 
     <div class="app-container">
         <div class="header" id="app-header" style="display: none;">
