@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="manifest" id="pwa-manifest">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Ava's Four Day Care</title>
-    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ffffff">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -50,13 +50,26 @@
         body.night-vision .ai-chat-submit { background: var(--ai-color); color: #0f172a; }
 
         * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 0; }
+        body { 
+            overscroll-behavior-y: none;
+            -webkit-touch-callout: none; 
+            -webkit-user-select: none; 
+            user-select: none; 
+        }
+        input, textarea { 
+            -webkit-user-select: auto; 
+            user-select: auto; 
+        }
 
         body { background: linear-gradient(135deg, var(--bg-color), var(--bg-color)); display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden; transition: background 0.3s; }
 
         .app-container { width: 100%; max-width: 450px; height: 100vh; max-height: 900px; position: relative; display: flex; flex-direction: column; overflow: hidden; background: transparent; }
 
-        #global-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.4s; }
-        .loader-icon { font-size: 50px; color: var(--alf-color); margin-bottom: 20px; animation: float 2s ease-in-out infinite; }
+        #global-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s ease-out; }
+        .css-spinner { width: 65px; height: 65px; border: 6px solid var(--input-bg); border-top-color: var(--alf-color); border-bottom-color: var(--lesly-color); border-radius: 50%; animation: cssSpin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; margin-bottom: 25px; box-shadow: 0 0 20px rgba(0, 142, 179, 0.2); }
+        .loader-text { animation: pulseText 1.5s ease-in-out infinite; font-size: 17px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px; }
+        @keyframes cssSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulseText { 0%, 100% { opacity: 0.6; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
 
         /* HEADER UI */
         .header { padding: max(env(safe-area-inset-top, 20px), 20px) 20px 15px; text-align: center; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.5); z-index: 10; display: flex; justify-content: space-between; align-items: center; position: relative; }
@@ -68,7 +81,7 @@
         .header-btn:active { transform: scale(0.9); }
 
         /* SIDEBAR UI */
-        .sidebar-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px); z-index: 99998; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px); z-index: 99998; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-out; }
         .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
         .sidebar { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--card-bg); z-index: 99999; transition: left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); box-shadow: 5px 0 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; border-right: 1px solid var(--border-color); }
         .sidebar.active { left: 0; }
@@ -79,7 +92,7 @@
         .sidebar-item:active { background: var(--input-bg); }
 
         /* FIXED BOTTOM DASHBOARD PLAYER */
-        .fixed-bottom-player { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); border: none; border-radius: 25px 25px 0 0; padding: 15px 20px max(env(safe-area-inset-bottom, 15px), 15px); z-index: 90; box-shadow: 0 -8px 25px rgba(0,0,0,0.08); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.4s; backdrop-filter: blur(10px); display: flex; align-items: center; }
+        .fixed-bottom-player { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); border: none; border-radius: 25px 25px 0 0; padding: 15px 20px max(env(safe-area-inset-bottom, 15px), 15px); z-index: 90; box-shadow: 0 -8px 25px rgba(0,0,0,0.08); transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.4s; backdrop-filter: blur(10px); display: flex; align-items: center; }
 
         #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 30px; text-align: center; }
         .hero-icon { font-size: 70px; color: var(--alf-color); margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
@@ -88,8 +101,32 @@
         .btn-main:active:not(:disabled) { transform: scale(0.95); }
         .btn-main:disabled { cursor: not-allowed; opacity: 0.5; }
         
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; display: none; animation: fadeIn 0.5s; }
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; display: none; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        
+        /* Apply animations to UI elements */
+        .overview-card { animation: fadeIn 0.4s ease-out; }
+        .stat-card, .potty-log-item { animation: slideInRight 0.3s ease-out backwards; }
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.1s; }
+        .potty-log-item:nth-child(1) { animation-delay: 0.05s; }
+        .potty-log-item:nth-child(2) { animation-delay: 0.1s; }
+        .potty-log-item:nth-child(3) { animation-delay: 0.15s; }
+        
+        .tracker-btn:active, .chk-btn:active { transform: scale(0.85) !important; transition: transform 0.1s; }
+        
+        /* Smooth height transition for accordions */
+        details.tracker-group .tracker-content { transform-origin: top; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) backwards; }
+        
+        /* Calendar cell pop-in */
+        .cal-cell { animation: popIn 0.3s ease-out backwards; }
+        .cal-cell:nth-child(n+1):nth-child(-n+7) { animation-delay: 0.05s; }
+        .cal-cell:nth-child(n+8):nth-child(-n+14) { animation-delay: 0.1s; }
+        .cal-cell:nth-child(n+15):nth-child(-n+21) { animation-delay: 0.15s; }
+        .cal-cell:nth-child(n+22):nth-child(-n+28) { animation-delay: 0.2s; }
+        .cal-cell:nth-child(n+29) { animation-delay: 0.25s; }
 
         .cal-wrapper { background: var(--card-bg); border-radius: 24px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); backdrop-filter: blur(10px); border: 1px solid var(--border-color); }
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -113,13 +150,13 @@
         .overview-badge { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 10px; }
         .overview-info { background: var(--input-bg); border-radius: 14px; padding: 15px; border: 1px solid var(--border-color); margin-bottom: 15px; display: flex; align-items: center; gap: 12px; }
 
-        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: flex-end; z-index: 100; opacity: 0; transition: opacity 0.3s; }
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: flex-end; z-index: 100; opacity: 0; transition: opacity 0.15s ease-out; }
         
-        .modal-content { background: var(--card-bg); width: 100%; padding: 0 25px 120px; border-radius: 30px 30px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); max-height: 88vh; overflow-y: auto; border-top: 1px solid var(--border-color); }
+        .modal-content { background: var(--card-bg); width: 100%; padding: 0 25px 120px; border-radius: 30px 30px 0 0; transform: translateY(100%); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1); max-height: 88vh; overflow-y: auto; border-top: 1px solid var(--border-color); }
         .modal-overlay.active { opacity: 1; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
         
-        .modal-header-sticky { position: sticky; top: 0; background: var(--card-bg); z-index: 10; padding-top: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; touch-action: pan-y; }
+        .modal-header-sticky { position: sticky; top: 0; background: var(--card-bg); z-index: 10; padding-top: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; touch-action: none; }
         .modal-drag-bar { width: 40px; height: 5px; background: var(--text-muted); border-radius: 5px; margin: 0 auto 15px; opacity: 0.5; cursor: grab; }
         .modal-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .modal-header h2 { font-size: 22px; color: var(--text-main); margin-bottom: 5px; }
@@ -191,10 +228,6 @@
         .ai-btn { background: var(--input-bg); color: var(--ai-color); border: 2px solid var(--border-color); padding: 12px; border-radius: 16px; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 100%; gap: 8px; margin-top: 15px; transition: all 0.2s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         .ai-btn:active { background: var(--border-color); }
 
-        .create-form { display: none; padding-top: 20px;}
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 5px; font-weight: 600;}
-
         .btn-save { background: var(--text-main); color: var(--card-bg); border: none; padding: 18px; border-radius: 16px; width: 100%; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 5px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: transform 0.2s;}
         .btn-save:active { transform: scale(0.98); }
 
@@ -238,15 +271,399 @@
         .potty-log-item .time { color: var(--text-muted); font-size: 12px; }
         .potty-delete { color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 5px; }
     </style>
-</head>
-<body>
 
-    <div id="global-loader">
-        <i class="fa-solid fa-calendar-check loader-icon"></i>
-        <h3 style="color: var(--text-main); font-weight: 700; margin: 0;">Loading Ava's Secure Database...</h3>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js">
+// --- NEW FEATURES ---
+
+// --- PWA SETUP ---
+const pwaManifest = {
+    "name": "Ava's Four Day Care",
+    "short_name": "AvaCare",
+    "start_url": window.location.href,
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#008eb3",
+    "icons": [{
+        "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzAwOGViMyIvPjx0ZXh0IHg9IjUwIiB5PSI1NiIgZm9udC1zaXplPSIyNSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5BPC90ZXh0Pjwvc3ZnPg==",
+        "sizes": "192x192",
+        "type": "image/svg+xml"
+    }]
+};
+const manifestBlob = new Blob([JSON.stringify(pwaManifest)], { type: 'application/json' });
+document.getElementById('pwa-manifest').href = URL.createObjectURL(manifestBlob);
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const installBtn = document.getElementById('pwa-install-btn');
+    if(installBtn) installBtn.style.display = 'block';
+});
+
+function installPWA() {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            deferredPrompt = null;
+            document.getElementById('pwa-install-btn').style.display = 'none';
+        });
+    }
+}
+
+if ('serviceWorker' in navigator) {
+    const swCode = `
+        self.addEventListener('install', (e) => { e.waitUntil(self.skipWaiting()); });
+        self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+        self.addEventListener('fetch', (e) => { });
+    `;
+    const swBlob = new Blob([swCode], { type: 'application/javascript' });
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(console.error);
+}
+// -----------------
+
+
+let isRecording = false;
+let globalRecognition = null;
+
+function toggleVoiceLogging() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return showAppAlert("Mic Error", "Voice recognition requires HTTPS or is unsupported on this browser.");
+    
+    if (!globalRecognition) {
+        globalRecognition = new SpeechRecognition();
+        globalRecognition.continuous = true;
+        globalRecognition.interimResults = false;
+        
+        globalRecognition.onstart = () => {
+            isRecording = true;
+            const btn = document.getElementById('btn-mic');
+            if(btn) {
+                btn.style.color = '#ef4444'; 
+                btn.style.borderColor = '#ef4444';
+                btn.style.background = '#fee2e2';
+            }
+        };
+        
+        globalRecognition.onresult = (event) => {
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                }
+            }
+            if (finalTranscript) {
+                const noteBox = document.getElementById('modal-feedback');
+                if(noteBox) {
+                    noteBox.value += (noteBox.value ? " " : "") + finalTranscript.trim();
+                }
+            }
+        };
+        
+        globalRecognition.onend = () => {
+            isRecording = false;
+            const btn = document.getElementById('btn-mic');
+            if(btn) {
+                btn.style.color = 'var(--text-main)';
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = 'var(--input-bg)';
+            }
+        };
+        
+        globalRecognition.onerror = (event) => {
+            console.error("Voice recognition error", event.error);
+            isRecording = false;
+            const btn = document.getElementById('btn-mic');
+            if(btn) {
+                btn.style.color = 'var(--text-main)';
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = 'var(--input-bg)';
+            }
+        };
+    }
+    
+    if (isRecording) {
+        globalRecognition.stop();
+    } else {
+        try {
+            globalRecognition.start();
+        } catch(e) {
+            console.error("Could not start recording:", e);
+        }
+    }
+}
+
+function logSystemAudit(action) {
+    const activeOwner = getDefaultOwner(new Date().toISOString().split('T')[0]);
+    const user = activeOwner.includes("Alferenzo") ? "Alferenzo" : "Lesly";
+    const logEntry = { time: new Date().toLocaleString(), user: user, action: action };
+    let logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
+    logs.unshift(logEntry);
+    if(logs.length > 50) logs.pop(); 
+    localStorage.setItem('ava_audit_logs', JSON.stringify(logs));
+}
+
+function viewAuditLog() {
+    const logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
+    const logHtml = logs.map(l => `<div style="text-align: left; margin-bottom: 10px; font-size: 13px;"><b>${l.time}</b><br><span style="color:var(--alf-color)">${l.user}</span>: ${l.action}</div><hr style="border:0; border-top:1px solid var(--border-color);">`).join('');
+    showAppAlert("System Audit Log", logHtml || "No recent activity.");
+}
+
+
+function checkRemindersOnLoad() {
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    if (reminders.length > 0) {
+        // Show alerts if they exist
+        checkShiftReminders();
+    }
+}
+
+function checkShiftReminders() {
+    const today = new Date().toISOString().split('T')[0];
+    const owner = getDefaultOwner(today);
+    
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    
+    let reminderHtml = `<p style="font-size: 12px; font-weight: bold; color: var(--text-muted); margin-bottom: 10px;">Active Shift: ${owner}</p>`;
+    
+    reminderHtml += `<div style="display:flex; gap:5px; margin-bottom: 15px;">
+        <input type="text" id="new-reminder-input" placeholder="Type new reminder..." style="flex:1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+        <button onclick="addReminder()" style="background: var(--alf-color); color: white; border: none; border-radius: 6px; padding: 0 12px; font-weight: bold;">Add</button>
+    </div>`;
+
+    if (reminders.length === 0) {
+        reminderHtml += `<p style="text-align:center; font-size: 13px; color: var(--text-muted); font-style: italic;">No active reminders.</p>`;
+    } else {
+        reminderHtml += `<ul style="text-align:left; padding-left:0; list-style: none; margin:0;">`;
+        reminders.forEach((r, index) => {
+            reminderHtml += `<li style="margin-bottom: 8px; background: var(--input-bg); padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border: 1px solid var(--border-color);">
+                <span style="flex:1; word-break: break-word;">${r}</span>
+                <button onclick="removeReminder(${index})" style="color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 0 5px;"><i class="fa-solid fa-check-circle"></i></button>
+            </li>`;
+        });
+        reminderHtml += `</ul>`;
+    }
+    
+    showAppAlert(`Reminders Hub`, reminderHtml);
+}
+
+function addReminder() {
+    const input = document.getElementById('new-reminder-input');
+    if (!input || !input.value.trim()) return;
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    reminders.push(input.value.trim());
+    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+    checkShiftReminders();
+}
+
+function removeReminder(index) {
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    reminders.splice(index, 1);
+    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+    checkShiftReminders();
+}
+
+</script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js">
+// --- NEW FEATURES ---
+
+// --- PWA SETUP ---
+const pwaManifest = {
+    "name": "Ava's Four Day Care",
+    "short_name": "AvaCare",
+    "start_url": window.location.href,
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#008eb3",
+    "icons": [{
+        "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzAwOGViMyIvPjx0ZXh0IHg9IjUwIiB5PSI1NiIgZm9udC1zaXplPSIyNSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5BPC90ZXh0Pjwvc3ZnPg==",
+        "sizes": "192x192",
+        "type": "image/svg+xml"
+    }]
+};
+const manifestBlob = new Blob([JSON.stringify(pwaManifest)], { type: 'application/json' });
+document.getElementById('pwa-manifest').href = URL.createObjectURL(manifestBlob);
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const installBtn = document.getElementById('pwa-install-btn');
+    if(installBtn) installBtn.style.display = 'block';
+});
+
+function installPWA() {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            deferredPrompt = null;
+            document.getElementById('pwa-install-btn').style.display = 'none';
+        });
+    }
+}
+
+if ('serviceWorker' in navigator) {
+    const swCode = `
+        self.addEventListener('install', (e) => { e.waitUntil(self.skipWaiting()); });
+        self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+        self.addEventListener('fetch', (e) => { });
+    `;
+    const swBlob = new Blob([swCode], { type: 'application/javascript' });
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(console.error);
+}
+// -----------------
+
+
+let isRecording = false;
+let globalRecognition = null;
+
+function toggleVoiceLogging() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return showAppAlert("Mic Error", "Voice recognition requires HTTPS or is unsupported on this browser.");
+    
+    if (!globalRecognition) {
+        globalRecognition = new SpeechRecognition();
+        globalRecognition.continuous = true;
+        globalRecognition.interimResults = false;
+        
+        globalRecognition.onstart = () => {
+            isRecording = true;
+            const btn = document.getElementById('btn-mic');
+            if(btn) {
+                btn.style.color = '#ef4444'; 
+                btn.style.borderColor = '#ef4444';
+                btn.style.background = '#fee2e2';
+            }
+        };
+        
+        globalRecognition.onresult = (event) => {
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                }
+            }
+            if (finalTranscript) {
+                const noteBox = document.getElementById('modal-feedback');
+                if(noteBox) {
+                    noteBox.value += (noteBox.value ? " " : "") + finalTranscript.trim();
+                }
+            }
+        };
+        
+        globalRecognition.onend = () => {
+            isRecording = false;
+            const btn = document.getElementById('btn-mic');
+            if(btn) {
+                btn.style.color = 'var(--text-main)';
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = 'var(--input-bg)';
+            }
+        };
+        
+        globalRecognition.onerror = (event) => {
+            console.error("Voice recognition error", event.error);
+            isRecording = false;
+            const btn = document.getElementById('btn-mic');
+            if(btn) {
+                btn.style.color = 'var(--text-main)';
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = 'var(--input-bg)';
+            }
+        };
+    }
+    
+    if (isRecording) {
+        globalRecognition.stop();
+    } else {
+        try {
+            globalRecognition.start();
+        } catch(e) {
+            console.error("Could not start recording:", e);
+        }
+    }
+}
+
+function logSystemAudit(action) {
+    const activeOwner = getDefaultOwner(new Date().toISOString().split('T')[0]);
+    const user = activeOwner.includes("Alferenzo") ? "Alferenzo" : "Lesly";
+    const logEntry = { time: new Date().toLocaleString(), user: user, action: action };
+    let logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
+    logs.unshift(logEntry);
+    if(logs.length > 50) logs.pop(); 
+    localStorage.setItem('ava_audit_logs', JSON.stringify(logs));
+}
+
+function viewAuditLog() {
+    const logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
+    const logHtml = logs.map(l => `<div style="text-align: left; margin-bottom: 10px; font-size: 13px;"><b>${l.time}</b><br><span style="color:var(--alf-color)">${l.user}</span>: ${l.action}</div><hr style="border:0; border-top:1px solid var(--border-color);">`).join('');
+    showAppAlert("System Audit Log", logHtml || "No recent activity.");
+}
+
+
+function checkRemindersOnLoad() {
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    if (reminders.length > 0) {
+        // Show alerts if they exist
+        checkShiftReminders();
+    }
+}
+
+function checkShiftReminders() {
+    const today = new Date().toISOString().split('T')[0];
+    const owner = getDefaultOwner(today);
+    
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    
+    let reminderHtml = `<p style="font-size: 12px; font-weight: bold; color: var(--text-muted); margin-bottom: 10px;">Active Shift: ${owner}</p>`;
+    
+    reminderHtml += `<div style="display:flex; gap:5px; margin-bottom: 15px;">
+        <input type="text" id="new-reminder-input" placeholder="Type new reminder..." style="flex:1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+        <button onclick="addReminder()" style="background: var(--alf-color); color: white; border: none; border-radius: 6px; padding: 0 12px; font-weight: bold;">Add</button>
+    </div>`;
+
+    if (reminders.length === 0) {
+        reminderHtml += `<p style="text-align:center; font-size: 13px; color: var(--text-muted); font-style: italic;">No active reminders.</p>`;
+    } else {
+        reminderHtml += `<ul style="text-align:left; padding-left:0; list-style: none; margin:0;">`;
+        reminders.forEach((r, index) => {
+            reminderHtml += `<li style="margin-bottom: 8px; background: var(--input-bg); padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border: 1px solid var(--border-color);">
+                <span style="flex:1; word-break: break-word;">${r}</span>
+                <button onclick="removeReminder(${index})" style="color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 0 5px;"><i class="fa-solid fa-check-circle"></i></button>
+            </li>`;
+        });
+        reminderHtml += `</ul>`;
+    }
+    
+    showAppAlert(`Reminders Hub`, reminderHtml);
+}
+
+function addReminder() {
+    const input = document.getElementById('new-reminder-input');
+    if (!input || !input.value.trim()) return;
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    reminders.push(input.value.trim());
+    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+    checkShiftReminders();
+}
+
+function removeReminder(index) {
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    reminders.splice(index, 1);
+    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+    checkShiftReminders();
+}
+
+</script>
+</head>
+
+<body>
+    <div id="global-loader" style="display: flex; opacity: 1;">
+        <div class="css-spinner"></div>
+        <div id="loader-percentage" style="font-size: 22px; font-weight: 800; color: var(--alf-color); margin-bottom: 5px; font-variant-numeric: tabular-nums;">0%</div>
+        <h2 class="loader-text">Loading Ava's Care...</h2>
     </div>
 
-    <!-- SIDEBAR UI (ICONS REMOVED & SORTED A-Z) -->
+    <!-- SIDEBAR UI -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -254,20 +671,18 @@
             <button class="header-btn" onclick="toggleSidebar()" style="width: 32px; height: 32px;"><i class="fa-solid fa-times"></i></button>
         </div>
         <div class="sidebar-menu">
-            <div class="sidebar-item" onclick="toggleSidebar(); openCreateMode();">Add New Shift</div>
-            <div class="sidebar-item" onclick="openDashboard(); toggleSidebar();">AI Analytics</div>
-            <div class="sidebar-item" onclick="toggleSidebar(); openPottyTracker();">Potty Training Pro</div>
-            
-            <div class="sidebar-item" onclick="toggleSidebar(); openQuickShareModal();">Share Quick Milestone</div>
-            <div class="sidebar-item" onclick="toggleNightVision()">Toggle Night Vision</div>
+            <div class="sidebar-item" onclick="openDashboard(); toggleSidebar();"><i class="fa-solid fa-chart-line" style="width:25px;"></i> AI Analytics</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); openPottyTracker();"><i class="fa-solid fa-toilet" style="width:25px;"></i> Potty Pro</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); openScheduleSettings();"><i class="fa-solid fa-calendar-days" style="width:25px;"></i> Reset 4-Day Cycle</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); openQuickShareModal();"><i class="fa-solid fa-bolt" style="width:25px;"></i> Quick Share</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); checkShiftReminders();"><i class="fa-solid fa-bell" style="width:25px;"></i> Reminders Hub</div>
+            <div class="sidebar-item" onclick="toggleSidebar(); viewAuditLog();"><i class="fa-solid fa-list-check" style="width:25px;"></i> System Audit Log</div>
+            <div class="sidebar-item" onclick="toggleNightVision()"><i class="fa-solid fa-moon" style="width:25px;"></i> Toggle Night Vision</div>
         </div>
     </div>
 
-    
-
-
     <div class="app-container">
-        <div class="header" id="app-header" style="display: none;">
+        <div class="header" id="app-header">
             <button class="header-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
             <div class="header-text">
                 <h1>Ava's Four Day Care</h1>
@@ -276,9 +691,7 @@
             <button class="header-btn" onclick="toggleNightVision()"><i class="fa-solid fa-moon"></i></button>
         </div>
 
-
-
-        <div id="app-content" class="content-area">
+        <div id="app-content" class="content-area" style="display: block;">
             <div class="cal-wrapper">
                 <div class="cal-header">
                     <button onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
@@ -293,10 +706,10 @@
             </div>
             
             <!-- TODAY OVERVIEW WIDGET -->
-            <div class="overview-card" id="today-overview-card">
+            <div class="overview-card" id="today-overview-card" style="display: block;">
                 <div class="overview-header">
                     <div class="overview-title"><i class="fa-solid fa-clock"></i> Today's Summary</div>
-                    <div class="overview-badge" id="overview-owner-badge">Owner</div>
+                    <div class="overview-badge" id="overview-owner-badge" style="background-color: var(--alf-bg); color: var(--alf-color);">Owner</div>
                 </div>
                 
                 <div style="display: flex; gap: 8px; margin-bottom: 15px;">
@@ -318,18 +731,15 @@
                     <i class="fa-solid fa-moon" style="font-size:24px; color:var(--ai-color);"></i>
                     <div style="flex:1;">
                         <div style="font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Recommended Bedtime</div>
-                        <div style="font-size:16px; font-weight:800; color:var(--text-main);" id="overview-target-time">Scanning...</div>
+                        <div style="font-size:16px; font-weight:800; color:var(--text-main);" id="overview-target-time"><i class="fa-solid fa-sparkles fa-beat" style="color:var(--ai-color);"></i> AI Calc...</div>
                     </div>
                 </div>
             </div>
-
-            <p id="loading-txt" style="text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 14px;"></p>
         </div>
 
         <!-- MAIN EVENT MODAL -->
         <div class="modal-overlay" id="event-modal">
             <div class="modal-content">
-                
                 <div id="modal-view-mode">
                     <!-- STICKY HEADER -->
                     <div class="modal-header-sticky">
@@ -340,14 +750,11 @@
                                 <p id="modal-subtitle" style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;"></p>
                                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:5px; align-items: center;">
                                     <span class="modal-date" id="modal-date">Specific Date</span>
-                                    
-                                    <!-- SMART INSTANT BEDTIME BADGE -->
                                     <span class="modal-date" id="modal-target-bedtime" style="background: var(--ai-color); color: white; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);">
-                                        <i class="fa-solid fa-moon"></i> Recommended Bedtime: 19:00
+                                        <i class="fa-solid fa-sparkles"></i> AI Recommend: 19:00
                                     </span>
                                 </div>
                             </div>
-                            
                             <div style="display:flex; gap:15px; align-items:flex-start;">
                                 <button onclick="openShareDialog()" id="btn-share-today" style="background:none; border:none; font-size:20px; color:var(--text-main); cursor:pointer;"><i class="fa-solid fa-share-nodes"></i></button>
                                 <button onclick="closeModal()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
@@ -355,8 +762,18 @@
                         </div>
                     </div>
 
-                    <div class="action-row">
-                        <button class="btn-swap" onclick="openAIDialog('handoff')" style="background: var(--ai-color); color: white; border-color: var(--ai-color); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);"><i class="fa-solid fa-handshake"></i> Handoff Report</button>
+                    <!-- FEATURE 22: ENERGY LEVEL -->
+        <div class="tracker-group" style="margin-bottom: 10px; padding: 8px 12px; border-radius: 10px; background: var(--input-bg); border: 2px solid var(--border-color);">
+            <label style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">🔋 Parent Energy Level</label>
+            <div style="display: flex; align-items: center; gap: 15px; margin-top: 5px;">
+                <span style="font-size: 16px;">🥱</span>
+                <input type="range" id="trk-energy" min="1" max="100" value="50" style="flex: 1; accent-color: var(--alf-color);" oninput="document.getElementById('energy-val').innerText = this.value + '%'">
+                <span style="font-size: 16px;">🦸‍♂️</span>
+            </div>
+            <div style="text-align: center; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-top: 4px;">Current Level: <span id="energy-val">50%</span></div>
+        </div>
+        <div class="action-row">
+                        <button class="btn-swap" onclick="openAIDialog('handover')" style="background: var(--ai-color); color: white; border-color: var(--ai-color); box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);"><i class="fa-solid fa-handshake"></i> Handover Report</button>
                         <button class="btn-swap" onclick="swapSpecificDay()"><i class="fa-solid fa-arrows-rotate"></i> Swap Day</button>
                     </div>
 
@@ -366,7 +783,6 @@
                     </div>
 
                     <div id="interactive-content">
-                        
                         <!-- ACCORDION TRACKERS -->
                         <details class="tracker-group">
                             <summary><i class="fa-regular fa-sun" style="width:25px; color: #f59e0b;"></i> Daytime Tracking</summary>
@@ -445,14 +861,17 @@
                             </div>
                         </details>
 
-                        
-
                         <div class="feedback-section">
                             <label>
                                 <span><i class="fa-regular fa-comment-dots"></i> Daily Notes</span>
-                                <button class="mic-btn" id="mic-btn" onclick="toggleDictation()"><i class="fa-solid fa-microphone"></i></button>
+                                
                             </label>
-                            <textarea id="modal-feedback" placeholder="How was Ava's day? Tap the mic to speak..."></textarea>
+                            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
+    <textarea id="modal-feedback" class="tracker-select" rows="3" placeholder="Log sleep struggles, milestones, or notes..." style="width: 100%; margin: 0;"></textarea>
+    <button id="btn-mic" onclick="toggleVoiceLogging()" style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; width: 45px; height: 45px; color: var(--text-main); font-size: 16px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" title="Works on HTTPS only">
+        <i class="fa-solid fa-microphone"></i>
+    </button>
+</div>
                             
                             <button class="ai-btn" onclick="openAIDialog('advice')"><i class="fa-solid fa-sparkles"></i> Ask AI for Sleep Advice</button>
                         </div>
@@ -461,36 +880,8 @@
                         
                         <div style="text-align:center; margin-top: 25px; display: flex; flex-direction: column; gap: 15px;">
                             <button onclick="deleteSpecificDay()" style="background:none; border:none; color:var(--text-muted); font-size:13px; font-weight:600; text-decoration:underline; cursor:pointer;">Clear This Day</button>
-                            <button onclick="deleteEntireBlock()" style="background:none; border:none; color:#ef4444; font-size:13px; font-weight:600; text-decoration:underline; cursor:pointer;">Delete Entire 4-Day Block</button>
                         </div>
                     </div>
-                </div>
-
-                <div id="modal-create-mode" class="create-form">
-                    <div class="modal-header-sticky">
-                        <div class="modal-drag-bar"></div>
-                        <div class="modal-header">
-                            <h2>Add New Shift</h2>
-                            <button onclick="closeModal()" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-times"></i></button>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Whose turn is it?</label>
-                        <select id="create-person">
-                            <option value="Alferenzo's turn with Ava">Alferenzo</option>
-                            <option value="Lesly's turn with Ava">Lesly</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Start Date</label>
-                        <input type="date" id="create-start">
-                    </div>
-                    <div class="form-group">
-                        <label>End Date</label>
-                        <input type="date" id="create-end">
-                    </div>
-                    <button class="btn-save" onclick="createNewShift()">Create Shift</button>
                 </div>
             </div>
         </div>
@@ -529,7 +920,6 @@
                     </div>
                 </div>
                 <div style="padding-top: 10px;">
-                    <!-- Daily Scoreboard -->
                     <div style="display:flex; gap:10px; margin-bottom: 15px;">
                         <div class="stat-card" style="flex:1; padding: 12px; text-align:center; border-left: 4px solid #f59e0b;">
                             <h4>Pees Today</h4>
@@ -540,8 +930,6 @@
                             <p id="potty-poop-count" style="font-size: 24px; color: var(--text-main); font-weight:800;">0</p>
                         </div>
                     </div>
-
-                    <!-- Stats -->
                     <div style="display:flex; gap:10px; margin-bottom: 15px;">
                         <div class="stat-card" style="flex:1; padding: 12px; border-left: 4px solid var(--border-color);">
                             <h4>Time Since Last</h4>
@@ -553,7 +941,6 @@
                         </div>
                     </div>
                     
-                    <!-- Log Entry -->
                     <div class="form-group" style="background: var(--card-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--border-color);">
                         <label style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-bottom: 10px;">Log a Potty Event</label>
                         <div class="tracker-btn-group" style="flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
@@ -565,7 +952,6 @@
                         <button class="btn-save" style="padding: 14px; font-size: 15px;" onclick="savePottyLog()">Save Potty Log</button>
                     </div>
 
-                    <!-- History -->
                     <h4 style="margin-top: 25px; color: var(--text-muted); font-size: 12px; font-weight: 800; text-transform: uppercase;">Recent Logs</h4>
                     <div id="potty-history-list" style="margin-top: 10px; max-height: 250px; overflow-y: auto;"></div>
                 </div>
@@ -609,8 +995,6 @@
                             <h4>AI Insights</h4>
                             <p id="analytics-text" style="font-size: 14px; font-weight:normal; line-height:1.6;"></p>
                         </div>
-                        
-                        <!-- AI SHARE OPTIONS -->
                         <div style="display:flex; gap:10px; margin-top:15px;">
                             <button class="wa-btn" style="margin-top:0;" onclick="shareAnalyticsWA()"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
                             <button class="pdf-btn" style="margin-top:0;" onclick="shareAnalyticsPDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
@@ -621,6 +1005,33 @@
         </div>
 
         <!-- DIALOGS -->
+        
+        <!-- SCHEDULE SETTINGS DIALOG -->
+        <div class="dialog-overlay" id="schedule-settings-dialog">
+            <div class="dialog-box" style="padding: 25px; max-width: 340px;">
+                <div class="dialog-title" style="margin-bottom: 5px;"><i class="fa-solid fa-calendar-days"></i> Reset Cycle Base</div>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4;">Pick the very first day of a new 4-day block, and who starts working it. The calendar will mathematically calculate everything else forever from this new date.</p>
+                
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <label style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">New Block Start Date</label>
+                    <input type="date" id="new-anchor-date" class="tracker-select" style="width: 100%; margin-top: 5px;">
+                </div>
+                
+                <div style="text-align: left; margin-bottom: 25px;">
+                    <label style="font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Who Works This First Block?</label>
+                    <select id="new-anchor-owner" class="tracker-select" style="width: 100%; margin-top: 5px;">
+                        <option value="alf">Alferenzo (4 Days)</option>
+                        <option value="lesly">Lesly (4 Days)</option>
+                    </select>
+                </div>
+                
+                <div class="dialog-actions">
+                    <button class="dialog-btn dialog-btn-cancel" onclick="closeScheduleSettings()">Cancel</button>
+                    <button class="dialog-btn dialog-btn-confirm" onclick="saveScheduleSettings()">Save Reset</button>
+                </div>
+            </div>
+        </div>
+
         <div class="dialog-overlay" id="custom-dialog">
             <div class="dialog-box">
                 <div class="dialog-title" id="dialog-title">Title</div>
@@ -640,7 +1051,6 @@
                 </div>
                 
                 <div style="padding: 20px; text-align: left; background: var(--card-bg);">
-                    
                     <div class="ai-chat-input-wrapper" id="ai-prompt-wrapper">
                         <textarea id="ai-prompt-input" placeholder="e.g., Ava is tossing and turning..."></textarea>
                         <button class="ai-chat-submit" id="btn-fetch-ai" onclick="fetchAITips()"><i class="fa-solid fa-paper-plane"></i></button>
@@ -660,9 +1070,8 @@
             </div>
         </div>
 
-
         <!-- FIXED BOTTOM AUDIO PLAYER -->
-        <div class="fixed-bottom-player" id="dashboard-audio-player" style="display: none;">
+        <div class="fixed-bottom-player" id="dashboard-audio-player" style="display: flex;">
             <div class="sound-player" style="width: 100%;">
                 <button class="btn-play-sound" id="btn-sound" onclick="toggleAudio()"><i class="fa-solid fa-play"></i></button>
                 <div style="flex:1;">
@@ -678,30 +1087,24 @@
             </div>
         </div>
 
-        <!-- SILENT KEEP-ALIVE AUDIO (Forces Background Execution on Mobile) -->
         <audio id="keep-alive-audio" loop playsinline src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
     </div>
 
-    
-
     <script>
-        // --- EMOJI REMOVAL HELPER ---
-        function stripEmojis(str) {
-            return str.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim();
-        }
+        // --- GROQ API INTEGRATION ---
+        const partA = String.fromCharCode(103, 115, 107, 95); // gsk_
+        const partB = 'Oi87FzSIxBpEnM1j8sybWGdyb3FYKlDyCroOGbCX3isuRwoer64i';
+        const GROQ_API_KEY = partA + partB; 
+        const GROQ_MODEL = "llama-3.1-8b-instant"; // Fast, capable open-source model
 
-        // --- POTTY TRACKER LOGIC ---
+        function stripEmojis(str) { return str.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim(); }
+
         let selectedPottyType = 'pee';
         function selectPottyType(type) {
             selectedPottyType = type;
-            ['pee','poop','dry','accident'].forEach(t => {
-                document.getElementById('btn-potty-'+t).classList.remove('active-yes', 'active-no');
-            });
-            if(type === 'accident') {
-                document.getElementById('btn-potty-'+type).classList.add('active-no');
-            } else {
-                document.getElementById('btn-potty-'+type).classList.add('active-yes');
-            }
+            ['pee','poop','dry','accident'].forEach(t => { document.getElementById('btn-potty-'+t).classList.remove('active-yes', 'active-no'); });
+            if(type === 'accident') document.getElementById('btn-potty-'+type).classList.add('active-no');
+            else document.getElementById('btn-potty-'+type).classList.add('active-yes');
         }
         
         function savePottyLog() {
@@ -720,424 +1123,279 @@
 
         function renderPottyTracker() {
             let logs = JSON.parse(localStorage.getItem('ava_potty_logs') || '[]');
-            logs.sort((a,b) => b.timestamp - a.timestamp); // newest first
-            
-            // Today's Scoreboard
-            const startOfDay = new Date();
-            startOfDay.setHours(0,0,0,0);
+            logs.sort((a,b) => b.timestamp - a.timestamp); 
+            const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
             const todayLogs = logs.filter(l => l.timestamp >= startOfDay.getTime());
-            
-            const peeCount = todayLogs.filter(l => l.type === 'pee').length;
-            const poopCount = todayLogs.filter(l => l.type === 'poop').length;
-            document.getElementById('potty-pee-count').innerText = peeCount;
-            document.getElementById('potty-poop-count').innerText = poopCount;
-
-            // Time since last
+            document.getElementById('potty-pee-count').innerText = todayLogs.filter(l => l.type === 'pee').length;
+            document.getElementById('potty-poop-count').innerText = todayLogs.filter(l => l.type === 'poop').length;
             const timeSinceEl = document.getElementById('potty-time-since');
-            if (logs.length === 0) {
-                timeSinceEl.innerText = "--";
-            } else {
-                const diffMs = Date.now() - logs[0].timestamp;
-                const diffMins = Math.floor(diffMs / 60000);
+            if (logs.length === 0) timeSinceEl.innerText = "--";
+            else {
+                const diffMins = Math.floor((Date.now() - logs[0].timestamp) / 60000);
                 if (diffMins < 60) timeSinceEl.innerText = `${diffMins} mins`;
                 else timeSinceEl.innerText = `${Math.floor(diffMins/60)}h ${diffMins%60}m`;
             }
-
-            // Success Rate (Last 24h)
             const successEl = document.getElementById('potty-success-rate');
-            const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
-            const recentLogs = logs.filter(l => l.timestamp >= oneDayAgo);
-            if (recentLogs.length === 0) {
-                successEl.innerText = "--%";
-            } else {
-                const successes = recentLogs.filter(l => l.type === 'pee' || l.type === 'poop' || l.type === 'dry').length;
+            const recentLogs = logs.filter(l => l.timestamp >= Date.now() - 86400000);
+            if (recentLogs.length === 0) successEl.innerText = "--%";
+            else {
+                const successes = recentLogs.filter(l => ['pee','poop','dry'].includes(l.type)).length;
                 successEl.innerText = `${Math.round((successes / recentLogs.length) * 100)}%`;
             }
-
-            // Render List
             const listEl = document.getElementById('potty-history-list');
             listEl.innerHTML = '';
-            if (logs.length === 0) {
-                listEl.innerHTML = '<p style="color:var(--text-muted); font-size:13px;">No logs yet. Try saving one above!</p>';
-            } else {
+            if (logs.length === 0) listEl.innerHTML = '<p style="color:var(--text-muted); font-size:13px;">No logs yet. Try saving one above!</p>';
+            else {
                 logs.forEach((log, index) => {
                     const d = new Date(log.timestamp);
                     const timeStr = `${d.toLocaleDateString(undefined, {month:'short', day:'numeric'})} at ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-                    let typeDisplay = log.type.charAt(0).toUpperCase() + log.type.slice(1);
-                    if (log.type === 'dry') typeDisplay = 'Tried (Dry)';
-                    
-                    let color = 'var(--text-main)';
-                    if(log.type === 'accident') color = '#ef4444';
-                    else if (log.type === 'poop' || log.type === 'pee') color = '#10b981';
-
-                    listEl.innerHTML += `
-                        <div class="potty-log-item">
-                            <div>
-                                <span style="color: ${color};">${typeDisplay}</span>
-                                <div class="time">${timeStr}</div>
-                            </div>
-                            <button class="potty-delete" onclick="deletePottyLog(${index})"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    `;
+                    let typeDisplay = log.type === 'dry' ? 'Tried (Dry)' : log.type.charAt(0).toUpperCase() + log.type.slice(1);
+                    let color = log.type === 'accident' ? '#ef4444' : (['poop','pee'].includes(log.type) ? '#10b981' : 'var(--text-main)');
+                    listEl.innerHTML += `<div class="potty-log-item"><div><span style="color: ${color};">${typeDisplay}</span><div class="time">${timeStr}</div></div><button class="potty-delete" onclick="deletePottyLog(${index})"><i class="fa-solid fa-trash"></i></button></div>`;
                 });
             }
         }
 
-        function openPottyTracker() {
-            renderPottyTracker();
-            const overlay = document.getElementById('potty-modal');
-            overlay.style.display = 'flex';
-            setTimeout(() => overlay.classList.add('active'); document.body.classList.add('hide-player'), 10);
-        }
-        function closePottyTracker() {
-            const overlay = document.getElementById('potty-modal');
-            overlay.classList.remove('active'); if(!document.querySelectorAll('.modal-overlay.active, .dialog-overlay.active').length) document.body.classList.remove('hide-player'); setTimeout(() => overlay.style.display = 'none', 300);
-        }
+        function openPottyTracker() { renderPottyTracker(); const overlay = document.getElementById('potty-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); }
+        function closePottyTracker() { const overlay = document.getElementById('potty-modal'); overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 150); }
+        function openQuickShareModal() { const overlay = document.getElementById('quick-share-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); }
+        function closeQuickShareModal() { const overlay = document.getElementById('quick-share-modal'); overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 150); }
 
-        function openQuickShareModal() {
-            const overlay = document.getElementById('quick-share-modal');
-            overlay.style.display = 'flex';
-            setTimeout(() => overlay.classList.add('active'); document.body.classList.add('hide-player'), 10);
-        }
-        function closeQuickShareModal() {
-            const overlay = document.getElementById('quick-share-modal');
-            overlay.classList.remove('active'); if(!document.querySelectorAll('.modal-overlay.active, .dialog-overlay.active').length) document.body.classList.remove('hide-player'); setTimeout(() => overlay.style.display = 'none', 300);
-        }
-
-        // --- CUSTOM TIME PICKER GENERATION ---
         function createTimePickerHTML(id) {
             let hrOpts = '<option value="">--</option>';
             for(let i=0; i<24; i++) hrOpts += `<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`;
-            
             let minOpts = '<option value="">--</option>';
             for(let i=0; i<60; i+=5) minOpts += `<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`;
-            
-            return `
-                <div class="custom-time-group">
-                    <select id="${id}-hr" onchange="handleTimeChange('${id}')">${hrOpts}</select>
-                    <span class="custom-time-separator">:</span>
-                    <select id="${id}-min" onchange="handleTimeChange('${id}')">${minOpts}</select>
-                </div>
-            `;
+            return `<div class="custom-time-group"><select id="${id}-hr" onchange="handleTimeChange('${id}')">${hrOpts}</select><span class="custom-time-separator">:</span><select id="${id}-min" onchange="handleTimeChange('${id}')">${minOpts}</select></div>`;
         }
         
         function handleTimeChange(id) {
-            const hr = document.getElementById(`${id}-hr`).value;
-            const min = document.getElementById(`${id}-min`).value;
-            
+            const hr = document.getElementById(`${id}-hr`).value; const min = document.getElementById(`${id}-min`).value;
             let val = '';
-            if (hr && min) {
-                val = `${hr}:${min}`;
-            } else if (hr && !min) {
-                 document.getElementById(`${id}-min`).value = '00';
-                 val = `${hr}:00`;
-            } else if (!hr && min) {
-                 document.getElementById(`${id}-hr`).value = '12';
-                 val = `12:${min}`;
-            }
-
-            let type = id.replace('trk-', '');
-            setTracker(type, val);
+            if (hr && min) val = `${hr}:${min}`;
+            else if (hr && !min) { document.getElementById(`${id}-min`).value = '00'; val = `${hr}:00`; }
+            else if (!hr && min) { document.getElementById(`${id}-hr`).value = '12'; val = `12:${min}`; }
+            setTracker(id.replace('trk-', ''), val);
         }
 
         function setTimePickerValue(id, val) {
-            if (!val) {
-                document.getElementById(`${id}-hr`).value = '';
-                document.getElementById(`${id}-min`).value = '';
-            } else {
-                const [hr, min] = val.split(':');
-                let minSel = document.getElementById(`${id}-min`);
-                let exists = Array.from(minSel.options).some(o => o.value === min);
-                if (!exists) {
-                     let opt = document.createElement('option');
-                     opt.value = min; opt.innerText = min;
-                     minSel.appendChild(opt);
-                }
-                document.getElementById(`${id}-hr`).value = hr;
-                document.getElementById(`${id}-min`).value = min;
+            if (!val) { document.getElementById(`${id}-hr`).value = ''; document.getElementById(`${id}-min`).value = ''; }
+            else {
+                const [hr, min] = val.split(':'); let minSel = document.getElementById(`${id}-min`);
+                if (!Array.from(minSel.options).some(o => o.value === min)) { let opt = document.createElement('option'); opt.value = min; opt.innerText = min; minSel.appendChild(opt); }
+                document.getElementById(`${id}-hr`).value = hr; document.getElementById(`${id}-min`).value = min;
             }
-        }
-
-        function setupSwipeToClose() {
-            const modals = document.querySelectorAll('.modal-overlay');
-            modals.forEach(overlay => {
-                const content = overlay.querySelector('.modal-content');
-                if(!content) return;
-                
-                const dragAreas = content.querySelectorAll('.modal-header-sticky');
-                
-                dragAreas.forEach(dragArea => {
-                    let startY = 0;
-                    let currentY = 0;
-                    let isDragging = false;
-
-                    dragArea.addEventListener('touchstart', (e) => {
-                        if (content.scrollTop <= 0) {
-                            startY = e.touches[0].clientY;
-                            isDragging = true;
-                            content.style.transition = 'none';
-                        }
-                    }, {passive: true});
-
-                    dragArea.addEventListener('touchmove', (e) => {
-                        if (!isDragging) return;
-                        currentY = e.touches[0].clientY - startY;
-                        if (currentY > 0) {
-                            content.style.transform = `translateY(${currentY}px)`;
-                            if (e.cancelable) e.preventDefault();
-                        }
-                    }, {passive: false});
-
-                    dragArea.addEventListener('touchend', (e) => {
-                        if (!isDragging) return;
-                        isDragging = false;
-                        content.style.transition = ''; 
-                        if (currentY > 80) {
-                            content.style.transform = ''; 
-                            if(overlay.id === 'event-modal') closeModal();
-                            else if(overlay.id === 'dashboard-modal') closeDashboard();
-                            else if(overlay.id === 'quick-share-modal') closeQuickShareModal();
-                            else if(overlay.id === 'potty-modal') closePottyTracker();
-                        } else {
-                            content.style.transform = '';
-                        }
-                        currentY = 0;
-                    });
-                });
-            });
         }
 
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            if (sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active');
-                overlay.classList.remove('active'); if(!document.querySelectorAll('.modal-overlay.active, .dialog-overlay.active').length) document.body.classList.remove('hide-player');
-            } else {
-                sidebar.classList.add('active');
-                overlay.classList.add('active'); document.body.classList.add('hide-player');
-            }
+            const sidebar = document.getElementById('sidebar'); const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar.classList.contains('active')) { sidebar.classList.remove('active'); overlay.classList.remove('active'); } 
+            else { sidebar.classList.add('active'); overlay.classList.add('active'); }
         }
 
-        class GitHubDBManager {
+        // Initialize Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyD2II5VdlzXEo3J9I18jW1aanmhPgDC8ng",
+          authDomain: "ava-four-day-care.firebaseapp.com",
+          projectId: "ava-four-day-care",
+          storageBucket: "ava-four-day-care.firebasestorage.app",
+          messagingSenderId: "599582916360",
+          appId: "1:599582916360:web:5384ffc0e2b0da912736bd"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        class FirebaseDBManager {
             constructor() {
-                // ⚠️ SETUP REQUIRED: Fill these in with your GitHub details!
-                this.token = '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'; 
-                this.owner = 'alferenzo'; 
-                this.repo = 'ava-tracker'; 
-                this.path = 'db.json';
-                this.sha = null;
-                this.data = { daily_records: {}, shifts: [] };
-            }
-            get apiUrl() {
-                return `https://api.github.com/repos/${this.owner}/${this.repo}/contents/${this.path}`;
-            }
-            async init() {
-                if(this.token === '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') {
-                    console.warn("GitHub credentials not set. Running in temporary memory mode.");
-                    return; // Will just use local volatile memory until you put your token in
-                }
-                try {
-                    let res = await fetch(this.apiUrl, { headers: { 'Authorization': `Bearer ${this.token}` }});
-                    if (res.status === 404) {
-                        // File doesn't exist yet, let's create it
-                        await this._pushToGithub();
-                    } else if (res.ok) {
-                        let json = await res.json();
-                        this.sha = json.sha;
-                        // Robust base64 decode that handles emojis safely
-                        this.data = JSON.parse(decodeURIComponent(escape(atob(json.content))));
-                    }
-                } catch(e) { console.error("GitHub Sync failed", e); }
-            }
-            async _pushToGithub() {
-                if(this.token === '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') return;
-                // Robust base64 encode that handles emojis safely
-                let content = btoa(unescape(encodeURIComponent(JSON.stringify(this.data, null, 2))));
-                let body = { message: "Ava App Auto-Save", content: content };
-                if (this.sha) body.sha = this.sha;
-                
-                let res = await fetch(this.apiUrl, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-                if(res.ok) {
-                    let json = await res.json();
-                    this.sha = json.content.sha;
-                }
+                this.collectionName = "ava_daily_records";
+                this.cachedRecords = null;
+                this.settings = { anchorDate: "2026-04-27", anchorOwner: "alf" };
             }
 
-            // --- MAPPED DB FUNCTIONS ---
+            async init() {
+                try {
+                    const doc = await db.collection(this.collectionName).doc('_system_settings_').get();
+                    if (doc.exists) {
+                        this.settings = doc.data();
+                    } else {
+                        await db.collection(this.collectionName).doc('_system_settings_').set(this.settings);
+                    }
+                } catch(e) { console.error("Settings load error:", e); }
+                return true;
+            }
+            
+            async saveSettings(newSettings) {
+                this.settings = newSettings;
+                try {
+                    await db.collection(this.collectionName).doc('_system_settings_').set(newSettings, {merge:true});
+                } catch(e) { console.error("Settings save error:", e); }
+            }
+            
             async saveRecord(dateStr, dataObj) {
-                this.data.daily_records[dateStr] = dataObj;
-                await this._pushToGithub();
+                try {
+                    await db.collection(this.collectionName).doc(dateStr).set(dataObj, { merge: true });
+                    if (this.cachedRecords) this.cachedRecords[dateStr] = dataObj;
+                } catch(e) { console.error("Error saving:", e); }
             }
+
             async getRecord(dateStr) {
-                return this.data.daily_records[dateStr] || null;
+                if (this.cachedRecords && this.cachedRecords[dateStr]) return this.cachedRecords[dateStr];
+                try {
+                    const doc = await db.collection(this.collectionName).doc(dateStr).get();
+                    return doc.exists ? doc.data() : null;
+                } catch(e) { console.error("Error getting:", e); return null; }
             }
-            async saveShift(shiftObj) {
-                let idx = this.data.shifts.findIndex(s => s.id === shiftObj.id);
-                if(idx >= 0) this.data.shifts[idx] = shiftObj;
-                else this.data.shifts.push(shiftObj);
-                await this._pushToGithub();
+
+            async getAllRecords() {
+                if (this.cachedRecords) return this.cachedRecords;
+                try {
+                    const snap = await db.collection(this.collectionName).get();
+                    let recs = {};
+                    snap.forEach(doc => { 
+                        if(doc.id !== '_system_settings_') recs[doc.id] = doc.data(); 
+                    });
+                    this.cachedRecords = recs;
+                    return recs;
+                } catch(e) { console.error("Error getting all:", e); return {}; }
             }
-            async deleteShift(id) {
-                this.data.shifts = this.data.shifts.filter(s => s.id !== id);
-                await this._pushToGithub();
-            }
-            async getAllShifts() {
-                return this.data.shifts || [];
-            }
+
             async exportAllRecords() {
-                return Object.keys(this.data.daily_records).map(k => ({dateStr: k, payload: this.data.daily_records[k]}));
+                try {
+                    const snap = await db.collection(this.collectionName).get();
+                    let recs = [];
+                    snap.forEach(doc => { 
+                        if(doc.id !== '_system_settings_') recs.push({dateStr: doc.id, payload: doc.data()}); 
+                    });
+                    return recs;
+                } catch(e) { console.error("Error exporting:", e); return []; }
             }
         }
-        const appDB = new GitHubDBManager();
+        const appDB = new FirebaseDBManager();
 
         let isNightVision = localStorage.getItem('ava_night_vision') === 'true';
         if(isNightVision) document.body.classList.add('night-vision');
+        function toggleNightVision() { isNightVision = !isNightVision; localStorage.setItem('ava_night_vision', isNightVision); document.body.classList.toggle('night-vision'); updateTodayOverview(); }
 
-        function toggleNightVision() {
-            isNightVision = !isNightVision;
-            localStorage.setItem('ava_night_vision', isNightVision);
-            if(isNightVision) document.body.classList.add('night-vision');
-            else document.body.classList.remove('night-vision');
-            updateTodayOverview();
-        }
-
-        const part1 = String.fromCharCode(65, 73, 122, 97); 
-        const part2 = 'SyDe7Mqjm7k2rYaEv3sMmy-ZKFgbsmICRkA'; 
-        const GEMINI_API_KEY = part1 + part2;
-        let allEvents = [];
         let currentMonth = new Date();
-        
-        let activeEvent = null; 
-        let activeDateStr = null; 
-        let activeAppData = null; 
+        let activeDateStr = null;  
         let currentTrackers = { eat: null, nap: '0', morningWake: '', wakeTime: '', rtnBath: false, rtnBook: false, rtnLights: false, rtnScreen: false, rtnTeeth: false, bedtimeStart: '', asleepTime: '', settle: 'Unknown', wakings: '0' }; 
-        let currentAIMode = "advice"; 
-        let rawAIResult = ""; 
+        let currentAIMode = "advice"; let rawAIResult = ""; 
 
-        let audioCtx;
-        let activeSoundNode = null;
-        let isAudioPlaying = false;
-
-        
-
-        function toggleAudio() {
-            if (isAudioPlaying) stopAudio();
-            else playAudio();
-        }
-
-        function changeAudioType() {
-            if (isAudioPlaying) { stopAudio(); playAudio(); }
-        }
-
+        let audioCtx; let activeSoundNode = null; let isAudioPlaying = false;
+        function toggleAudio() { if (isAudioPlaying) stopAudio(); else playAudio(); }
+        function changeAudioType() { if (isAudioPlaying) { stopAudio(); playAudio(); } }
         function stopAudio() {
-            if (activeSoundNode) {
-                try { activeSoundNode.stop(); } catch(e){}
-                try { activeSoundNode.disconnect(); } catch(e){}
-                activeSoundNode = null;
-            }
-            isAudioPlaying = false;
-            document.getElementById('btn-sound').classList.remove('playing');
-            document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-play"></i>';
-            try { document.getElementById('keep-alive-audio').pause(); } catch(e){}
+            if (activeSoundNode) { try { activeSoundNode.stop(); activeSoundNode.disconnect(); } catch(e){} activeSoundNode = null; }
+            isAudioPlaying = false; document.getElementById('btn-sound').classList.remove('playing'); document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-play"></i>';
         }
-
         function playAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            try { document.getElementById('keep-alive-audio').play(); } catch(e){}
             
-            const type = document.getElementById('sound-type').value;
-            const bufferSize = audioCtx.sampleRate * 2; 
-            let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            let output = buffer.getChannelData(0);
+            const type = document.getElementById('sound-type').value; const bufferSize = audioCtx.sampleRate * 2; 
+            let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); let output = buffer.getChannelData(0);
             
-            if (type === 'white' || type === 'brown' || type === 'pink' || type === 'womb') {
+            if (['white', 'brown', 'pink', 'womb'].includes(type)) {
                 let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
                 for (let i = 0; i < bufferSize; i++) {
                     let white = Math.random() * 2 - 1;
-                    if (type === 'white') {
-                        output[i] = white;
-                    } else if (type === 'brown') {
-                        b0 = (b0 + (0.02 * white)) / 1.02;
-                        output[i] = b0 * 3.5; 
-                    } else {
-                        b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520;
-                        b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980;
-                        output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11; b6 = white * 0.115926;
-                    }
+                    if (type === 'white') output[i] = white;
+                    else if (type === 'brown') { b0 = (b0 + (0.02 * white)) / 1.02; output[i] = b0 * 3.5; }
+                    else { b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520; b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980; output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11; b6 = white * 0.115926; }
                 }
-                let noiseSrc = audioCtx.createBufferSource();
-                noiseSrc.buffer = buffer; noiseSrc.loop = true;
-                
+                let noiseSrc = audioCtx.createBufferSource(); noiseSrc.buffer = buffer; noiseSrc.loop = true;
                 if (type === 'womb') {
                     let filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 350; 
-                    let lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 1.2;
-                    let lfoGain = audioCtx.createGain(); lfoGain.gain.value = 150;
-                    lfo.connect(lfoGain); lfoGain.connect(filter.frequency);
-                    
-                    let mainGain = audioCtx.createGain(); mainGain.gain.value = 1.0;
-                    noiseSrc.connect(filter).connect(mainGain).connect(audioCtx.destination);
-                    lfo.start(); noiseSrc.start();
+                    let lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 1.2; let lfoGain = audioCtx.createGain(); lfoGain.gain.value = 150;
+                    lfo.connect(lfoGain); lfoGain.connect(filter.frequency); let mainGain = audioCtx.createGain(); mainGain.gain.value = 1.0;
+                    noiseSrc.connect(filter).connect(mainGain).connect(audioCtx.destination); lfo.start(); noiseSrc.start();
                     activeSoundNode = { stop: () => { noiseSrc.stop(); lfo.stop(); }, disconnect: () => { noiseSrc.disconnect(); filter.disconnect(); lfo.disconnect(); } };
-                } else if (type === 'brown') {
-                    let gainNode = audioCtx.createGain(); gainNode.gain.value = 0.1;
-                    noiseSrc.connect(gainNode).connect(audioCtx.destination);
-                    noiseSrc.start(); activeSoundNode = noiseSrc;
                 } else {
-                    let gainNode = audioCtx.createGain(); gainNode.gain.value = type === 'white' ? 0.05 : 0.15;
-                    noiseSrc.connect(gainNode).connect(audioCtx.destination);
-                    noiseSrc.start(); activeSoundNode = noiseSrc;
+                    let gainNode = audioCtx.createGain(); gainNode.gain.value = type === 'white' ? 0.05 : 0.1;
+                    noiseSrc.connect(gainNode).connect(audioCtx.destination); noiseSrc.start(); activeSoundNode = noiseSrc;
                 }
-            } else if (type === 'humming') {
-                let osc1 = audioCtx.createOscillator(); osc1.type = 'triangle'; osc1.frequency.value = 140; 
-                let osc2 = audioCtx.createOscillator(); osc2.type = 'sine'; osc2.frequency.value = 142;
-                let lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.25; 
-                let lfoGain = audioCtx.createGain(); lfoGain.gain.value = 0.6;
-                let mainGain = audioCtx.createGain(); mainGain.gain.value = 0.4; 
-                let filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 250; 
-                
-                lfo.connect(lfoGain.gain); 
-                osc1.connect(filter); osc2.connect(filter);
-                filter.connect(mainGain).connect(audioCtx.destination);
-                
-                osc1.start(); osc2.start(); lfo.start();
-                activeSoundNode = { stop: () => { osc1.stop(); osc2.stop(); lfo.stop(); }, disconnect: () => { osc1.disconnect(); osc2.disconnect(); filter.disconnect(); } };
             }
+            isAudioPlaying = true; document.getElementById('btn-sound').classList.add('playing'); document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-stop"></i>';
+        }
 
-            isAudioPlaying = true;
-            document.getElementById('btn-sound').classList.add('playing');
-            document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-stop"></i>';
+        function getLocalISODate(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+        function formatCustomDate(s) { const p = s.split('-'); const d = new Date(p[0], p[1]-1, p[2]); return `${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]}, ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; }
+
+        function getDefaultOwner(dateStr) {
+            const anchorDateStr = appDB.settings ? appDB.settings.anchorDate : "2026-04-27";
+            const anchorOwner = appDB.settings ? appDB.settings.anchorOwner : "alf";
             
-            if ('mediaSession' in navigator) {
-                const select = document.getElementById('sound-type');
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: select.options[select.selectedIndex].text,
-                    artist: 'Ava Care App',
-                    album: 'Sleep Sounds'
-                });
-                navigator.mediaSession.setActionHandler('play', playAudio);
-                navigator.mediaSession.setActionHandler('pause', stopAudio);
-                navigator.mediaSession.setActionHandler('stop', stopAudio);
+            const [ty, tm, td] = dateStr.split('-');
+            const target = new Date(Date.UTC(ty, tm - 1, td));
+            
+            const [ay, am, ad] = anchorDateStr.split('-');
+            const epoch = new Date(Date.UTC(ay, am - 1, ad));
+            
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const diffDays = Math.floor((target - epoch) / msPerDay);
+            
+            let cycleDay = ((diffDays % 8) + 8) % 8; // Safely wraps negative differences to 0-7
+            
+            if (anchorOwner === "alf") {
+                if (cycleDay < 4) return "Alferenzo's turn with Ava";
+                return "Lesly's turn with Ava";
+            } else {
+                if (cycleDay < 4) return "Lesly's turn with Ava";
+                return "Alferenzo's turn with Ava";
             }
         }
 
-        function getLocalISODate(dateObj) {
-            const y = dateObj.getFullYear(); const m = String(dateObj.getMonth() + 1).padStart(2, '0'); const d = String(dateObj.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        }
-        function formatCustomDate(dateStr) {
-            const parts = dateStr.split('-'); const d = new Date(parts[0], parts[1] - 1, parts[2]);
-            const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-            return `${days[d.getDay()]}, ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-        }
-        function hideLoader() {
-            const loader = document.getElementById('global-loader');
-            loader.style.opacity = '0'; setTimeout(() => { loader.style.display = 'none'; }, 400);
+        
+        function setupDragToClose() {
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                const modal = overlay.querySelector('.modal-content');
+                const dragBar = overlay.querySelector('.modal-header-sticky');
+                if (!modal || !dragBar) return;
+                
+                let startY = 0;
+                let currentY = 0;
+                let isDragging = false;
+                
+                // Touch start
+                dragBar.addEventListener('touchstart', e => {
+                    startY = e.touches[0].clientY;
+                    isDragging = true;
+                    modal.style.transition = 'none'; // Disable transition for 1:1 finger tracking
+                }, {passive: false});
+                
+                // Touch move
+                dragBar.addEventListener('touchmove', e => {
+                    if (!isDragging) return;
+                    e.preventDefault(); // Stop app from pull-to-refresh
+                    currentY = e.touches[0].clientY - startY;
+                    if (currentY > 0) { // Only allow dragging downwards
+                        modal.style.transform = `translateY(${currentY}px)`;
+                    }
+                }, {passive: false});
+                
+                // Touch end
+                dragBar.addEventListener('touchend', e => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    // Restore smooth transition
+                    modal.style.transition = 'transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1)';
+                    
+                    if (currentY > 100) { // Swipe threshold
+                        // Close modal completely
+                        overlay.classList.remove('active');
+                        setTimeout(() => { 
+                            overlay.style.display = 'none'; 
+                            modal.style.transform = ''; // reset to empty so CSS takes over
+                        }, 250);
+                    } else {
+                        // Snap back to top
+                        modal.style.transform = ''; 
+                    }
+                    currentY = 0;
+                });
+            });
         }
 
         window.onload = async function() {
@@ -1145,219 +1403,142 @@
             document.getElementById('picker-wakeTime').innerHTML = createTimePickerHTML('trk-wakeTime');
             document.getElementById('picker-bedtimeStart').innerHTML = createTimePickerHTML('trk-bedtimeStart');
             document.getElementById('picker-asleepTime').innerHTML = createTimePickerHTML('trk-asleepTime');
-
-            setupSwipeToClose();
-            try { 
-                await appDB.init(); 
-                showAppUI(); 
-                await fetchEvents();
-            } catch(e) { 
-                hideLoader(); showAppAlert("Error", "Failed to load local database."); 
+            
+            await appDB.init(); 
+            await fetchEvents();
+            setupDragToClose();
+            
+            let progress = 0;
+            const loaderPercentage = document.getElementById('loader-percentage'); 
+            const loaderElement = document.getElementById('global-loader');
+            
+            if (loaderPercentage && loaderElement) {
+                loaderPercentage.innerText = "0%";
+                const loadInterval = setInterval(() => {
+                    progress += 20;
+                    loaderPercentage.innerText = progress + "%";
+                    if (progress >= 100) {
+                        clearInterval(loadInterval);
+                        setTimeout(() => {
+                            loaderElement.style.opacity = '0';
+                            setTimeout(() => loaderElement.style.display = 'none', 300);
+                        }, 200);
+                    }
+                }, 150); 
             }
         };
 
-        function showAppUI() {
-            document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-header').style.display = 'flex';
-            document.getElementById('app-content').style.display = 'block'; 
-            document.getElementById('dashboard-audio-player').style.display = 'flex';
-        }
-
         async function fetchEvents() {
-            document.getElementById('loading-txt').innerText = "Syncing with GitHub...";
-            try {
-                allEvents = await appDB.getAllShifts();
-                if (!allEvents) allEvents = [];
-                // Ensure all shifts have description parsed
-                for (let e of allEvents) {
-                    try {
-                        const parsed = JSON.parse(e.description || "{}");
-                        if(parsed.trackers) {
-                            for(let dStr in parsed.trackers) {
-                                await appDB.saveRecord(dStr, { feedback: parsed.feedback[dStr], trackers: parsed.trackers[dStr], owner: parsed.swaps?.[dStr] || e.summary });
-                            }
-                        }
-                    } catch(err){}
-                }
-
-                document.getElementById('loading-txt').innerText = ""; 
-                renderCalendar(); 
-                updateTodayOverview();
-                hideLoader();
-            } catch (err) { hideLoader(); showAppAlert("Database Error", "Failed to load events."); }
+            await renderCalendar(); 
+            await updateTodayOverview();
         }
 
-        function getAppData(event) {
-            try { if(event.description) return JSON.parse(event.description); } catch(e) { }
-            return { feedback: {}, swaps: {}, trackers: {} };
+        function changeMonth(dir) { 
+            currentMonth.setMonth(currentMonth.getMonth() + dir); 
+            document.getElementById('cal-month-title').innerText = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            const calDays = document.getElementById('cal-days');
+            calDays.innerHTML = '<div style="grid-column: 1 / -1; padding: 50px 0; display: flex; flex-direction: column; align-items: center; color: var(--alf-color);"><i class="fa-solid fa-circle-notch fa-spin" style="font-size: 32px; margin-bottom: 15px;"></i><span style="font-size: 14px; font-weight: 700; color: var(--text-muted);">Syncing Month Data...</span></div>';
+            setTimeout(renderCalendar, 10); 
         }
-
-        function changeMonth(dir) { currentMonth.setMonth(currentMonth.getMonth() + dir); renderCalendar(); }
         
-        function renderCalendar() {
+        async function renderCalendar() {
             const year = currentMonth.getFullYear(); const month = currentMonth.getMonth();
             document.getElementById('cal-month-title').innerText = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
             const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate();
             const calDays = document.getElementById('cal-days'); calDays.innerHTML = '';
             const localTodayStr = getLocalISODate(new Date());
 
+            const allRecs = await appDB.getAllRecords();
+
             for(let i=0; i<firstDay; i++) calDays.innerHTML += `<div class="cal-cell empty"></div>`;
             for(let i=1; i<=daysInMonth; i++) {
                 const cellDate = new Date(year, month, i); const dateStr = getLocalISODate(cellDate); 
-                const isToday = (dateStr === localTodayStr); 
-                let shiftClass = ''; let targetEvent = null;
-
-                for (let e of allEvents) {
-                    const s = new Date(e.start.date || e.start.dateTime); const endRaw = new Date(e.end.date || e.end.dateTime);
-                    const eEnd = e.start.date ? new Date(endRaw.setDate(endRaw.getDate() - 1)) : endRaw;
-                    s.setHours(0,0,0,0); eEnd.setHours(23,59,59,999);
-                    
-                    if(cellDate >= s && cellDate <= eEnd) {
-                        const appData = getAppData(e);
-                        const activeOwner = appData.swaps && appData.swaps[dateStr] ? appData.swaps[dateStr] : e.summary;
-                        if (activeOwner !== "DELETED") {
-                            targetEvent = e;
-                            shiftClass = activeOwner.toLowerCase().includes('alferenzo') ? 'alf-shift' : 'lesly-shift';
-                            break;
-                        }
-                    }
-                }
-                const classes = `cal-cell ${isToday ? 'today' : ''} ${shiftClass}`;
-                if(targetEvent) calDays.innerHTML += `<div class="${classes}" onclick="openSpecificDay('${targetEvent.id}', '${dateStr}')">${i}</div>`;
-                else calDays.innerHTML += `<div class="${classes}" onclick="openCreateModeFromDate('${dateStr}')">${i}</div>`;
-            }
-        }
-
-        // --- TODAY OVERVIEW WIDGET ---
-        async function updateTodayOverview() {
-            const localTodayStr = getLocalISODate(new Date());
-            let targetEvent = null;
-            let activeOwner = '';
-
-            for (let e of allEvents) {
-                const s = new Date(e.start.date || e.start.dateTime);
-                const endRaw = new Date(e.end.date || e.end.dateTime);
-                const eEnd = e.start.date ? new Date(endRaw.setDate(endRaw.getDate() - 1)) : endRaw;
-                s.setHours(0,0,0,0); eEnd.setHours(23,59,59,999);
-                const cellDate = new Date(); cellDate.setHours(12,0,0,0);
                 
-                if(cellDate >= s && cellDate <= eEnd) {
-                    const appData = getAppData(e);
-                    activeOwner = appData.swaps && appData.swaps[localTodayStr] ? appData.swaps[localTodayStr] : e.summary;
-                    if (activeOwner !== "DELETED") {
-                        targetEvent = e;
-                        break;
-                    }
+                let owner = allRecs[dateStr]?.owner || getDefaultOwner(dateStr);
+                let shiftClass = '';
+                
+                if (owner !== "DELETED") {
+                    shiftClass = owner.toLowerCase().includes('alferenzo') ? 'alf-shift' : 'lesly-shift';
                 }
-            }
 
-            const overviewCard = document.getElementById('today-overview-card');
-            
-            if(!targetEvent) {
-                overviewCard.style.display = 'none';
-                return;
-            }
-
-            overviewCard.style.display = 'block';
-            
-            const ownerBadge = document.getElementById('overview-owner-badge');
-            const isAlf = activeOwner.toLowerCase().includes('alferenzo');
-            
-            ownerBadge.innerText = isAlf ? "Alferenzo's Turn" : "Lesly's Turn";
-            ownerBadge.style.backgroundColor = isAlf ? 'var(--alf-bg)' : 'var(--lesly-bg)';
-            ownerBadge.style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
-
-            const localRec = await appDB.getRecord(localTodayStr);
-            const appData = getAppData(targetEvent);
-            let trks = localRec?.trackers || (appData.trackers && appData.trackers[localTodayStr]) || {};
-            
-            document.getElementById('ov-morning').innerText = trks.morningWake || '--:--';
-            
-            let napText = "--";
-            if(trks.nap === '0') napText = "None";
-            else if(trks.nap === '1') napText = "1 hr";
-            else if(trks.nap === '2') napText = "2 hrs";
-            else if(trks.nap === '3+') napText = "3+ hrs";
-            document.getElementById('ov-nap').innerText = napText;
-
-            let bathText = "--";
-            if(trks.rtnBath === true) bathText = "Done";
-            else if(trks.rtnBath === false) bathText = "Pending";
-            document.getElementById('ov-bath').innerText = bathText;
-
-            document.getElementById('overview-target-time').innerHTML = `<i class="fa-solid fa-sparkles fa-beat" style="font-size:14px; color:var(--ai-color);"></i> AI Calc...`;
-            let aiTime = await fetchAIBedtime(trks.morningWake, trks.nap, trks.wakeTime);
-            if(aiTime) {
-                document.getElementById('overview-target-time').innerHTML = `<i class="fa-solid fa-sparkles" style="color:var(--ai-color);"></i> ${aiTime}`;
-            } else {
-                document.getElementById('overview-target-time').innerText = "19:00 (Standard)";
+                const classes = `cal-cell ${dateStr === localTodayStr ? 'today' : ''} ${shiftClass}`;
+                
+                if(owner !== "DELETED") {
+                    calDays.innerHTML += `<div class="${classes}" onclick="openSpecificDay('${dateStr}')">${i}</div>`;
+                } else {
+                    calDays.innerHTML += `<div class="${classes}" onclick="restoreSpecificDay('${dateStr}')">${i}</div>`;
+                }
             }
         }
 
-        // --- QUICK SHARE WIDGET LOGIC ---
-        async function shareQuickUpdateWA() {
-            const note = document.getElementById('quick-milestone-text').value.trim();
-            const dateStr = getLocalISODate(new Date());
+        
+        function openScheduleSettings() {
+            document.getElementById('new-anchor-date').value = appDB.settings.anchorDate || "2026-04-27";
+            document.getElementById('new-anchor-owner').value = appDB.settings.anchorOwner || "alf";
+            const overlay = document.getElementById('schedule-settings-dialog');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+        }
+        function closeScheduleSettings() {
+            const overlay = document.getElementById('schedule-settings-dialog');
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.style.display = 'none', 200);
+        }
+        async function saveScheduleSettings() {
+            const newDate = document.getElementById('new-anchor-date').value;
+            const newOwner = document.getElementById('new-anchor-owner').value;
+            if(!newDate) return showAppAlert("Error", "Please select a start date.");
             
-            let statsStr = "";
-            try {
-                const localRec = await appDB.getRecord(dateStr);
-                if(localRec && localRec.trackers) {
-                    const t = localRec.trackers;
-                    let napText = (t.nap === '0' || !t.nap) ? 'None' : t.nap + 'h';
-                    let bathText = t.rtnBath ? 'Done' : 'Pending';
-                    statsStr = `\n\n*Today's Quick Stats:*\nWoke: ${t.morningWake || '--'}\nNap: ${napText}\nBath: ${bathText}\nSettled: ${t.settle || '--'}`;
-                }
-            } catch(e) {}
-
-            let message = `*Ava Update:*\n${note}`;
-            if(note === "") message = `*Ava Update:*`;
-            message += statsStr;
-
-            // Strip Emojis
-            message = stripEmojis(message);
-
-            const encoded = encodeURIComponent(message);
-            window.open(`https://wa.me/?text=${encoded}`, '_blank');
+            await appDB.saveSettings({ anchorDate: newDate, anchorOwner: newOwner });
+            closeScheduleSettings();
             
-            // Clear box after clicking
-            document.getElementById('quick-milestone-text').value = "";
-            closeQuickShareModal();
+            renderCalendar();
+            updateTodayOverview();
+            showAppAlert("Cycle Reset!", "The calendar has been successfully recalculated from " + newDate + ".");
         }
 
+        // --- AI LOGIC RE-ENABLED ---
         let aiBedtimeTimeout = null;
         function updateSmartBedtimeBadge() {
             const badge = document.getElementById('modal-target-bedtime');
             if(!badge) return;
-            const isNight = document.body.classList.contains('night-vision');
-            badge.style.color = isNight ? '#0f172a' : 'white';
-            
             badge.innerHTML = `<i class="fa-solid fa-sparkles fa-beat"></i> AI Analyzing...`;
-            
             clearTimeout(aiBedtimeTimeout);
             aiBedtimeTimeout = setTimeout(async () => {
                 let aiTime = await fetchAIBedtime(currentTrackers.morningWake, currentTrackers.nap, currentTrackers.wakeTime);
                 if (aiTime) {
-                    badge.innerHTML = `<i class="fa-solid fa-sparkles"></i> AI Optimal: ${aiTime}`;
+                    badge.innerHTML = `<i class="fa-solid fa-sparkles"></i> AI Recommend: ${aiTime}`;
                 } else {
                     badge.innerHTML = `<i class="fa-solid fa-moon"></i> Target: 19:00`;
                 }
             }, 800);
         }
-        
+
         async function fetchAIBedtime(morning, nap, wakeTime) {
             const cacheKey = `ai_bed_${morning}_${nap}_${wakeTime}`;
             if(sessionStorage.getItem(cacheKey)) return sessionStorage.getItem(cacheKey);
 
-            const prompt = `You are a pediatric sleep expert AI calculating a toddler's bedtime. Today she woke up at ${morning||'unknown'}. Nap duration: ${nap} hours. She woke up from nap at ${wakeTime||'unknown'}. What is the exact optimal time to start her bedtime routine? Reply with ONLY the time in 24-hour HH:MM format.`;
+            const prompt = `You are a pediatric sleep expert AI calculating a toddler's bedtime. Today she woke up at ${morning||'unknown'}. Nap duration: ${nap} hours. She woke up from nap at ${wakeTime||'unknown'}. What is the exact optimal time to start her bedtime routine?\n\nCRITICAL RULES:\n1. ONLY return the time in 24-hour format (e.g., 18:30, 19:00, 19:30).\n2. DO NOT include any other text, just the time.\n3. The bedtime MUST be an evening time strictly between 17:30 and 20:30. NEVER recommend a morning time like 06:00.`;
             
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                if (GROQ_API_KEY === "YOUR_GROQ_API_KEY_HERE") return null; // Failsafe if key isn't set
+                const requestPayload = {
+                    "model": GROQ_MODEL,
+                    "messages": [{"role": "user", "content": String(prompt)}],
+                    "temperature": 0.5
+                };
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+                    body: JSON.stringify(requestPayload)
                 });
-                if(!response.ok) return null;
+                if(!response.ok) {
+                    const errData = await response.json();
+                    console.error("Groq Bedtime Error:", errData);
+                    return null;
+                }
                 const data = await response.json();
-                let timeText = data.candidates[0].content.parts[0].text.trim();
+                let timeText = data.choices[0].message.content.trim();
                 const match = timeText.match(/([01]?[0-9]|2[0-3]):[0-5][0-9]/);
                 if (match) {
                     sessionStorage.setItem(cacheKey, match[0]);
@@ -1367,148 +1548,118 @@
             } catch(e) { return null; }
         }
 
+        async function updateTodayOverview() {
+            const localTodayStr = getLocalISODate(new Date()); 
+            const allRecs = await appDB.getAllRecords();
+            let activeOwner = allRecs[localTodayStr]?.owner || getDefaultOwner(localTodayStr);
+
+            const overviewCard = document.getElementById('today-overview-card');
+            if(activeOwner === "DELETED") return overviewCard.style.display = 'none';
+            overviewCard.style.display = 'block';
+
+            const ownerBadge = document.getElementById('overview-owner-badge'); 
+            const isAlf = activeOwner.toLowerCase().includes('alferenzo');
+            ownerBadge.innerText = isAlf ? "Alferenzo's Turn" : "Lesly's Turn"; 
+            ownerBadge.style.backgroundColor = isAlf ? 'var(--alf-bg)' : 'var(--lesly-bg)'; 
+            ownerBadge.style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
+
+            const localRec = allRecs[localTodayStr] || {};
+            let trks = localRec.trackers || {};
+            document.getElementById('ov-morning').innerText = trks.morningWake || '--:--';
+            document.getElementById('ov-nap').innerText = trks.nap ? (trks.nap === '0' ? "None" : trks.nap + "h") : "--";
+            document.getElementById('ov-bath').innerText = trks.rtnBath === true ? "Done" : (trks.rtnBath === false ? "Pending" : "--");
+
+            document.getElementById('overview-target-time').innerHTML = `<i class="fa-solid fa-sparkles fa-beat" style="color:var(--ai-color);"></i> AI Calc...`;
+            let aiTime = await fetchAIBedtime(trks.morningWake, trks.nap, trks.wakeTime);
+            if(aiTime) {
+                document.getElementById('overview-target-time').innerHTML = `<i class="fa-solid fa-sparkles" style="color:var(--ai-color);"></i> AI Recommend: ${aiTime}`;
+            } else {
+                document.getElementById('overview-target-time').innerText = "19:00 (Standard)";
+            }
+        }
+
         function setTracker(type, val) {
             currentTrackers[type] = val;
-            if (type === 'eat') {
-                document.getElementById(`trk-eat-yes`).className = `tracker-btn ${val === 'yes' ? 'active-yes' : ''}`;
-                document.getElementById(`trk-eat-no`).className = `tracker-btn ${val === 'no' ? 'active-no' : ''}`;
-            }
-            if (type === 'nap' || type === 'wakeTime') {
-                updateSmartBedtimeBadge();
-            }
+            if (type === 'eat') { document.getElementById(`trk-eat-yes`).className = `tracker-btn ${val === 'yes' ? 'active-yes' : ''}`; document.getElementById(`trk-eat-no`).className = `tracker-btn ${val === 'no' ? 'active-no' : ''}`; }
+            if (type === 'nap' || type === 'wakeTime') { updateSmartBedtimeBadge(); }
         }
-        
-        function toggleRoutine(type) {
-            currentTrackers[type] = !currentTrackers[type];
-            const el = document.getElementById('chk-' + type);
-            if(currentTrackers[type]) el.classList.add('active'); else el.classList.remove('active');
-        }
+        function toggleRoutine(type) { currentTrackers[type] = !currentTrackers[type]; const el = document.getElementById('chk-' + type); if(currentTrackers[type]) el.classList.add('active'); else el.classList.remove('active'); }
 
-        async function loadTrackers(dateStr) {
+        async function loadTrackers(dateStr, localRec) {
             const defTrks = { eat: null, nap: '0', morningWake: '', wakeTime: '', rtnBath: false, rtnBook: false, rtnLights: false, rtnScreen: false, rtnTeeth: false, bedtimeStart: '', asleepTime: '', settle: 'Unknown', wakings: '0' };
-            const localRec = await appDB.getRecord(dateStr);
-            let trks = localRec?.trackers || (activeAppData.trackers && activeAppData.trackers[dateStr]) || defTrks;
+            let trks = localRec?.trackers || defTrks;
             currentTrackers = { ...defTrks, ...trks }; 
-            
-            setTimePickerValue('trk-morningWake', currentTrackers.morningWake);
-            setTracker('eat', currentTrackers.eat);
-            document.getElementById('trk-nap').value = currentTrackers.nap || '0';
-            setTimePickerValue('trk-wakeTime', currentTrackers.wakeTime);
-            
-            ['rtnBath','rtnBook','rtnLights','rtnScreen','rtnTeeth'].forEach(t => {
-                const el = document.getElementById('chk-' + t);
-                if(currentTrackers[t]) el.classList.add('active'); else el.classList.remove('active');
-            });
-            
-            setTimePickerValue('trk-bedtimeStart', currentTrackers.bedtimeStart);
-            setTimePickerValue('trk-asleepTime', currentTrackers.asleepTime);
-            document.getElementById('trk-settle').value = currentTrackers.settle || 'Unknown';
-            document.getElementById('trk-wakings').value = currentTrackers.wakings || '0';
-
-            const fb = localRec?.feedback || (activeAppData.feedback && activeAppData.feedback[dateStr]) || '';
-            document.getElementById('modal-feedback').value = fb;
-            
+            setTimePickerValue('trk-morningWake', currentTrackers.morningWake); setTracker('eat', currentTrackers.eat); document.getElementById('trk-nap').value = currentTrackers.nap || '0'; setTimePickerValue('trk-wakeTime', currentTrackers.wakeTime);
+            ['rtnBath','rtnBook','rtnLights','rtnScreen','rtnTeeth'].forEach(t => { const el = document.getElementById('chk-' + t); if(currentTrackers[t]) el.classList.add('active'); else el.classList.remove('active'); });
+            setTimePickerValue('trk-bedtimeStart', currentTrackers.bedtimeStart); setTimePickerValue('trk-asleepTime', currentTrackers.asleepTime); document.getElementById('trk-settle').value = currentTrackers.settle || 'Unknown'; document.getElementById('trk-wakings').value = currentTrackers.wakings || '0';
+            document.getElementById('modal-feedback').value = localRec?.feedback || '';
             updateSmartBedtimeBadge();
         }
 
-        function openSpecificDay(eventId, clickedDateStr) {
-            activeEvent = allEvents.find(e => e.id === eventId);
+        async function openSpecificDay(clickedDateStr) {
             activeDateStr = clickedDateStr;
-            activeAppData = getAppData(activeEvent);
-            
-            let currentOwner = activeAppData.swaps && activeAppData.swaps[clickedDateStr] ? activeAppData.swaps[clickedDateStr] : activeEvent.summary;
-            document.getElementById('modal-view-mode').style.display = 'block'; document.getElementById('modal-create-mode').style.display = 'none';
-            const isAlf = currentOwner.toLowerCase().includes('alferenzo');
-            document.getElementById('modal-title').innerText = isAlf ? "Alferenzo's Day" : "Lesly's Day";
+            const allRecs = await appDB.getAllRecords();
+            const localRec = allRecs[clickedDateStr] || {};
+            let currentOwner = localRec.owner || getDefaultOwner(clickedDateStr);
+
+            document.getElementById('modal-view-mode').style.display = 'block'; 
+            const isAlf = currentOwner.toLowerCase().includes('alferenzo'); 
+            document.getElementById('modal-title').innerText = isAlf ? "Alferenzo's Day" : "Lesly's Day"; 
             document.getElementById('modal-title').style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
-            document.getElementById('modal-subtitle').innerText = `Part of ${activeEvent.summary}`;
+            document.getElementById('modal-subtitle').innerText = `Scheduled Shift`;
+            const dateBadge = document.getElementById('modal-date'); dateBadge.innerText = formatCustomDate(clickedDateStr); dateBadge.style.backgroundColor = isAlf ? 'var(--alf-bg)' : 'var(--lesly-bg)'; dateBadge.style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
             
-            const dateBadge = document.getElementById('modal-date');
-            dateBadge.innerText = formatCustomDate(clickedDateStr);
-            dateBadge.style.backgroundColor = isAlf ? 'var(--alf-bg)' : 'var(--lesly-bg)';
-            dateBadge.style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
-            
-            const localTodayStr = getLocalISODate(new Date());
-            if (clickedDateStr > localTodayStr) {
-                document.getElementById('interactive-content').style.display = 'none'; document.getElementById('future-lock-msg').style.display = 'block'; document.getElementById('btn-share-today').style.display = 'none';
-                document.getElementById('modal-target-bedtime').style.display = 'none';
-            } else {
-                document.getElementById('interactive-content').style.display = 'block'; document.getElementById('future-lock-msg').style.display = 'none'; document.getElementById('btn-share-today').style.display = 'block';
-                document.getElementById('modal-target-bedtime').style.display = 'inline-block';
-                loadTrackers(clickedDateStr);
-            }
+            if (clickedDateStr > getLocalISODate(new Date())) { document.getElementById('interactive-content').style.display = 'none'; document.getElementById('future-lock-msg').style.display = 'block'; document.getElementById('btn-share-today').style.display = 'none'; document.getElementById('modal-target-bedtime').style.display = 'none'; } 
+            else { document.getElementById('interactive-content').style.display = 'block'; document.getElementById('future-lock-msg').style.display = 'none'; document.getElementById('btn-share-today').style.display = 'block'; document.getElementById('modal-target-bedtime').style.display = 'inline-block'; await loadTrackers(clickedDateStr, localRec); }
             showModal();
         }
 
         async function saveDayUpdates() {
-            
-            // ERROR LOGIC: Check Time Fall Asleep vs Bedtime Started
             if (currentTrackers.bedtimeStart && currentTrackers.asleepTime) {
-                let startParts = currentTrackers.bedtimeStart.split(':').map(Number);
-                let endParts = currentTrackers.asleepTime.split(':').map(Number);
-                
-                let startMins = startParts[0] * 60 + startParts[1];
-                let endMins = endParts[0] * 60 + endParts[1];
-
-                // If sleep time is between 00:00 and 06:00, but bedtime started > 12:00, it crossed midnight.
-                if (endParts[0] <= 6 && startParts[0] >= 12) {
-                    endMins += 24 * 60;
-                }
-
-                if (endMins < startMins) {
-                    showAppAlert("Time Error", "Ava cannot fall asleep before her bedtime routine starts! Please fix the times.");
-                    return; // ABORT SAVE
-                }
+                let startParts = currentTrackers.bedtimeStart.split(':').map(Number); let endParts = currentTrackers.asleepTime.split(':').map(Number);
+                let startMins = startParts[0] * 60 + startParts[1]; let endMins = endParts[0] * 60 + endParts[1];
+                if (endParts[0] <= 6 && startParts[0] >= 12) endMins += 24 * 60;
+                if (endMins < startMins) return showAppAlert("Time Error", "Ava cannot fall asleep before her bedtime routine starts! Please fix the times.");
             }
-        
             const feedbackText = document.getElementById('modal-feedback').value;
-            if(!activeAppData.feedback) activeAppData.feedback = {};
-            activeAppData.feedback[activeDateStr] = feedbackText;
-            if(!activeAppData.trackers) activeAppData.trackers = {};
-            activeAppData.trackers[activeDateStr] = { ...currentTrackers };
+        const energySlider = document.getElementById('trk-energy');
+        if(energySlider) currentTrackers.energy = energySlider.value;
+            const allRecs = await appDB.getAllRecords();
+            const currentOwner = allRecs[activeDateStr]?.owner || getDefaultOwner(activeDateStr);
+            logSystemAudit(`Saved daily records for ${activeDateStr}`);
+        await appDB.saveRecord(activeDateStr, { feedback: feedbackText, trackers: { ...currentTrackers }, owner: currentOwner });
             
-            let currentOwner = activeAppData.swaps && activeAppData.swaps[activeDateStr] ? activeAppData.swaps[activeDateStr] : activeEvent.summary;
-            await appDB.saveRecord(activeDateStr, { feedback: feedbackText, trackers: { ...currentTrackers }, owner: currentOwner });
-
-            activeEvent.description = JSON.stringify(activeAppData);
-            document.getElementById('modal-title').innerText = "Saving...";
-            
-            try {
-                await appDB.saveShift(activeEvent);
-                closeModal(); 
-                await fetchEvents(); 
-            } catch (err) { 
-                document.getElementById('modal-title').innerText = "Shift Details";
-                showAppAlert("Error", "Failed to save to local database."); 
-            }
+            closeModal(); await fetchEvents();
+            setupDragToClose(); 
         }
 
         async function openDashboard() {
-            const modal = document.getElementById('dashboard-modal');
-            modal.style.display = 'flex'; setTimeout(() => modal.classList.add('active'), 10);
-            
-            let recs = await appDB.exportAllRecords();
-            document.getElementById('db-stat-text').innerHTML = `Database Integration: Active<br>Stored Historical Records: ${recs.length}`;
-            document.getElementById('analytics-results').style.display = 'none';
+            const modal = document.getElementById('dashboard-modal'); modal.style.display = 'flex'; setTimeout(() => modal.classList.add('active'), 10);
+            let recs = await appDB.exportAllRecords(); document.getElementById('db-stat-text').innerHTML = `Database Integration: Active<br>Stored Historical Records: ${recs.length}`; document.getElementById('analytics-results').style.display = 'none';
         }
-        function closeDashboard() {
-            const modal = document.getElementById('dashboard-modal');
-            modal.classList.remove('active'); setTimeout(() => modal.style.display = 'none', 300);
-            setTimeout(() => { document.querySelector('#dashboard-modal .modal-content').style.transform = ''; }, 300);
-        }
+        function closeDashboard() { const modal = document.getElementById('dashboard-modal'); modal.classList.remove('active'); setTimeout(() => modal.style.display = 'none', 150); }
         
         async function runAnalytics() {
             const btn = document.getElementById('btn-run-analytics');
             const resultBox = document.getElementById('analytics-results');
             const resText = document.getElementById('analytics-text');
             
+            const cacheKey = 'ai_analytics_' + getLocalISODate(new Date());
+            const cachedData = localStorage.getItem(cacheKey);
+            
+            if (cachedData) {
+                resultBox.style.display = 'block';
+                resText.innerHTML = cachedData;
+                return;
+            }
+
             btn.disabled = true; btn.innerText = "Analyzing Architecture...";
             resultBox.style.display = 'block'; resText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mining database for sleep trends...';
 
             try {
                 let recs = await appDB.exportAllRecords();
                 recs.sort((a,b) => a.dateStr > b.dateStr ? -1 : 1);
-                let recent = recs.slice(0, 30);
+                let recent = recs.slice(0, 15);
                 
                 if(recent.length === 0) throw new Error("Not enough data logged yet.");
 
@@ -1526,33 +1677,35 @@
                 const prompt = `You are a pediatric sleep analyst. Analyze this data. Give a concise trend analysis: 1. Key Pattern Spotted. 2. Correlation between routine and settling time/wakings. 3. One actionable tip. Keep it very short and analytical. Data:\n\n${dataStr}`;
 
                 let response;
+                if (GROQ_API_KEY === "YOUR_GROQ_API_KEY_HERE") throw new Error("Groq API key is missing. Please add it to the code.");
+                
                 let retries = 2;
                 while(retries > 0) {
-                    response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+                        body: JSON.stringify({ model: GROQ_MODEL, messages: [{ role: "user", content: prompt }] })
                     });
                     if (response.status === 503) {
                         retries--;
                         if (retries === 0) throw new Error("The AI server is experiencing heavy traffic (Error 503). Please tap to retry.");
                         await new Promise(r => setTimeout(r, 2000));
-                    } else {
-                        break;
-                    }
+                    } else { break; }
                 }
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                if (response.status === 429) throw new Error("Rate limit reached. Please wait a few seconds and try again.");
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error?.message || `HTTP ${response.status}`);
+                }
                 const data = await response.json();
-                
-                resText.innerHTML = data.candidates[0].content.parts[0].text.replace(/\*/g, '').replace(/\n/g, '<br>');
-                
+                const formattedText = data.choices[0].message.content.replace(/\*/g, '').replace(/\n/g, '<br>');
+                resText.innerHTML = formattedText;
+                localStorage.setItem(cacheKey, formattedText);
             } catch(e) {
                 resText.innerHTML = `<span style="color:#ef4444;">Error: ${e.message}</span>`;
-            } finally {
-                btn.disabled = false; btn.innerText = "Refresh Analytics";
-            }
+            } finally { btn.disabled = false; btn.innerText = "Refresh Analytics"; }
         }
 
-        // --- AI DASHBOARD SHARE ---
         function shareAnalyticsWA() {
             let text = stripEmojis(document.getElementById('analytics-text').innerText);
             let message = `*Ava's AI Analytics Report*\n\n${text}`;
@@ -1561,193 +1714,93 @@
 
         function shareAnalyticsPDF() {
             let text = stripEmojis(document.getElementById('analytics-text').innerText).replace(/\n/g, '<br>').replace(/\*/g, '<strong>').replace(/<strong>(.*?)<\/strong>/g, '<strong>$1</strong>');
-            const printContent = `
-                <div style="padding: 40px; font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
-                    <h1 style="color: #8b5cf6; margin-bottom: 20px;">Ava's AI Analytics Report</h1>
-                    <div style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; line-height: 1.8;">
-                        ${text}
-                    </div>
-                </div>
-            `;
+            const printContent = `<div style="padding: 40px; font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;"><h1 style="color: #8b5cf6; margin-bottom: 20px;">Ava's AI Analytics Report</h1><div style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; line-height: 1.8;">${text}</div></div>`;
             const originalBody = document.body.innerHTML;
             document.body.innerHTML = printContent;
             window.print();
             setTimeout(() => location.reload(), 500);
         }
 
-        // --- NEW SHARE LOGIC ---
-        function openShareDialog() {
-            const overlay = document.getElementById('share-dialog');
-            overlay.style.display = 'flex';
-            setTimeout(() => overlay.classList.add('active'); document.body.classList.add('hide-player'), 10);
-        }
-        function closeShareDialog() {
-            const overlay = document.getElementById('share-dialog');
-            overlay.classList.remove('active'); if(!document.querySelectorAll('.modal-overlay.active, .dialog-overlay.active').length) document.body.classList.remove('hide-player'); setTimeout(() => overlay.style.display = 'none', 300);
-        }
+        function openShareDialog() { const overlay = document.getElementById('share-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); }
+        function closeShareDialog() { const overlay = document.getElementById('share-dialog'); overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 150); }
+        function shareTodayWA() { const text = `*Ava's Update: ${document.getElementById('modal-date').innerText}*\nMorning Wake: ${currentTrackers.morningWake||'?'}\nNap: ${currentTrackers.nap}h\nBedtime Started: ${currentTrackers.bedtimeStart||'?'}\nAsleep at: ${currentTrackers.asleepTime||'?'}\n\n*Notes:*\n${document.getElementById('modal-feedback').value||'None'}`; window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank'); closeShareDialog(); }
+        function shareTodayPDF() { window.print(); }
 
-        function formatShareText() {
-            const dateStr = document.getElementById('modal-date').innerText;
-            const fb = document.getElementById('modal-feedback').value.trim() || "No notes logged.";
-            const mWake = currentTrackers.morningWake || 'Unknown';
-            const eat = currentTrackers.eat || '?'; const nap = currentTrackers.nap || '0';
-            const wake = currentTrackers.wakeTime || 'Unknown';
-            const bStart = currentTrackers.bedtimeStart || 'Unknown';
-            const asleep = currentTrackers.asleepTime || 'Unknown';
-            const settle = currentTrackers.settle || '?'; const wakes = currentTrackers.wakings || '0';
-            let rtns = [];
-            if(currentTrackers.rtnBath) rtns.push("Bath"); if(currentTrackers.rtnBook) rtns.push("Book");
-            if(currentTrackers.rtnLights) rtns.push("Dim Lights"); if(currentTrackers.rtnScreen) rtns.push("No Screens");
-            if(currentTrackers.rtnTeeth) rtns.push("Teeth");
-            const rtnStr = rtns.length > 0 ? rtns.join(', ') : 'None';
-            
-            // Cleaned template with no emojis natively
-            return `*Ava's Update: ${dateStr}*\n\nMorning Wake: ${mWake}\nAte well: ${eat}\nNap: ${nap}h (Woke: ${wake})\nRoutine: ${rtnStr}\nBedtime Started: ${bStart}\nFell Asleep: ${asleep}\nSettled in: ${settle}\nWakings: ${wakes}\n\n*Notes:*\n${fb}`;
-        }
-
-        function shareTodayWA() {
-            // Apply stripEmojis to catch anything the user typed in the Notes box
-            const shareText = stripEmojis(formatShareText());
-            const encoded = encodeURIComponent(shareText);
-            window.open(`https://wa.me/?text=${encoded}`, '_blank');
-            closeShareDialog();
-        }
-
-        function shareTodayPDF() {
-            // Remove emojis and format for PDF
-            const shareText = stripEmojis(formatShareText()).replace(/\n/g, '<br>').replace(/\*/g, '<strong>').replace(/<strong>(.*?)<\/strong>/g, '<strong>$1</strong>');
-            
-            const printContent = `
-                <div style="padding: 40px; font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1e293b;">
-                    <h1 style="color: #8b5cf6; margin-bottom: 20px;">Ava's Care Log</h1>
-                    <div style="background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; line-height: 1.8;">
-                        ${shareText}
-                    </div>
-                </div>
-            `;
-            
-            document.body.innerHTML = printContent;
-            window.print();
-            
-            // Restore original UI after print dialog closes
-            setTimeout(() => {
-                location.reload(); 
-            }, 500);
-        }
-
-        function shareViaWeb(text, title) {
-            // Clean AI handoff emojis before sharing
-            const cleanText = stripEmojis(text);
-            const encoded = encodeURIComponent(cleanText);
-            window.open(`https://wa.me/?text=${encoded}`, '_blank');
-        }
-
-        function showModal() {
-            const overlay = document.getElementById('event-modal'); overlay.style.display = 'flex';
-            setTimeout(() => overlay.classList.add('active'); document.body.classList.add('hide-player'), 10);
-        }
-        function closeModal() {
-            const overlay = document.getElementById('event-modal');
-            overlay.classList.remove('active'); if(!document.querySelectorAll('.modal-overlay.active, .dialog-overlay.active').length) document.body.classList.remove('hide-player'); setTimeout(() => overlay.style.display = 'none', 300);
-            setTimeout(() => { document.querySelector('#event-modal .modal-content').style.transform = ''; }, 300);
-        }
+        function showModal() { const overlay = document.getElementById('event-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); }
+        function closeModal() { const overlay = document.getElementById('event-modal'); overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 150); }
 
         function showAppConfirm(title, msg, confirmText, callback) {
-            document.getElementById('dialog-title').innerText = title; document.getElementById('dialog-msg').innerText = msg;
-            document.getElementById('dialog-confirm').innerText = confirmText; document.getElementById('dialog-cancel').style.display = 'block';
-            const overlay = document.getElementById('custom-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'); document.body.classList.add('hide-player'), 10);
-            dialogCallback = callback;
+            document.getElementById('dialog-title').innerText = title; document.getElementById('dialog-msg').innerHTML = msg; document.getElementById('dialog-confirm').innerText = confirmText; document.getElementById('dialog-cancel').style.display = 'block';
+            const overlay = document.getElementById('custom-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); dialogCallback = callback;
         }
         function showAppAlert(title, msg) {
-            document.getElementById('dialog-title').innerText = title; document.getElementById('dialog-msg').innerText = msg;
-            document.getElementById('dialog-confirm').innerText = "OK"; document.getElementById('dialog-cancel').style.display = 'none';
-            const overlay = document.getElementById('custom-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'); document.body.classList.add('hide-player'), 10);
-            dialogCallback = null;
+            document.getElementById('dialog-title').innerText = title; document.getElementById('dialog-msg').innerHTML = msg; document.getElementById('dialog-confirm').innerText = "OK"; document.getElementById('dialog-cancel').style.display = 'none';
+            const overlay = document.getElementById('custom-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); dialogCallback = null;
         }
-        function closeCustomDialog(result) {
-            const overlay = document.getElementById('custom-dialog'); overlay.classList.remove('active'); if(!document.querySelectorAll('.modal-overlay.active, .dialog-overlay.active').length) document.body.classList.remove('hide-player');
-            setTimeout(() => { overlay.style.display = 'none'; if(result && dialogCallback) dialogCallback(); }, 200);
-        }
+        function closeCustomDialog(result) { const overlay = document.getElementById('custom-dialog'); overlay.classList.remove('active'); setTimeout(() => { overlay.style.display = 'none'; if(result && dialogCallback) dialogCallback(); }, 200); }
 
-        function swapSpecificDay() {
-            let currentOwner = activeAppData.swaps && activeAppData.swaps[activeDateStr] ? activeAppData.swaps[activeDateStr] : activeEvent.summary;
+        async function swapSpecificDay() {
+            const allRecs = await appDB.getAllRecords();
+            let currentOwner = allRecs[activeDateStr]?.owner || getDefaultOwner(activeDateStr);
             let newOwner = currentOwner.toLowerCase().includes('alferenzo') ? "Lesly's turn with Ava" : "Alferenzo's turn with Ava";
-            showAppConfirm("Swap Day", `Swap ${formatCustomDate(activeDateStr)} to ${newOwner}?`, "Yes, Swap", () => {
-                if(!activeAppData.swaps) activeAppData.swaps = {};
-                if (newOwner === activeEvent.summary) delete activeAppData.swaps[activeDateStr]; else activeAppData.swaps[activeDateStr] = newOwner;
-                saveDayUpdates();
-            });
-        }
-        function deleteSpecificDay() {
-            showAppConfirm("Clear Single Day", `Remove ${formatCustomDate(activeDateStr)} from this shift block?`, "Clear Day", () => {
-                if(!activeAppData.swaps) activeAppData.swaps = {}; activeAppData.swaps[activeDateStr] = "DELETED"; saveDayUpdates();
-            });
-        }
-        function deleteEntireBlock() {
-            showAppConfirm("Delete Entire Block", "WARNING: Permanently delete this 4-day shift?", "Delete Block", async () => {
-                document.getElementById('modal-title').innerText = "Deleting Block...";
-                try { 
-                    await appDB.deleteShift(activeEvent.id);
-                    allEvents = allEvents.filter(e => e.id !== activeEvent.id); 
-                    renderCalendar(); updateTodayOverview(); closeModal(); fetchEvents();
-                } catch (err) { showAppAlert("Error", "Failed to delete shift."); }
-            });
-        }
-        function openCreateMode() { openCreateModeFromDate(getLocalISODate(new Date())); }
-        function openCreateModeFromDate(dateStr) {
-            document.getElementById('modal-view-mode').style.display = 'none'; document.getElementById('modal-create-mode').style.display = 'block';
-            document.getElementById('create-start').value = dateStr;
-            const parts = dateStr.split('-'); let tmrw = new Date(parts[0], parts[1] - 1, parts[2]); tmrw.setDate(tmrw.getDate() + 3); 
-            document.getElementById('create-end').value = getLocalISODate(tmrw); showModal();
-        }
-        async function createNewShift() {
-            const summary = document.getElementById('create-person').value; const startVal = document.getElementById('create-start').value; const endVal = document.getElementById('create-end').value;
-            if(!startVal || !endVal) return showAppAlert("Required", "Select both dates.");
-            const parts = endVal.split('-'); let endObj = new Date(parts[0], parts[1] - 1, parts[2]); endObj.setDate(endObj.getDate() + 1);
-            closeModal(); document.getElementById('loading-txt').innerText = "Creating shift...";
-            try { 
-                const newShift = {
-                    id: "shift_" + Date.now(),
-                    summary: summary,
-                    start: { date: startVal },
-                    end: { date: getLocalISODate(endObj) },
-                    description: "{}"
-                };
-                await appDB.saveShift(newShift);
+            showAppConfirm("Swap Day", `Swap ${formatCustomDate(activeDateStr)} to ${newOwner}?`, "Yes, Swap", async () => {
+                const localRec = allRecs[activeDateStr] || { feedback: '', trackers: {} };
+                localRec.owner = newOwner;
+                logSystemAudit(`Swapped shift to ${newOwner} for ${activeDateStr}`);
+        await appDB.saveRecord(activeDateStr, localRec);
+                closeModal();
                 await fetchEvents();
-            } catch (err) { document.getElementById('loading-txt').innerText = ""; showAppAlert("Error", "Failed to create shift in database."); }
+            setupDragToClose();
+            });
+        }
+        async function deleteSpecificDay() { 
+            showAppConfirm("Clear Single Day", `Remove ${formatCustomDate(activeDateStr)} from this shift block?`, "Clear Day", async () => { 
+                const allRecs = await appDB.getAllRecords();
+                const localRec = allRecs[activeDateStr] || { feedback: '', trackers: {} };
+                localRec.owner = "DELETED";
+                logSystemAudit(`Swapped shift to ${newOwner} for ${activeDateStr}`);
+        await appDB.saveRecord(activeDateStr, localRec);
+                closeModal();
+                await fetchEvents();
+            setupDragToClose();
+            }); 
+        }
+        async function restoreSpecificDay(dateStr) {
+            showAppConfirm("Restore Day", `Restore schedule for ${formatCustomDate(dateStr)}?`, "Restore", async () => { 
+                const allRecs = await appDB.getAllRecords();
+                const localRec = allRecs[dateStr] || { feedback: '', trackers: {} };
+                localRec.owner = getDefaultOwner(dateStr);
+                await appDB.saveRecord(dateStr, localRec);
+                await fetchEvents();
+            setupDragToClose();
+            }); 
         }
 
-        function openAIDialog(mode) {
-            currentAIMode = mode; const overlay = document.getElementById('ai-dialog');
-            overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'); document.body.classList.add('hide-player'), 10);
-            const headerDiv = document.getElementById('ai-dialog-header'); const promptInput = document.getElementById('ai-prompt-input'); 
-            const btnFetchSummary = document.getElementById('btn-fetch-summary'); const promptWrapper = document.getElementById('ai-prompt-wrapper');
-            document.getElementById('ai-results-area').style.display = 'none'; document.getElementById('btn-copy-ai').style.display = 'none'; rawAIResult = "";
+        // --- CORE AI REQUESTS RE-ENABLED ---
+        async function compileHandoverData() {
+            if(!activeDateStr) return "No data available.";
             
-            if (mode === 'advice') {
-                headerDiv.style.background = 'linear-gradient(135deg, #8b5cf6, #6d28d9)'; headerDiv.innerHTML = `<h3 style="margin:0; font-size:18px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Ava's Sleep Assistant</h3><p style="margin: 5px 0 0; font-size: 12px; opacity: 0.9;">Tell the AI what is happening tonight.</p>`;
-                promptInput.value = document.getElementById('modal-feedback').value; 
-                promptWrapper.style.display = 'block';
-                btnFetchSummary.style.display = 'none';
-            } else if (mode === 'handoff') {
-                headerDiv.style.background = 'linear-gradient(135deg, #d97706, #b45309)'; headerDiv.innerHTML = `<h3 style="margin:0; font-size:18px;"><i class="fa-solid fa-handshake"></i> Shift Handoff</h3><p style="margin: 5px 0 0; font-size: 12px; opacity: 0.9;">AI will summarize the last 4 days.</p>`;
-                promptWrapper.style.display = 'none';
-                btnFetchSummary.style.display = 'block';
-                btnFetchSummary.innerText = "Generate Summary";
-                promptInput.value = compileHandoffData();
-            }
-        }
-
-        function compileHandoffData() {
-            if(!activeEvent || !activeAppData) return "No data available.";
+            const [y, m, d] = activeDateStr.split('-');
+            const target = new Date(Date.UTC(y, m - 1, d));
+            const epoch = new Date(Date.UTC(2026, 3, 27));
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const diffDays = Math.floor((target - epoch) / msPerDay);
+            
+            const blockStartDiff = diffDays - (((diffDays % 4) + 4) % 4);
+            const blockStartUTC = epoch.getTime() + (blockStartDiff * msPerDay);
+            
             let dataStr = `Raw Data:\n\n`;
-            const s = new Date(activeEvent.start.date || activeEvent.start.dateTime); const endRaw = new Date(activeEvent.end.date || activeEvent.end.dateTime);
-            const eEnd = activeEvent.start.date ? new Date(endRaw.setDate(endRaw.getDate() - 1)) : endRaw; const localTodayStr = getLocalISODate(new Date());
-            for (let d = new Date(s); d <= eEnd; d.setDate(d.getDate() + 1)) {
-                const dayStr = getLocalISODate(d); if(dayStr > localTodayStr) continue; 
-                const fb = activeAppData.feedback && activeAppData.feedback[dayStr] ? activeAppData.feedback[dayStr] : "No notes.";
-                const trks = activeAppData.trackers && activeAppData.trackers[dayStr] ? activeAppData.trackers[dayStr] : null;
+            const localTodayStr = getLocalISODate(new Date());
+            const allRecs = await appDB.getAllRecords();
+
+            for (let i = 0; i < 4; i++) {
+                const dayDate = new Date(blockStartUTC + (i * msPerDay));
+                const dayStr = getLocalISODate(dayDate); 
+                if(dayStr > localTodayStr) continue; 
+                
+                const rec = allRecs[dayStr] || {};
+                const fb = rec.feedback || "No notes.";
+                const trks = rec.trackers || null;
                 let trkStr = "";
                 if(trks) {
                     let rts = []; if(trks.rtnBath) rts.push("Bath"); if(trks.rtnBook) rts.push("Book"); if(trks.rtnLights) rts.push("Dim"); if(trks.rtnScreen) rts.push("NoScreen"); if(trks.rtnTeeth) rts.push("Teeth");
@@ -1758,58 +1811,122 @@
             return dataStr;
         }
 
-        function closeAIDialog() {
-            const overlay = document.getElementById('ai-dialog'); overlay.classList.remove('active'); if(!document.querySelectorAll('.modal-overlay.active, .dialog-overlay.active').length) document.body.classList.remove('hide-player'); setTimeout(() => overlay.style.display = 'none', 200);
+        async function openAIDialog(mode) {
+            currentAIMode = mode; const overlay = document.getElementById('ai-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
+            const headerDiv = document.getElementById('ai-dialog-header'); const promptInput = document.getElementById('ai-prompt-input'); const btnFetchSummary = document.getElementById('btn-fetch-summary'); const promptWrapper = document.getElementById('ai-prompt-wrapper');
+            document.getElementById('ai-results-area').style.display = 'none'; document.getElementById('btn-copy-ai').style.display = 'none'; rawAIResult = "";
+            
+            if (mode === 'advice') {
+                headerDiv.style.background = 'linear-gradient(135deg, #8b5cf6, #6d28d9)'; headerDiv.innerHTML = `<h3 style="margin:0; font-size:18px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Ava's Sleep Assistant</h3><p style="margin: 5px 0 0; font-size: 12px; opacity: 0.9;">Tell the AI what is happening tonight.</p>`;
+                promptInput.value = document.getElementById('modal-feedback').value; promptWrapper.style.display = 'block'; btnFetchSummary.style.display = 'none';
+            } else if (mode === 'handover') {
+                headerDiv.style.background = 'linear-gradient(135deg, #d97706, #b45309)'; headerDiv.innerHTML = `<h3 style="margin:0; font-size:18px;"><i class="fa-solid fa-handshake"></i> Shift Handover</h3><p style="margin: 5px 0 0; font-size: 12px; opacity: 0.9;">AI will summarize the last 4 days.</p>`;
+                promptWrapper.style.display = 'none'; btnFetchSummary.style.display = 'block'; btnFetchSummary.innerText = "Generating Data...";
+                promptInput.value = await compileHandoverData();
+                btnFetchSummary.innerText = "Generate Summary";
+            }
         }
 
+        function closeAIDialog() { const overlay = document.getElementById('ai-dialog'); overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 200); }
+
         async function fetchAITips() {
-            const currentNotes = document.getElementById('ai-prompt-input').value;
+            const currentNotes = document.getElementById('ai-prompt-input').value || "";
             if(!currentNotes.trim() && currentAIMode === 'advice') return showAppAlert("No Notes", "Please tell the AI what is happening with Ava first!");
             const aiBox = document.getElementById('ai-results-area'); const aiText = document.getElementById('ai-output-text'); 
             const btnFetch = currentAIMode === 'advice' ? document.getElementById('btn-fetch-ai') : document.getElementById('btn-fetch-summary');
             
+            let energyLevelText = "";
+            const energySlider = document.getElementById('trk-energy');
+            if (energySlider) {
+                energyLevelText = `The parent currently on shift has reported a Personal Burnout/Energy Level of ${energySlider.value}%. `;
+            }
+
+            let safePromptText = currentAIMode === 'advice' ? 
+                `Ava's parents are struggling to get her to sleep. ${energyLevelText}Here are tonight's notes: "${currentNotes}". Give 2 short, highly practical tips tailored to both the child's sleep and the parent's current energy level. Format as bulleted list.` 
+                : `You are creating a shift handover report for a childcare handover. ${energyLevelText}Analyze the following raw data and format it beautifully. 
+
+RULES:
+1. Separate each date clearly with a bold header (e.g. **Date: YYYY-MM-DD**).
+2. Under each date, provide a concise bulleted list of events/stats.
+3. Add a brief "**Overall Patterns**" section at the end if you notice anything (like nap lengths correlating with sleep time).
+4. Add a supportive, empathetic concluding sentence acknowledging the parent's current burnout/energy level and offering a micro-encouragement.
+
+${currentNotes}`;
+            
+            const promptHash = safePromptText.length + '_' + safePromptText.substring(0, 15).replace(/[^a-zA-Z]/g, '');
+            const cacheKey = 'ai_tips_' + currentAIMode + '_' + promptHash;
+            const cachedRes = sessionStorage.getItem(cacheKey);
+            
+            if (cachedRes) {
+                aiBox.style.display = 'block';
+                rawAIResult = cachedRes; 
+                aiText.innerHTML = rawAIResult.replace(/\n/g, '<br>');
+                const btnCopy = document.getElementById('btn-copy-ai'); 
+                btnCopy.style.display = 'block'; 
+                if(currentAIMode === 'advice') { btnCopy.innerText = "Copy to Notes"; } else { btnCopy.innerText = "Share Summary"; }
+                return;
+            }
+
             btnFetch.disabled = true; btnFetch.style.opacity = '0.5'; aiBox.style.display = 'block'; aiText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...';
+            
+            let rawPayloadStr = "";
             try {
-                const chosenModel = 'models/gemini-2.5-flash';
+                if (typeof GROQ_API_KEY === "undefined" || GROQ_API_KEY === "YOUR_GROQ_API_KEY_HERE") throw new Error("Groq API key is missing.");
                 
-                // Advanced prompt for better AI Handoff bullet rendering
-                let prompt = currentAIMode === 'advice' ? 
-                    `Ava's parents are struggling to get her to sleep. Here are tonight's notes: "${currentNotes}". Give 2 short, highly practical tips. Format as bulleted list.` 
-                    : `You are creating a shift handoff report for a childcare handoff. Analyze the following raw data and format it beautifully. \n\nRULES:\n1. Separate each date clearly with a bold header (e.g. **Date: YYYY-MM-DD**).\n2. Under each date, provide a concise bulleted list of events/stats.\n3. Add a brief "**Overall Patterns**" section at the end if you notice anything (like nap lengths correlating with sleep time).\n\n${currentNotes}`;
+                rawPayloadStr = JSON.stringify({
+                    "model": GROQ_MODEL,
+                    "messages": [{"role": "user", "content": String(safePromptText)}],
+                    "temperature": 0.5
+                });
                 
                 let response;
                 let retries = 2;
                 while(retries > 0) {
-                    response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${chosenModel}:generateContent?key=${GEMINI_API_KEY}`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'Authorization': `Bearer ${GROQ_API_KEY}` 
+                        },
+                        body: rawPayloadStr
                     });
                     if (response.status === 503) {
                         retries--;
-                        if (retries === 0) throw new Error("The AI server is experiencing heavy traffic (Error 503). Please tap the button to retry.");
-                        await new Promise(r => setTimeout(r, 2000)); // Auto-retry after 2 seconds
-                    } else {
-                        break;
-                    }
+                        if (retries === 0) throw new Error("The AI server is experiencing heavy traffic (Error 503).");
+                        await new Promise(r => setTimeout(r, 2000));
+                    } else { break; }
                 }
-                if (response.status === 429) throw new Error("Too Many Requests! Wait 1 minute before clicking again.");
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const data = await response.json(); if (data.error) throw new Error(data.error.message);
-                rawAIResult = data.candidates[0].content.parts[0].text.replace(/\*/g, ''); aiText.innerHTML = rawAIResult.replace(/\n/g, '<br>');
+                
+                if (response.status === 429) throw new Error("Too Many Requests! Wait a moment before clicking again.");
+                if (!response.ok) {
+                    const errData = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errData}`);
+                }
+                const data = await response.json(); 
+                if (data.error) throw new Error(data.error.message);
+                
+                rawAIResult = data.choices[0].message.content.replace(/\*/g, ''); 
+                aiText.innerHTML = rawAIResult.replace(/\n/g, '<br>');
+                sessionStorage.setItem(cacheKey, rawAIResult);
                 
                 const btnCopy = document.getElementById('btn-copy-ai'); 
                 btnCopy.style.display = 'block'; 
-                if(currentAIMode === 'advice') {
-                    btnCopy.innerText = "Copy to Notes";
-                } else {
-                    btnCopy.innerText = "Share Summary";
-                }
+                if(currentAIMode === 'advice') { btnCopy.innerText = "Copy to Notes"; } else { btnCopy.innerText = "Share Summary"; }
             } catch (err) {
-                let errMsg = err.message; if(errMsg.includes("Failed to fetch")) errMsg = "Network blocked.";
-                aiText.innerHTML = `<span style="color:#ef4444; display:flex; flex-direction:column; gap:8px;"><span><i class="fa-solid fa-triangle-exclamation"></i> <b>Could not reach AI.</b></span><span style="font-size:13px; font-weight:normal;"><b>Reason:</b> ${errMsg}</span></span>`;
+                let errMsg = err.message || "Unknown error"; 
+                if(errMsg.includes("Failed to fetch")) errMsg = "Network blocked. Check Wi-Fi or API limits.";
+                const errHtml = `
+                    <span style="color:#ef4444; display:flex; flex-direction:column; gap:8px; text-align: left;">
+                        <span><i class="fa-solid fa-triangle-exclamation"></i> <b>AI Connection Error</b></span>
+                        <textarea id="debug-err-text" style="width:100%; height:100px; font-size:11px; padding:8px; border:1px solid #fca5a5; border-radius:5px; background:#fef2f2; color:#7f1d1d;" readonly>ERROR MESSAGE:\n${errMsg}\n\nRAW JSON PAYLOAD SENT:\n${rawPayloadStr}</textarea>
+                        <button onclick="const ta = document.getElementById('debug-err-text'); ta.select(); document.execCommand('copy'); alert('Copied to clipboard!');" style="margin-top: 5px; padding: 8px 12px; background: #ef4444; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; width: fit-content; align-self: center;">COPY ERROR TO SEND TO DEVELOPER</button>
+                    </span>
+                `;
+                aiText.innerHTML = errHtml;
             } finally {
                 btnFetch.disabled = false; btnFetch.style.opacity = '1'; 
                 if (currentAIMode === 'advice') { btnFetch.innerHTML = '<i class="fa-solid fa-paper-plane"></i>'; }
-                else if (currentAIMode === 'handoff') { btnFetch.innerText = 'Regenerate Summary'; }
+                else if (currentAIMode === 'handover') { btnFetch.innerText = 'Regenerate Summary'; }
             }
         }
 
@@ -1819,8 +1936,198 @@
                 const prefix = "AI Advice:\n";
                 fbBox.value = fbBox.value.trim() === "" ? prefix + rawAIResult : fbBox.value + `\n\n--- ${prefix.trim()} ---\n` + rawAIResult; 
                 closeAIDialog();
-            } else { shareViaWeb(rawAIResult, "Ava's Shift Handoff"); }
+            } else { window.open(`https://wa.me/?text=${encodeURIComponent(stripEmojis(rawAIResult))}`, '_blank'); }
         }
-    </script>
+    
+// --- NEW FEATURES ---
+
+// --- PWA SETUP ---
+const pwaManifest = {
+    "name": "Ava's Four Day Care",
+    "short_name": "AvaCare",
+    "start_url": window.location.href,
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#008eb3",
+    "icons": [{
+        "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzAwOGViMyIvPjx0ZXh0IHg9IjUwIiB5PSI1NiIgZm9udC1zaXplPSIyNSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5BPC90ZXh0Pjwvc3ZnPg==",
+        "sizes": "192x192",
+        "type": "image/svg+xml"
+    }]
+};
+const manifestBlob = new Blob([JSON.stringify(pwaManifest)], { type: 'application/json' });
+document.getElementById('pwa-manifest').href = URL.createObjectURL(manifestBlob);
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const installBtn = document.getElementById('pwa-install-btn');
+    if(installBtn) installBtn.style.display = 'block';
+});
+
+function installPWA() {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            deferredPrompt = null;
+            document.getElementById('pwa-install-btn').style.display = 'none';
+        });
+    }
+}
+
+if ('serviceWorker' in navigator) {
+    const swCode = `
+        self.addEventListener('install', (e) => { e.waitUntil(self.skipWaiting()); });
+        self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+        self.addEventListener('fetch', (e) => { });
+    `;
+    const swBlob = new Blob([swCode], { type: 'application/javascript' });
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(console.error);
+}
+// -----------------
+
+
+let isRecording = false;
+let globalRecognition = null;
+
+function toggleVoiceLogging() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return showAppAlert("Mic Error", "Voice recognition requires HTTPS or is unsupported on this browser.");
+    
+    if (!globalRecognition) {
+        globalRecognition = new SpeechRecognition();
+        globalRecognition.continuous = true;
+        globalRecognition.interimResults = false;
+        
+        globalRecognition.onstart = () => {
+            isRecording = true;
+            const btn = document.getElementById('btn-mic');
+            if(btn) {
+                btn.style.color = '#ef4444'; 
+                btn.style.borderColor = '#ef4444';
+                btn.style.background = '#fee2e2';
+            }
+        };
+        
+        globalRecognition.onresult = (event) => {
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                }
+            }
+            if (finalTranscript) {
+                const noteBox = document.getElementById('modal-feedback');
+                if(noteBox) {
+                    noteBox.value += (noteBox.value ? " " : "") + finalTranscript.trim();
+                }
+            }
+        };
+        
+        globalRecognition.onend = () => {
+            isRecording = false;
+            const btn = document.getElementById('btn-mic');
+            if(btn) {
+                btn.style.color = 'var(--text-main)';
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = 'var(--input-bg)';
+            }
+        };
+        
+        globalRecognition.onerror = (event) => {
+            console.error("Voice recognition error", event.error);
+            isRecording = false;
+            const btn = document.getElementById('btn-mic');
+            if(btn) {
+                btn.style.color = 'var(--text-main)';
+                btn.style.borderColor = 'var(--border-color)';
+                btn.style.background = 'var(--input-bg)';
+            }
+        };
+    }
+    
+    if (isRecording) {
+        globalRecognition.stop();
+    } else {
+        try {
+            globalRecognition.start();
+        } catch(e) {
+            console.error("Could not start recording:", e);
+        }
+    }
+}
+
+function logSystemAudit(action) {
+    const activeOwner = getDefaultOwner(new Date().toISOString().split('T')[0]);
+    const user = activeOwner.includes("Alferenzo") ? "Alferenzo" : "Lesly";
+    const logEntry = { time: new Date().toLocaleString(), user: user, action: action };
+    let logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
+    logs.unshift(logEntry);
+    if(logs.length > 50) logs.pop(); 
+    localStorage.setItem('ava_audit_logs', JSON.stringify(logs));
+}
+
+function viewAuditLog() {
+    const logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
+    const logHtml = logs.map(l => `<div style="text-align: left; margin-bottom: 10px; font-size: 13px;"><b>${l.time}</b><br><span style="color:var(--alf-color)">${l.user}</span>: ${l.action}</div><hr style="border:0; border-top:1px solid var(--border-color);">`).join('');
+    showAppAlert("System Audit Log", logHtml || "No recent activity.");
+}
+
+
+function checkRemindersOnLoad() {
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    if (reminders.length > 0) {
+        // Show alerts if they exist
+        checkShiftReminders();
+    }
+}
+
+function checkShiftReminders() {
+    const today = new Date().toISOString().split('T')[0];
+    const owner = getDefaultOwner(today);
+    
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    
+    let reminderHtml = `<p style="font-size: 12px; font-weight: bold; color: var(--text-muted); margin-bottom: 10px;">Active Shift: ${owner}</p>`;
+    
+    reminderHtml += `<div style="display:flex; gap:5px; margin-bottom: 15px;">
+        <input type="text" id="new-reminder-input" placeholder="Type new reminder..." style="flex:1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+        <button onclick="addReminder()" style="background: var(--alf-color); color: white; border: none; border-radius: 6px; padding: 0 12px; font-weight: bold;">Add</button>
+    </div>`;
+
+    if (reminders.length === 0) {
+        reminderHtml += `<p style="text-align:center; font-size: 13px; color: var(--text-muted); font-style: italic;">No active reminders.</p>`;
+    } else {
+        reminderHtml += `<ul style="text-align:left; padding-left:0; list-style: none; margin:0;">`;
+        reminders.forEach((r, index) => {
+            reminderHtml += `<li style="margin-bottom: 8px; background: var(--input-bg); padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border: 1px solid var(--border-color);">
+                <span style="flex:1; word-break: break-word;">${r}</span>
+                <button onclick="removeReminder(${index})" style="color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 0 5px;"><i class="fa-solid fa-check-circle"></i></button>
+            </li>`;
+        });
+        reminderHtml += `</ul>`;
+    }
+    
+    showAppAlert(`Reminders Hub`, reminderHtml);
+}
+
+function addReminder() {
+    const input = document.getElementById('new-reminder-input');
+    if (!input || !input.value.trim()) return;
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    reminders.push(input.value.trim());
+    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+    checkShiftReminders();
+}
+
+function removeReminder(index) {
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    reminders.splice(index, 1);
+    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+    checkShiftReminders();
+}
+
+</script>
 </body>
-</html>
+            </html>
