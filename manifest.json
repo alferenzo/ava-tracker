@@ -1,8 +1,8 @@
 {
   "name": "Ava's Four Day Care",
   "short_name": "Ava Care",
-  "description": "Ava's Schedule and Care Tracking App",
-  "start_url": "index.html",
+  "description": "Ava's Care & Sleep Schedule",
+  "start_url": "./Index.html",
   "display": "standalone",
   "background_color": "#f0f4f8",
   "theme_color": "#008eb3",
@@ -10,14 +10,12 @@
     {
       "src": "https://cdn-icons-png.flaticon.com/512/2913/2913520.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "https://cdn-icons-png.flaticon.com/512/2913/2913520.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
