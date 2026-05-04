@@ -348,10 +348,21 @@ function toggleVoiceLogging() {
     }
 }
 
-function logSystemAudit(action) {
+async function logSystemAudit(action) {
+    let currentIp = "Unknown";
+    try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        currentIp = data.ip;
+    } catch(err) {
+        currentIp = "Blocked/Offline";
+    }
+
     const logEntry = { 
+        time: new Date().toLocaleString(),
+        action: action,
         device: navigator.userAgent.includes("Mobile") ? "Mobile Device" : "Desktop/Laptop", 
-        ip: "Tracking Active"
+        ip: currentIp
     };
     let logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
     logs.unshift(logEntry);
@@ -361,7 +372,7 @@ function logSystemAudit(action) {
 
 function viewAuditLog() {
     const logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
-    const logHtml = logs.length ? logs.map(l => `<div style="text-align: left; margin-bottom: 10px; font-size: 13px;"><b>Device:</b> ${l.device || 'Unknown'}<br><b>IP:</b> ${l.ip || 'Unknown'}</div><hr style="border:0; border-top:1px solid var(--border-color);">`).join('') : '<p>No logs found.</p>';
+    const logHtml = logs.length ? logs.map(l => `<div style="text-align: left; margin-bottom: 10px; font-size: 13px;"><b>Time:</b> ${l.time || 'N/A'}<br><b>Action:</b> ${l.action || 'System Ping'}<br><b>Device:</b> ${l.device || 'Unknown'}<br><b>IP:</b> ${l.ip || 'Unknown'}</div><hr style="border:0; border-top:1px solid var(--border-color);">`).join('') : '<p>No logs found.</p>';
     showAppAlert('System Audit Log', `<div style="max-height: 300px; overflow-y: auto;">${logHtml}</div>`);
 }
 
@@ -369,6 +380,16 @@ function viewAuditLog() {
 
 // --- PWA SETUP ---
 let deferredPrompt;
+
+// Check if it's iOS
+const isIos = () => {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  return /iphone|ipad|ipod/.test(userAgent);
+};
+
+// Check if already installed
+const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -383,12 +404,16 @@ function installPWA() {
             deferredPrompt = null;
             document.getElementById('pwa-install-btn').style.display = 'none';
         });
+    } else if (isIos() && !isInStandaloneMode()) {
+        showAppAlert("Install App", "To install on iPhone/iPad: Tap the 'Share' icon at the bottom of Safari, then tap 'Add to Home Screen'.");
+    } else {
+        showAppAlert("Install App", "App is either already installed, or your browser doesn't support automatic installation. Try 'Add to Home screen' from your browser menu.");
     }
 }
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('Service Worker Registered!', reg))
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker Registered!'))
       .catch(err => console.error('Service Worker Error!', err));
 }
 // -----------------
@@ -588,10 +613,21 @@ function toggleVoiceLogging() {
     }
 }
 
-function logSystemAudit(action) {
+async function logSystemAudit(action) {
+    let currentIp = "Unknown";
+    try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        currentIp = data.ip;
+    } catch(err) {
+        currentIp = "Blocked/Offline";
+    }
+
     const logEntry = { 
+        time: new Date().toLocaleString(),
+        action: action,
         device: navigator.userAgent.includes("Mobile") ? "Mobile Device" : "Desktop/Laptop", 
-        ip: "Tracking Active"
+        ip: currentIp
     };
     let logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
     logs.unshift(logEntry);
@@ -601,7 +637,7 @@ function logSystemAudit(action) {
 
 function viewAuditLog() {
     const logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
-    const logHtml = logs.length ? logs.map(l => `<div style="text-align: left; margin-bottom: 10px; font-size: 13px;"><b>Device:</b> ${l.device || 'Unknown'}<br><b>IP:</b> ${l.ip || 'Unknown'}</div><hr style="border:0; border-top:1px solid var(--border-color);">`).join('') : '<p>No logs found.</p>';
+    const logHtml = logs.length ? logs.map(l => `<div style="text-align: left; margin-bottom: 10px; font-size: 13px;"><b>Time:</b> ${l.time || 'N/A'}<br><b>Action:</b> ${l.action || 'System Ping'}<br><b>Device:</b> ${l.device || 'Unknown'}<br><b>IP:</b> ${l.ip || 'Unknown'}</div><hr style="border:0; border-top:1px solid var(--border-color);">`).join('') : '<p>No logs found.</p>';
     showAppAlert('System Audit Log', `<div style="max-height: 300px; overflow-y: auto;">${logHtml}</div>`);
 }
 
@@ -609,6 +645,16 @@ function viewAuditLog() {
 
 // --- PWA SETUP ---
 let deferredPrompt;
+
+// Check if it's iOS
+const isIos = () => {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  return /iphone|ipad|ipod/.test(userAgent);
+};
+
+// Check if already installed
+const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -623,12 +669,16 @@ function installPWA() {
             deferredPrompt = null;
             document.getElementById('pwa-install-btn').style.display = 'none';
         });
+    } else if (isIos() && !isInStandaloneMode()) {
+        showAppAlert("Install App", "To install on iPhone/iPad: Tap the 'Share' icon at the bottom of Safari, then tap 'Add to Home Screen'.");
+    } else {
+        showAppAlert("Install App", "App is either already installed, or your browser doesn't support automatic installation. Try 'Add to Home screen' from your browser menu.");
     }
 }
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('Service Worker Registered!', reg))
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker Registered!'))
       .catch(err => console.error('Service Worker Error!', err));
 }
 // -----------------
@@ -2112,10 +2162,21 @@ function toggleVoiceLogging() {
     }
 }
 
-function logSystemAudit(action) {
+async function logSystemAudit(action) {
+    let currentIp = "Unknown";
+    try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        currentIp = data.ip;
+    } catch(err) {
+        currentIp = "Blocked/Offline";
+    }
+
     const logEntry = { 
+        time: new Date().toLocaleString(),
+        action: action,
         device: navigator.userAgent.includes("Mobile") ? "Mobile Device" : "Desktop/Laptop", 
-        ip: "Tracking Active"
+        ip: currentIp
     };
     let logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
     logs.unshift(logEntry);
@@ -2125,7 +2186,7 @@ function logSystemAudit(action) {
 
 function viewAuditLog() {
     const logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
-    const logHtml = logs.length ? logs.map(l => `<div style="text-align: left; margin-bottom: 10px; font-size: 13px;"><b>Device:</b> ${l.device || 'Unknown'}<br><b>IP:</b> ${l.ip || 'Unknown'}</div><hr style="border:0; border-top:1px solid var(--border-color);">`).join('') : '<p>No logs found.</p>';
+    const logHtml = logs.length ? logs.map(l => `<div style="text-align: left; margin-bottom: 10px; font-size: 13px;"><b>Time:</b> ${l.time || 'N/A'}<br><b>Action:</b> ${l.action || 'System Ping'}<br><b>Device:</b> ${l.device || 'Unknown'}<br><b>IP:</b> ${l.ip || 'Unknown'}</div><hr style="border:0; border-top:1px solid var(--border-color);">`).join('') : '<p>No logs found.</p>';
     showAppAlert('System Audit Log', `<div style="max-height: 300px; overflow-y: auto;">${logHtml}</div>`);
 }
 
@@ -2133,6 +2194,16 @@ function viewAuditLog() {
 
 // --- PWA SETUP ---
 let deferredPrompt;
+
+// Check if it's iOS
+const isIos = () => {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  return /iphone|ipad|ipod/.test(userAgent);
+};
+
+// Check if already installed
+const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -2147,12 +2218,16 @@ function installPWA() {
             deferredPrompt = null;
             document.getElementById('pwa-install-btn').style.display = 'none';
         });
+    } else if (isIos() && !isInStandaloneMode()) {
+        showAppAlert("Install App", "To install on iPhone/iPad: Tap the 'Share' icon at the bottom of Safari, then tap 'Add to Home Screen'.");
+    } else {
+        showAppAlert("Install App", "App is either already installed, or your browser doesn't support automatic installation. Try 'Add to Home screen' from your browser menu.");
     }
 }
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('Service Worker Registered!', reg))
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker Registered!'))
       .catch(err => console.error('Service Worker Error!', err));
 }
 // -----------------
@@ -2277,4 +2352,4 @@ function removeReminder(index) {
 
 </script>
 </body>
-    </html>
+                                </html>
