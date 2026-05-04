@@ -2,7 +2,7 @@
     "name": "Ava's Four Day Care",
     "short_name": "AvaCare",
     "start_url": "./index.html",
-    "display": "standalone",
+    "display": "fullscreen",
     "background_color": "#ffffff",
     "theme_color": "#008eb3",
     "icons": [
