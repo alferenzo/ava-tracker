@@ -409,35 +409,84 @@ function viewAuditLog() {
 }
 
 
-function checkRemindersOnLoad() {
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    if (reminders.length > 0) {
-        // Show alerts if they exist
-        checkShiftReminders();
+// --- TIME-BASED PUSH NOTIFICATION SYSTEM ---
+function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission();
     }
+}
+
+function checkTimeBasedReminders() {
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    if (reminders.length === 0) return;
+    
+    let now = new Date();
+    let currentHours = String(now.getHours()).padStart(2, '0');
+    let currentMinutes = String(now.getMinutes()).padStart(2, '0');
+    let currentTime = `${currentHours}:${currentMinutes}`;
+    let updated = false;
+    
+    reminders.forEach(r => {
+        if (typeof r === 'object' && r.time === currentTime && !r.notified) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification("⏰ Ava Care Alert", {
+                        body: r.text,
+                        icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzAwOGViMyIvPjx0ZXh0IHg9IjUwIiB5PSI1NiIgZm9udC1zaXplPSIyNSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5BPC90ZXh0Pjwvc3ZnPg==",
+                        vibrate: [200, 100, 200, 100, 200, 100, 200]
+                    });
+                }).catch(() => {
+                    new Notification("⏰ Ava Care Alert", { body: r.text });
+                });
+            } else {
+                showAppAlert("⏰ Reminder Alert!", r.text);
+            }
+            r.notified = true;
+            updated = true;
+        }
+    });
+    
+    if (updated) {
+        localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+        // Refresh hub if it's currently open
+        if(document.getElementById('modal-title') && document.getElementById('modal-title').innerText === 'Reminders Hub') {
+            checkShiftReminders();
+        }
+    }
+}
+
+// Run the checker every 30 seconds
+setInterval(checkTimeBasedReminders, 30000);
+
+function checkRemindersOnLoad() {
+    requestNotificationPermission(); // Ask permission when app loads
+    checkTimeBasedReminders(); // Initial check
 }
 
 function checkShiftReminders() {
     const today = new Date().toISOString().split('T')[0];
     const owner = getDefaultOwner(today);
-    
     let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
     
     let reminderHtml = `<p style="font-size: 12px; font-weight: bold; color: var(--text-muted); margin-bottom: 10px;">Active Shift: ${owner}</p>`;
     
     reminderHtml += `<div style="display:flex; gap:5px; margin-bottom: 15px;">
-        <input type="text" id="new-reminder-input" placeholder="Type new reminder..." style="flex:1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+        <input type="text" id="new-reminder-input" placeholder="Note (e.g. Meds)..." style="flex:2; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+        <input type="time" id="new-reminder-time" style="flex:1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
         <button onclick="addReminder()" style="background: var(--alf-color); color: white; border: none; border-radius: 6px; padding: 0 12px; font-weight: bold;">Add</button>
     </div>`;
 
     if (reminders.length === 0) {
         reminderHtml += `<p style="text-align:center; font-size: 13px; color: var(--text-muted); font-style: italic;">No active reminders.</p>`;
     } else {
-        reminderHtml += `<ul style="text-align:left; padding-left:0; list-style: none; margin:0;">`;
+        reminderHtml += `<ul style="text-align:left; padding-left:0; list-style: none; margin:0; max-height: 250px; overflow-y: auto;">`;
         reminders.forEach((r, index) => {
+            let textLabel = typeof r === 'string' ? r : `<span style="color:var(--ai-color); font-weight:bold;">${r.time ? '⏰ ' + r.time : ''}</span> ${r.text}`;
+            let sentBadge = (typeof r === 'object' && r.notified) ? `<span style="font-size: 10px; color: white; background: var(--text-muted); padding: 2px 5px; border-radius: 10px; margin-left: 5px;">Sent</span>` : '';
+            
             reminderHtml += `<li style="margin-bottom: 8px; background: var(--input-bg); padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border: 1px solid var(--border-color);">
-                <span style="flex:1; word-break: break-word;">${r}</span>
-                <button onclick="removeReminder(${index})" style="color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 0 5px;"><i class="fa-solid fa-check-circle"></i></button>
+                <span style="flex:1; word-break: break-word;">${textLabel} ${sentBadge}</span>
+                <button onclick="removeReminder(${index})" style="color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 0 5px; margin-left: 10px;"><i class="fa-solid fa-check-circle"></i></button>
             </li>`;
         });
         reminderHtml += `</ul>`;
@@ -448,12 +497,28 @@ function checkShiftReminders() {
 
 function addReminder() {
     const input = document.getElementById('new-reminder-input');
+    const timeInput = document.getElementById('new-reminder-time');
     if (!input || !input.value.trim()) return;
+    
     let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    reminders.push(input.value.trim());
+    reminders.push({
+        text: input.value.trim(),
+        time: timeInput ? timeInput.value : "",
+        notified: false
+    });
+    
+    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+    requestNotificationPermission(); // Ensure permission is requested
+    checkShiftReminders(); // Re-render the UI
+}
+
+function removeReminder(index) {
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    reminders.splice(index, 1);
     localStorage.setItem('ava_reminders', JSON.stringify(reminders));
     checkShiftReminders();
 }
+// ------------------------------------------
 
 function removeReminder(index) {
     let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
@@ -600,35 +665,84 @@ function viewAuditLog() {
 }
 
 
-function checkRemindersOnLoad() {
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    if (reminders.length > 0) {
-        // Show alerts if they exist
-        checkShiftReminders();
+// --- TIME-BASED PUSH NOTIFICATION SYSTEM ---
+function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission();
     }
+}
+
+function checkTimeBasedReminders() {
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    if (reminders.length === 0) return;
+    
+    let now = new Date();
+    let currentHours = String(now.getHours()).padStart(2, '0');
+    let currentMinutes = String(now.getMinutes()).padStart(2, '0');
+    let currentTime = `${currentHours}:${currentMinutes}`;
+    let updated = false;
+    
+    reminders.forEach(r => {
+        if (typeof r === 'object' && r.time === currentTime && !r.notified) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification("⏰ Ava Care Alert", {
+                        body: r.text,
+                        icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzAwOGViMyIvPjx0ZXh0IHg9IjUwIiB5PSI1NiIgZm9udC1zaXplPSIyNSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5BPC90ZXh0Pjwvc3ZnPg==",
+                        vibrate: [200, 100, 200, 100, 200, 100, 200]
+                    });
+                }).catch(() => {
+                    new Notification("⏰ Ava Care Alert", { body: r.text });
+                });
+            } else {
+                showAppAlert("⏰ Reminder Alert!", r.text);
+            }
+            r.notified = true;
+            updated = true;
+        }
+    });
+    
+    if (updated) {
+        localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+        // Refresh hub if it's currently open
+        if(document.getElementById('modal-title') && document.getElementById('modal-title').innerText === 'Reminders Hub') {
+            checkShiftReminders();
+        }
+    }
+}
+
+// Run the checker every 30 seconds
+setInterval(checkTimeBasedReminders, 30000);
+
+function checkRemindersOnLoad() {
+    requestNotificationPermission(); // Ask permission when app loads
+    checkTimeBasedReminders(); // Initial check
 }
 
 function checkShiftReminders() {
     const today = new Date().toISOString().split('T')[0];
     const owner = getDefaultOwner(today);
-    
     let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
     
     let reminderHtml = `<p style="font-size: 12px; font-weight: bold; color: var(--text-muted); margin-bottom: 10px;">Active Shift: ${owner}</p>`;
     
     reminderHtml += `<div style="display:flex; gap:5px; margin-bottom: 15px;">
-        <input type="text" id="new-reminder-input" placeholder="Type new reminder..." style="flex:1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+        <input type="text" id="new-reminder-input" placeholder="Note (e.g. Meds)..." style="flex:2; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+        <input type="time" id="new-reminder-time" style="flex:1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
         <button onclick="addReminder()" style="background: var(--alf-color); color: white; border: none; border-radius: 6px; padding: 0 12px; font-weight: bold;">Add</button>
     </div>`;
 
     if (reminders.length === 0) {
         reminderHtml += `<p style="text-align:center; font-size: 13px; color: var(--text-muted); font-style: italic;">No active reminders.</p>`;
     } else {
-        reminderHtml += `<ul style="text-align:left; padding-left:0; list-style: none; margin:0;">`;
+        reminderHtml += `<ul style="text-align:left; padding-left:0; list-style: none; margin:0; max-height: 250px; overflow-y: auto;">`;
         reminders.forEach((r, index) => {
+            let textLabel = typeof r === 'string' ? r : `<span style="color:var(--ai-color); font-weight:bold;">${r.time ? '⏰ ' + r.time : ''}</span> ${r.text}`;
+            let sentBadge = (typeof r === 'object' && r.notified) ? `<span style="font-size: 10px; color: white; background: var(--text-muted); padding: 2px 5px; border-radius: 10px; margin-left: 5px;">Sent</span>` : '';
+            
             reminderHtml += `<li style="margin-bottom: 8px; background: var(--input-bg); padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border: 1px solid var(--border-color);">
-                <span style="flex:1; word-break: break-word;">${r}</span>
-                <button onclick="removeReminder(${index})" style="color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 0 5px;"><i class="fa-solid fa-check-circle"></i></button>
+                <span style="flex:1; word-break: break-word;">${textLabel} ${sentBadge}</span>
+                <button onclick="removeReminder(${index})" style="color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 0 5px; margin-left: 10px;"><i class="fa-solid fa-check-circle"></i></button>
             </li>`;
         });
         reminderHtml += `</ul>`;
@@ -639,12 +753,28 @@ function checkShiftReminders() {
 
 function addReminder() {
     const input = document.getElementById('new-reminder-input');
+    const timeInput = document.getElementById('new-reminder-time');
     if (!input || !input.value.trim()) return;
+    
     let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    reminders.push(input.value.trim());
+    reminders.push({
+        text: input.value.trim(),
+        time: timeInput ? timeInput.value : "",
+        notified: false
+    });
+    
+    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+    requestNotificationPermission(); // Ensure permission is requested
+    checkShiftReminders(); // Re-render the UI
+}
+
+function removeReminder(index) {
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    reminders.splice(index, 1);
     localStorage.setItem('ava_reminders', JSON.stringify(reminders));
     checkShiftReminders();
 }
+// ------------------------------------------
 
 function removeReminder(index) {
     let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
@@ -2075,35 +2205,84 @@ function viewAuditLog() {
 }
 
 
-function checkRemindersOnLoad() {
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    if (reminders.length > 0) {
-        // Show alerts if they exist
-        checkShiftReminders();
+// --- TIME-BASED PUSH NOTIFICATION SYSTEM ---
+function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission();
     }
+}
+
+function checkTimeBasedReminders() {
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    if (reminders.length === 0) return;
+    
+    let now = new Date();
+    let currentHours = String(now.getHours()).padStart(2, '0');
+    let currentMinutes = String(now.getMinutes()).padStart(2, '0');
+    let currentTime = `${currentHours}:${currentMinutes}`;
+    let updated = false;
+    
+    reminders.forEach(r => {
+        if (typeof r === 'object' && r.time === currentTime && !r.notified) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification("⏰ Ava Care Alert", {
+                        body: r.text,
+                        icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzAwOGViMyIvPjx0ZXh0IHg9IjUwIiB5PSI1NiIgZm9udC1zaXplPSIyNSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5BPC90ZXh0Pjwvc3ZnPg==",
+                        vibrate: [200, 100, 200, 100, 200, 100, 200]
+                    });
+                }).catch(() => {
+                    new Notification("⏰ Ava Care Alert", { body: r.text });
+                });
+            } else {
+                showAppAlert("⏰ Reminder Alert!", r.text);
+            }
+            r.notified = true;
+            updated = true;
+        }
+    });
+    
+    if (updated) {
+        localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+        // Refresh hub if it's currently open
+        if(document.getElementById('modal-title') && document.getElementById('modal-title').innerText === 'Reminders Hub') {
+            checkShiftReminders();
+        }
+    }
+}
+
+// Run the checker every 30 seconds
+setInterval(checkTimeBasedReminders, 30000);
+
+function checkRemindersOnLoad() {
+    requestNotificationPermission(); // Ask permission when app loads
+    checkTimeBasedReminders(); // Initial check
 }
 
 function checkShiftReminders() {
     const today = new Date().toISOString().split('T')[0];
     const owner = getDefaultOwner(today);
-    
     let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
     
     let reminderHtml = `<p style="font-size: 12px; font-weight: bold; color: var(--text-muted); margin-bottom: 10px;">Active Shift: ${owner}</p>`;
     
     reminderHtml += `<div style="display:flex; gap:5px; margin-bottom: 15px;">
-        <input type="text" id="new-reminder-input" placeholder="Type new reminder..." style="flex:1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+        <input type="text" id="new-reminder-input" placeholder="Note (e.g. Meds)..." style="flex:2; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
+        <input type="time" id="new-reminder-time" style="flex:1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
         <button onclick="addReminder()" style="background: var(--alf-color); color: white; border: none; border-radius: 6px; padding: 0 12px; font-weight: bold;">Add</button>
     </div>`;
 
     if (reminders.length === 0) {
         reminderHtml += `<p style="text-align:center; font-size: 13px; color: var(--text-muted); font-style: italic;">No active reminders.</p>`;
     } else {
-        reminderHtml += `<ul style="text-align:left; padding-left:0; list-style: none; margin:0;">`;
+        reminderHtml += `<ul style="text-align:left; padding-left:0; list-style: none; margin:0; max-height: 250px; overflow-y: auto;">`;
         reminders.forEach((r, index) => {
+            let textLabel = typeof r === 'string' ? r : `<span style="color:var(--ai-color); font-weight:bold;">${r.time ? '⏰ ' + r.time : ''}</span> ${r.text}`;
+            let sentBadge = (typeof r === 'object' && r.notified) ? `<span style="font-size: 10px; color: white; background: var(--text-muted); padding: 2px 5px; border-radius: 10px; margin-left: 5px;">Sent</span>` : '';
+            
             reminderHtml += `<li style="margin-bottom: 8px; background: var(--input-bg); padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border: 1px solid var(--border-color);">
-                <span style="flex:1; word-break: break-word;">${r}</span>
-                <button onclick="removeReminder(${index})" style="color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 0 5px;"><i class="fa-solid fa-check-circle"></i></button>
+                <span style="flex:1; word-break: break-word;">${textLabel} ${sentBadge}</span>
+                <button onclick="removeReminder(${index})" style="color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 0 5px; margin-left: 10px;"><i class="fa-solid fa-check-circle"></i></button>
             </li>`;
         });
         reminderHtml += `</ul>`;
@@ -2114,12 +2293,28 @@ function checkShiftReminders() {
 
 function addReminder() {
     const input = document.getElementById('new-reminder-input');
+    const timeInput = document.getElementById('new-reminder-time');
     if (!input || !input.value.trim()) return;
+    
     let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    reminders.push(input.value.trim());
+    reminders.push({
+        text: input.value.trim(),
+        time: timeInput ? timeInput.value : "",
+        notified: false
+    });
+    
+    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+    requestNotificationPermission(); // Ensure permission is requested
+    checkShiftReminders(); // Re-render the UI
+}
+
+function removeReminder(index) {
+    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    reminders.splice(index, 1);
     localStorage.setItem('ava_reminders', JSON.stringify(reminders));
     checkShiftReminders();
 }
+// ------------------------------------------
 
 function removeReminder(index) {
     let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
@@ -2130,4 +2325,4 @@ function removeReminder(index) {
 
 </script>
 </body>
-    </html>
+                </html>
