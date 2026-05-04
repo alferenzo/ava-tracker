@@ -144,11 +144,11 @@
         .cal-cell.lesly-shift { background: var(--lesly-bg); color: var(--lesly-color); border: 2px solid rgba(219, 39, 119, 0.2); }
         .cal-cell.today::after { content: ''; position: absolute; bottom: 4px; width: 6px; height: 6px; border-radius: 50%; background-color: var(--text-main); }
 
-        .overview-card { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-top: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); border: 1px solid var(--border-color); display: none; }
+        .overview-card { background: var(--card-bg); border-radius: 16px; padding: 12px; margin-top: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid var(--border-color); display: none; }
         .overview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .overview-title { font-size: 16px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
         .overview-badge { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 10px; }
-        .overview-info { background: var(--input-bg); border-radius: 14px; padding: 15px; border: 1px solid var(--border-color); margin-bottom: 15px; display: flex; align-items: center; gap: 12px; }
+        .overview-info { background: var(--input-bg); border-radius: 10px; padding: 10px 12px; border: 1px solid var(--border-color); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
 
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: flex-end; z-index: 100; opacity: 0; transition: opacity 0.15s ease-out; }
         
@@ -272,536 +272,8 @@
         .potty-delete { color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 5px; }
     </style>
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js">
-// --- NEW FEATURES ---
-
-
-
-
-let isRecording = false;
-let globalRecognition = null;
-
-function toggleVoiceLogging() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return showAppAlert("Mic Error", "Voice recognition requires HTTPS or is unsupported on this browser.");
-    
-    if (!globalRecognition) {
-        globalRecognition = new SpeechRecognition();
-        globalRecognition.continuous = true;
-        globalRecognition.interimResults = false;
-        
-        globalRecognition.onstart = () => {
-            isRecording = true;
-            const btn = document.getElementById('btn-mic');
-            if(btn) {
-                btn.style.color = '#ef4444'; 
-                btn.style.borderColor = '#ef4444';
-                btn.style.background = '#fee2e2';
-            }
-        };
-        
-        globalRecognition.onresult = (event) => {
-            let finalTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript;
-                }
-            }
-            if (finalTranscript) {
-                const noteBox = document.getElementById('modal-feedback');
-                if(noteBox) {
-                    noteBox.value += (noteBox.value ? " " : "") + finalTranscript.trim();
-                }
-            }
-        };
-        
-        globalRecognition.onend = () => {
-            isRecording = false;
-            const btn = document.getElementById('btn-mic');
-            if(btn) {
-                btn.style.color = 'var(--text-main)';
-                btn.style.borderColor = 'var(--border-color)';
-                btn.style.background = 'var(--input-bg)';
-            }
-        };
-        
-        globalRecognition.onerror = (event) => {
-            console.error("Voice recognition error", event.error);
-            isRecording = false;
-            const btn = document.getElementById('btn-mic');
-            if(btn) {
-                btn.style.color = 'var(--text-main)';
-                btn.style.borderColor = 'var(--border-color)';
-                btn.style.background = 'var(--input-bg)';
-            }
-        };
-    }
-    
-    if (isRecording) {
-        globalRecognition.stop();
-    } else {
-        try {
-            globalRecognition.start();
-        } catch(e) {
-            console.error("Could not start recording:", e);
-        }
-    }
-}
-
-async function logSystemAudit(action) {
-    let currentIp = "Unknown";
-    try {
-        const res = await fetch('https://api.ipify.org?format=json');
-        const data = await res.json();
-        currentIp = data.ip;
-    } catch(err) {
-        currentIp = "Blocked/Offline";
-    }
-
-    const logEntry = { 
-        time: new Date().toLocaleString(),
-        action: action,
-        device: navigator.userAgent.includes("Mobile") ? "Mobile Device" : "Desktop/Laptop", 
-        ip: currentIp
-    };
-    let logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
-    logs.unshift(logEntry);
-    if(logs.length > 50) logs.pop();
-    localStorage.setItem('ava_audit_logs', JSON.stringify(logs));
-}
-
-function viewAuditLog() {
-    const logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
-    const logHtml = logs.length ? logs.map(l => `<div style="text-align: left; margin-bottom: 10px; font-size: 13px;"><b>Time:</b> ${l.time || 'N/A'}<br><b>Action:</b> ${l.action || 'System Ping'}<br><b>Device:</b> ${l.device || 'Unknown'}<br><b>IP:</b> ${l.ip || 'Unknown'}</div><hr style="border:0; border-top:1px solid var(--border-color);">`).join('') : '<p>No logs found.</p>';
-    showAppAlert('System Audit Log', `<div style="max-height: 300px; overflow-y: auto;">${logHtml}</div>`);
-}
-
-
-
-// --- PWA SETUP ---
-let deferredPrompt;
-
-// Check if it's iOS
-const isIos = () => {
-  const userAgent = window.navigator.userAgent.toLowerCase();
-  return /iphone|ipad|ipod/.test(userAgent);
-};
-
-// Check if already installed
-const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    const installBtn = document.getElementById('pwa-install-btn');
-    if(installBtn) installBtn.style.display = 'block';
-});
-
-function installPWA() {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            deferredPrompt = null;
-            document.getElementById('pwa-install-btn').style.display = 'none';
-        });
-    } else if (isIos() && !isInStandaloneMode()) {
-        showAppAlert("Install App", "To install on iPhone/iPad: Tap the 'Share' icon at the bottom of Safari, then tap 'Add to Home Screen'.");
-    } else {
-        showAppAlert("Install App", "App is either already installed, or your browser doesn't support automatic installation. Try 'Add to Home screen' from your browser menu.");
-    }
-}
-
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('Service Worker Registered!'))
-      .catch(err => console.error('Service Worker Error!', err));
-}
-// -----------------
-
-// --- TIME-BASED PUSH NOTIFICATION SYSTEM ---
-function requestNotificationPermission() {
-    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-        Notification.requestPermission();
-    }
-}
-
-function checkTimeBasedReminders() {
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    if (reminders.length === 0) return;
-    
-    let now = new Date();
-    let currentHours = String(now.getHours()).padStart(2, '0');
-    let currentMinutes = String(now.getMinutes()).padStart(2, '0');
-    let currentTime = `${currentHours}:${currentMinutes}`;
-    let updated = false;
-    
-    reminders.forEach(r => {
-        if (typeof r === 'object' && r.time === currentTime && !r.notified) {
-            if ('Notification' in window && Notification.permission === 'granted') {
-                navigator.serviceWorker.ready.then(registration => {
-                    registration.showNotification("⏰ Ava Care Alert", {
-                        body: r.text,
-                        icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzAwOGViMyIvPjx0ZXh0IHg9IjUwIiB5PSI1NiIgZm9udC1zaXplPSIyNSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5BPC90ZXh0Pjwvc3ZnPg==",
-                        vibrate: [200, 100, 200, 100, 200, 100, 200]
-                    });
-                }).catch(() => {
-                    new Notification("⏰ Ava Care Alert", { body: r.text });
-                });
-            } else {
-                showAppAlert("⏰ Reminder Alert!", r.text);
-            }
-            r.notified = true;
-            updated = true;
-        }
-    });
-    
-    if (updated) {
-        localStorage.setItem('ava_reminders', JSON.stringify(reminders));
-        // Refresh hub if it's currently open
-        if(document.getElementById('modal-title') && document.getElementById('modal-title').innerText === 'Reminders Hub') {
-            checkShiftReminders();
-        }
-    }
-}
-
-// Run the checker every 30 seconds
-setInterval(checkTimeBasedReminders, 30000);
-
-function checkRemindersOnLoad() {
-    requestNotificationPermission(); // Ask permission when app loads
-    checkTimeBasedReminders(); // Initial check
-}
-
-function checkShiftReminders() {
-    const today = new Date().toISOString().split('T')[0];
-    const owner = getDefaultOwner(today);
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    
-    let reminderHtml = `<p style="font-size: 12px; font-weight: bold; color: var(--text-muted); margin-bottom: 10px;">Active Shift: ${owner}</p>`;
-    
-    reminderHtml += `<div style="display:flex; gap:5px; margin-bottom: 15px;">
-        <input type="text" id="new-reminder-input" placeholder="Note (e.g. Meds)..." style="flex:2; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
-        <input type="time" id="new-reminder-time" style="flex:1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
-        <button onclick="addReminder()" style="background: var(--alf-color); color: white; border: none; border-radius: 6px; padding: 0 12px; font-weight: bold;">Add</button>
-    </div>`;
-
-    if (reminders.length === 0) {
-        reminderHtml += `<p style="text-align:center; font-size: 13px; color: var(--text-muted); font-style: italic;">No active reminders.</p>`;
-    } else {
-        reminderHtml += `<ul style="text-align:left; padding-left:0; list-style: none; margin:0; max-height: 250px; overflow-y: auto;">`;
-        reminders.forEach((r, index) => {
-            let textLabel = typeof r === 'string' ? r : `<span style="color:var(--ai-color); font-weight:bold;">${r.time ? '⏰ ' + r.time : ''}</span> ${r.text}`;
-            let sentBadge = (typeof r === 'object' && r.notified) ? `<span style="font-size: 10px; color: white; background: var(--text-muted); padding: 2px 5px; border-radius: 10px; margin-left: 5px;">Sent</span>` : '';
-            
-            reminderHtml += `<li style="margin-bottom: 8px; background: var(--input-bg); padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border: 1px solid var(--border-color);">
-                <span style="flex:1; word-break: break-word;">${textLabel} ${sentBadge}</span>
-                <button onclick="removeReminder(${index})" style="color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 0 5px; margin-left: 10px;"><i class="fa-solid fa-check-circle"></i></button>
-            </li>`;
-        });
-        reminderHtml += `</ul>`;
-    }
-    
-    showAppAlert(`Reminders Hub`, reminderHtml);
-}
-
-function addReminder() {
-    const input = document.getElementById('new-reminder-input');
-    const timeInput = document.getElementById('new-reminder-time');
-    if (!input || !input.value.trim()) return;
-    
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    reminders.push({
-        text: input.value.trim(),
-        time: timeInput ? timeInput.value : "",
-        notified: false
-    });
-    
-    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
-    requestNotificationPermission(); // Ensure permission is requested
-    checkShiftReminders(); // Re-render the UI
-}
-
-function removeReminder(index) {
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    reminders.splice(index, 1);
-    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
-    checkShiftReminders();
-}
-// ------------------------------------------
-
-function removeReminder(index) {
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    reminders.splice(index, 1);
-    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
-    checkShiftReminders();
-}
-
-</script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js">
-// --- NEW FEATURES ---
-
-
-
-
-let isRecording = false;
-let globalRecognition = null;
-
-function toggleVoiceLogging() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return showAppAlert("Mic Error", "Voice recognition requires HTTPS or is unsupported on this browser.");
-    
-    if (!globalRecognition) {
-        globalRecognition = new SpeechRecognition();
-        globalRecognition.continuous = true;
-        globalRecognition.interimResults = false;
-        
-        globalRecognition.onstart = () => {
-            isRecording = true;
-            const btn = document.getElementById('btn-mic');
-            if(btn) {
-                btn.style.color = '#ef4444'; 
-                btn.style.borderColor = '#ef4444';
-                btn.style.background = '#fee2e2';
-            }
-        };
-        
-        globalRecognition.onresult = (event) => {
-            let finalTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript;
-                }
-            }
-            if (finalTranscript) {
-                const noteBox = document.getElementById('modal-feedback');
-                if(noteBox) {
-                    noteBox.value += (noteBox.value ? " " : "") + finalTranscript.trim();
-                }
-            }
-        };
-        
-        globalRecognition.onend = () => {
-            isRecording = false;
-            const btn = document.getElementById('btn-mic');
-            if(btn) {
-                btn.style.color = 'var(--text-main)';
-                btn.style.borderColor = 'var(--border-color)';
-                btn.style.background = 'var(--input-bg)';
-            }
-        };
-        
-        globalRecognition.onerror = (event) => {
-            console.error("Voice recognition error", event.error);
-            isRecording = false;
-            const btn = document.getElementById('btn-mic');
-            if(btn) {
-                btn.style.color = 'var(--text-main)';
-                btn.style.borderColor = 'var(--border-color)';
-                btn.style.background = 'var(--input-bg)';
-            }
-        };
-    }
-    
-    if (isRecording) {
-        globalRecognition.stop();
-    } else {
-        try {
-            globalRecognition.start();
-        } catch(e) {
-            console.error("Could not start recording:", e);
-        }
-    }
-}
-
-async function logSystemAudit(action) {
-    let currentIp = "Unknown";
-    try {
-        const res = await fetch('https://api.ipify.org?format=json');
-        const data = await res.json();
-        currentIp = data.ip;
-    } catch(err) {
-        currentIp = "Blocked/Offline";
-    }
-
-    const logEntry = { 
-        time: new Date().toLocaleString(),
-        action: action,
-        device: navigator.userAgent.includes("Mobile") ? "Mobile Device" : "Desktop/Laptop", 
-        ip: currentIp
-    };
-    let logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
-    logs.unshift(logEntry);
-    if(logs.length > 50) logs.pop();
-    localStorage.setItem('ava_audit_logs', JSON.stringify(logs));
-}
-
-function viewAuditLog() {
-    const logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
-    const logHtml = logs.length ? logs.map(l => `<div style="text-align: left; margin-bottom: 10px; font-size: 13px;"><b>Time:</b> ${l.time || 'N/A'}<br><b>Action:</b> ${l.action || 'System Ping'}<br><b>Device:</b> ${l.device || 'Unknown'}<br><b>IP:</b> ${l.ip || 'Unknown'}</div><hr style="border:0; border-top:1px solid var(--border-color);">`).join('') : '<p>No logs found.</p>';
-    showAppAlert('System Audit Log', `<div style="max-height: 300px; overflow-y: auto;">${logHtml}</div>`);
-}
-
-
-
-// --- PWA SETUP ---
-let deferredPrompt;
-
-// Check if it's iOS
-const isIos = () => {
-  const userAgent = window.navigator.userAgent.toLowerCase();
-  return /iphone|ipad|ipod/.test(userAgent);
-};
-
-// Check if already installed
-const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    const installBtn = document.getElementById('pwa-install-btn');
-    if(installBtn) installBtn.style.display = 'block';
-});
-
-function installPWA() {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            deferredPrompt = null;
-            document.getElementById('pwa-install-btn').style.display = 'none';
-        });
-    } else if (isIos() && !isInStandaloneMode()) {
-        showAppAlert("Install App", "To install on iPhone/iPad: Tap the 'Share' icon at the bottom of Safari, then tap 'Add to Home Screen'.");
-    } else {
-        showAppAlert("Install App", "App is either already installed, or your browser doesn't support automatic installation. Try 'Add to Home screen' from your browser menu.");
-    }
-}
-
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('Service Worker Registered!'))
-      .catch(err => console.error('Service Worker Error!', err));
-}
-// -----------------
-
-// --- TIME-BASED PUSH NOTIFICATION SYSTEM ---
-function requestNotificationPermission() {
-    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-        Notification.requestPermission();
-    }
-}
-
-function checkTimeBasedReminders() {
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    if (reminders.length === 0) return;
-    
-    let now = new Date();
-    let currentHours = String(now.getHours()).padStart(2, '0');
-    let currentMinutes = String(now.getMinutes()).padStart(2, '0');
-    let currentTime = `${currentHours}:${currentMinutes}`;
-    let updated = false;
-    
-    reminders.forEach(r => {
-        if (typeof r === 'object' && r.time === currentTime && !r.notified) {
-            if ('Notification' in window && Notification.permission === 'granted') {
-                navigator.serviceWorker.ready.then(registration => {
-                    registration.showNotification("⏰ Ava Care Alert", {
-                        body: r.text,
-                        icon: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iIzAwOGViMyIvPjx0ZXh0IHg9IjUwIiB5PSI1NiIgZm9udC1zaXplPSIyNSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5BPC90ZXh0Pjwvc3ZnPg==",
-                        vibrate: [200, 100, 200, 100, 200, 100, 200]
-                    });
-                }).catch(() => {
-                    new Notification("⏰ Ava Care Alert", { body: r.text });
-                });
-            } else {
-                showAppAlert("⏰ Reminder Alert!", r.text);
-            }
-            r.notified = true;
-            updated = true;
-        }
-    });
-    
-    if (updated) {
-        localStorage.setItem('ava_reminders', JSON.stringify(reminders));
-        // Refresh hub if it's currently open
-        if(document.getElementById('modal-title') && document.getElementById('modal-title').innerText === 'Reminders Hub') {
-            checkShiftReminders();
-        }
-    }
-}
-
-// Run the checker every 30 seconds
-setInterval(checkTimeBasedReminders, 30000);
-
-function checkRemindersOnLoad() {
-    requestNotificationPermission(); // Ask permission when app loads
-    checkTimeBasedReminders(); // Initial check
-}
-
-function checkShiftReminders() {
-    const today = new Date().toISOString().split('T')[0];
-    const owner = getDefaultOwner(today);
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    
-    let reminderHtml = `<p style="font-size: 12px; font-weight: bold; color: var(--text-muted); margin-bottom: 10px;">Active Shift: ${owner}</p>`;
-    
-    reminderHtml += `<div style="display:flex; gap:5px; margin-bottom: 15px;">
-        <input type="text" id="new-reminder-input" placeholder="Note (e.g. Meds)..." style="flex:2; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
-        <input type="time" id="new-reminder-time" style="flex:1; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;">
-        <button onclick="addReminder()" style="background: var(--alf-color); color: white; border: none; border-radius: 6px; padding: 0 12px; font-weight: bold;">Add</button>
-    </div>`;
-
-    if (reminders.length === 0) {
-        reminderHtml += `<p style="text-align:center; font-size: 13px; color: var(--text-muted); font-style: italic;">No active reminders.</p>`;
-    } else {
-        reminderHtml += `<ul style="text-align:left; padding-left:0; list-style: none; margin:0; max-height: 250px; overflow-y: auto;">`;
-        reminders.forEach((r, index) => {
-            let textLabel = typeof r === 'string' ? r : `<span style="color:var(--ai-color); font-weight:bold;">${r.time ? '⏰ ' + r.time : ''}</span> ${r.text}`;
-            let sentBadge = (typeof r === 'object' && r.notified) ? `<span style="font-size: 10px; color: white; background: var(--text-muted); padding: 2px 5px; border-radius: 10px; margin-left: 5px;">Sent</span>` : '';
-            
-            reminderHtml += `<li style="margin-bottom: 8px; background: var(--input-bg); padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border: 1px solid var(--border-color);">
-                <span style="flex:1; word-break: break-word;">${textLabel} ${sentBadge}</span>
-                <button onclick="removeReminder(${index})" style="color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 0 5px; margin-left: 10px;"><i class="fa-solid fa-check-circle"></i></button>
-            </li>`;
-        });
-        reminderHtml += `</ul>`;
-    }
-    
-    showAppAlert(`Reminders Hub`, reminderHtml);
-}
-
-function addReminder() {
-    const input = document.getElementById('new-reminder-input');
-    const timeInput = document.getElementById('new-reminder-time');
-    if (!input || !input.value.trim()) return;
-    
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    reminders.push({
-        text: input.value.trim(),
-        time: timeInput ? timeInput.value : "",
-        notified: false
-    });
-    
-    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
-    requestNotificationPermission(); // Ensure permission is requested
-    checkShiftReminders(); // Re-render the UI
-}
-
-function removeReminder(index) {
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    reminders.splice(index, 1);
-    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
-    checkShiftReminders();
-}
-// ------------------------------------------
-
-function removeReminder(index) {
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    reminders.splice(index, 1);
-    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
-    checkShiftReminders();
-}
-
-</script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 
 <body>
@@ -819,6 +291,7 @@ function removeReminder(index) {
             <button class="header-btn" onclick="toggleSidebar()" style="width: 32px; height: 32px;"><i class="fa-solid fa-times"></i></button>
         </div>
         <div class="sidebar-menu">
+            <div class="sidebar-item" id="pwa-install-btn" onclick="installPWA(); toggleSidebar();"><i class="fa-solid fa-download" style="width:25px;"></i> Install App</div>
             <div class="sidebar-item" onclick="openDashboard(); toggleSidebar();"><i class="fa-solid fa-chart-line" style="width:25px;"></i> AI Analytics</div>
             <div class="sidebar-item" onclick="toggleSidebar(); openPottyTracker();"><i class="fa-solid fa-toilet" style="width:25px;"></i> Potty Pro</div>
             <div class="sidebar-item" onclick="toggleSidebar(); openScheduleSettings();"><i class="fa-solid fa-calendar-days" style="width:25px;"></i> Reset 4-Day Cycle</div>
@@ -854,32 +327,32 @@ function removeReminder(index) {
             </div>
             
             <!-- TODAY OVERVIEW WIDGET -->
-            <div class="overview-card" id="today-overview-card" style="display: block;">
-                <div class="overview-header">
-                    <div class="overview-title"><i class="fa-solid fa-clock"></i> Today's Summary</div>
-                    <div class="overview-badge" id="overview-owner-badge" style="background-color: var(--alf-bg); color: var(--alf-color);">Owner</div>
+            <div class="overview-card" id="today-overview-card" style="display: block; padding: 12px; margin-top: 10px;">
+                <div class="overview-header" style="margin-bottom: 8px;">
+                    <div class="overview-title" style="font-size: 14px;"><i class="fa-solid fa-clock"></i> Today's Summary</div>
+                    <div class="overview-badge" id="overview-owner-badge" style="background-color: var(--alf-bg); color: var(--alf-color); font-size: 11px; padding: 3px 8px;">Owner</div>
                 </div>
                 
-                <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-                    <div style="flex: 1; background: var(--input-bg); border-radius: 12px; padding: 10px 5px; border: 1px solid var(--border-color); text-align: center;">
-                        <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-sun" style="color: #f59e0b;"></i> Woke</div>
-                        <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-top: 4px;" id="ov-morning">--:--</div>
+                <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                    <div style="flex: 1; background: var(--input-bg); border-radius: 10px; padding: 6px 4px; border: 1px solid var(--border-color); text-align: center;">
+                        <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-sun" style="color: #f59e0b;"></i> Woke</div>
+                        <div style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="ov-morning">--:--</div>
                     </div>
-                    <div style="flex: 1; background: var(--input-bg); border-radius: 12px; padding: 10px 5px; border: 1px solid var(--border-color); text-align: center;">
-                        <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-bed" style="color: #3b82f6;"></i> Nap</div>
-                        <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-top: 4px;" id="ov-nap">--</div>
+                    <div style="flex: 1; background: var(--input-bg); border-radius: 10px; padding: 6px 4px; border: 1px solid var(--border-color); text-align: center;">
+                        <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-bed" style="color: #3b82f6;"></i> Nap</div>
+                        <div style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="ov-nap">--</div>
                     </div>
-                    <div style="flex: 1; background: var(--input-bg); border-radius: 12px; padding: 10px 5px; border: 1px solid var(--border-color); text-align: center;">
-                        <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-bath" style="color: #3b82f6;"></i> Bath</div>
-                        <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-top: 4px;" id="ov-bath">--</div>
+                    <div style="flex: 1; background: var(--input-bg); border-radius: 10px; padding: 6px 4px; border: 1px solid var(--border-color); text-align: center;">
+                        <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-bath" style="color: #3b82f6;"></i> Bath</div>
+                        <div style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="ov-bath">--</div>
                     </div>
                 </div>
 
-                <div class="overview-info" style="margin-bottom: 0;">
-                    <i class="fa-solid fa-moon" style="font-size:24px; color:var(--ai-color);"></i>
+                <div class="overview-info" style="margin-bottom: 0; padding: 10px 12px; border-radius: 10px;">
+                    <i class="fa-solid fa-moon" style="font-size:18px; color:var(--ai-color);"></i>
                     <div style="flex:1;">
-                        <div style="font-size:12px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Recommended Bedtime</div>
-                        <div style="font-size:16px; font-weight:800; color:var(--text-main);" id="overview-target-time"><i class="fa-solid fa-sparkles fa-beat" style="color:var(--ai-color);"></i> AI Calc...</div>
+                        <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Recommended Bedtime</div>
+                        <div style="font-size:14px; font-weight:800; color:var(--text-main);" id="overview-target-time"><i class="fa-solid fa-sparkles fa-beat" style="color:var(--ai-color);"></i> AI Calc...</div>
                     </div>
                 </div>
             </div>
@@ -2352,4 +1825,4 @@ function removeReminder(index) {
 
 </script>
 </body>
-                                </html>
+                        </html>
