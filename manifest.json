@@ -2,7 +2,7 @@
   "name": "Ava's Four Day Care",
   "short_name": "Ava's Four Day",
   "description": "Ava's Care & Sleep Schedule",
-  "start_url": "./Index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f0f4f8",
   "theme_color": "#008eb3",
