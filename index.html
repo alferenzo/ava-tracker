@@ -1197,14 +1197,36 @@
             } catch(e) { return null; }
         }
 
-        async function updateTodayOverview() {
-            const localTodayStr = getLocalISODate(new Date()); 
+        
+        let currentOverviewDate = new Date(); // Track the date currently shown on the dashboard
+
+        async function updateTodayOverview(dateObj = null) {
+            if (!dateObj) dateObj = new Date();
+            currentOverviewDate = dateObj;
+            
+            const localStr = getLocalISODate(dateObj); 
+            const todayStr = getLocalISODate(new Date());
+            
             const allRecs = await appDB.getAllRecords();
-            let activeOwner = allRecs[localTodayStr]?.owner || getDefaultOwner(localTodayStr);
+            let activeOwner = allRecs[localStr]?.owner || getDefaultOwner(localStr);
 
             const overviewCard = document.getElementById('today-overview-card');
             if(activeOwner === "DELETED") return overviewCard.style.display = 'none';
             overviewCard.style.display = 'block';
+            
+            // Update the title to reflect the date
+            let titleText = "Today's Summary";
+            if (localStr !== todayStr) {
+                const diffTime = new Date().getTime() - dateObj.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays === 1) titleText = "Yesterday's Summary";
+                else if (diffDays === -1) titleText = "Tomorrow's Summary";
+                else titleText = formatCustomDate(localStr) + " Summary";
+            }
+            
+            // Update DOM title
+            const titleEl = overviewCard.querySelector('.overview-title');
+            if(titleEl) titleEl.innerHTML = `<i class="fa-solid fa-clock"></i> ${titleText}`;
 
             const ownerBadge = document.getElementById('overview-owner-badge'); 
             const isAlf = activeOwner.toLowerCase().includes('alferenzo');
@@ -1212,7 +1234,7 @@
             ownerBadge.style.backgroundColor = isAlf ? 'var(--alf-bg)' : 'var(--lesly-bg)'; 
             ownerBadge.style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
 
-            const localRec = allRecs[localTodayStr] || {};
+            const localRec = allRecs[localStr] || {};
             let trks = localRec.trackers || {};
             document.getElementById('ov-morning').innerText = trks.morningWake || '--:--';
             document.getElementById('ov-nap').innerText = trks.nap ? (trks.nap === '0' ? "None" : trks.nap + "h") : "--";
@@ -1226,6 +1248,44 @@
                 document.getElementById('overview-target-time').innerText = "19:00 (Standard)";
             }
         }
+        
+        // --- SWIPE LOGIC FOR OVERVIEW CARD ---
+        let overviewTouchStartX = 0;
+        let overviewTouchEndX = 0;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const overviewCard = document.getElementById('today-overview-card');
+            if(overviewCard) {
+                overviewCard.addEventListener('touchstart', e => {
+                    overviewTouchStartX = e.changedTouches[0].screenX;
+                }, {passive: true});
+                
+                overviewCard.addEventListener('touchend', e => {
+                    overviewTouchEndX = e.changedTouches[0].screenX;
+                    handleOverviewSwipe();
+                }, {passive: true});
+            }
+        });
+        
+        function handleOverviewSwipe() {
+            const threshold = 50; // Minimum distance to be considered a swipe
+            if (overviewTouchEndX < overviewTouchStartX - threshold) {
+                // Swiped Left -> Go forward in time (up to today, or tomorrow)
+                let nextDay = new Date(currentOverviewDate);
+                nextDay.setDate(nextDay.getDate() + 1);
+                // Optional: prevent going into future by checking against today
+                // const today = new Date();
+                // if (nextDay <= today) {
+                updateTodayOverview(nextDay);
+                // }
+            } else if (overviewTouchEndX > overviewTouchStartX + threshold) {
+                // Swiped Right -> Go back in time (yesterday)
+                let prevDay = new Date(currentOverviewDate);
+                prevDay.setDate(prevDay.getDate() - 1);
+                updateTodayOverview(prevDay);
+            }
+        }
+
 
         function setTracker(type, val) {
             currentTrackers[type] = val;
