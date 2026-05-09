@@ -340,15 +340,15 @@
                 </div>
                 
                 <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-                    <div style="flex: 1; background: var(--input-bg); border-radius: 10px; padding: 6px 4px; border: 1px solid var(--border-color); text-align: center;">
+                    <div onclick="openModalAndFocus('morningWake')" style="flex: 1; background: var(--input-bg); border-radius: 10px; padding: 6px 4px; border: 1px solid var(--border-color); text-align: center; cursor: pointer; transition: transform 0.1s;" onactive="this.style.transform='scale(0.95)'">
                         <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-sun" style="color: #f59e0b;"></i> Woke</div>
                         <div style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="ov-morning">--:--</div>
                     </div>
-                    <div style="flex: 1; background: var(--input-bg); border-radius: 10px; padding: 6px 4px; border: 1px solid var(--border-color); text-align: center;">
+                    <div onclick="openModalAndFocus('nap')" style="flex: 1; background: var(--input-bg); border-radius: 10px; padding: 6px 4px; border: 1px solid var(--border-color); text-align: center; cursor: pointer; transition: transform 0.1s;" onactive="this.style.transform='scale(0.95)'">
                         <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-bed" style="color: #3b82f6;"></i> Nap</div>
                         <div style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="ov-nap">--</div>
                     </div>
-                    <div style="flex: 1; background: var(--input-bg); border-radius: 10px; padding: 6px 4px; border: 1px solid var(--border-color); text-align: center;">
+                    <div onclick="openModalAndFocus('rtnBath')" style="flex: 1; background: var(--input-bg); border-radius: 10px; padding: 6px 4px; border: 1px solid var(--border-color); text-align: center; cursor: pointer; transition: transform 0.1s;" onactive="this.style.transform='scale(0.95)'">
                         <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-bath" style="color: #3b82f6;"></i> Bath</div>
                         <div style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="ov-bath">--</div>
                     </div>
@@ -924,53 +924,102 @@
             if (activeSoundNode) { try { activeSoundNode.stop(); activeSoundNode.disconnect(); } catch(e){} activeSoundNode = null; }
             isAudioPlaying = false; document.getElementById('btn-sound').classList.remove('playing'); document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-play"></i>';
         }
-        function playAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+        // --- AUDIO GENERATION TO BLOB FOR BACKGROUND PLAYBACK ---
+        function audioBufferToWav(buffer) {
+            const numOfChan = buffer.numberOfChannels, length = buffer.length * numOfChan * 2 + 44;
+            const arrayBuffer = new ArrayBuffer(length), view = new DataView(arrayBuffer);
+            const channels = [], sampleRate = buffer.sampleRate;
+            let offset = 0, pos = 0;
+            const setUint16 = data => { view.setUint16(pos, data, true); pos += 2; };
+            const setUint32 = data => { view.setUint32(pos, data, true); pos += 4; };
+            setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157); setUint32(0x20746d66);
+            setUint32(16); setUint16(1); setUint16(numOfChan); setUint32(sampleRate);
+            setUint32(sampleRate * 2 * numOfChan); setUint16(numOfChan * 2); setUint16(16);
+            setUint32(0x61746164); setUint32(length - pos - 4);
+            for (let i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
+            while (offset < buffer.length) {
+                for (let i = 0; i < numOfChan; i++) {
+                    let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+                    view.setInt16(pos, sample, true); pos += 2;
+                }
+                offset++;
+            }
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        async function playAudio() {
+            if (isAudioPlaying) return;
+            const btn = document.getElementById('btn-sound');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; // Loading state
+
+            const type = document.getElementById('sound-type').value; 
+            const sampleRate = 44100;
             
-            const keepAlive = document.getElementById('keep-alive-audio');
-            if (keepAlive) {
-                keepAlive.play().catch(e => console.log('Keep-alive audio failed', e));
+            // Generate a 2-second perfectly loopable chunk of noise. 
+            // Womb noise LFO is 1.2Hz. 2 seconds is 2.4 cycles... let's use 2.5 seconds (exactly 3 cycles of 1.2Hz).
+            const duration = type === 'womb' ? 2.5 : 2.0; 
+            
+            const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, sampleRate * duration, sampleRate);
+            const bufferSize = offlineCtx.sampleRate * duration;
+            let buffer = offlineCtx.createBuffer(1, bufferSize, offlineCtx.sampleRate);
+            let output = buffer.getChannelData(0);
+            
+            let b0=0, b1=0, b2=0, b3=0, b4=0, b5=0, b6=0;
+            for (let i = 0; i < bufferSize; i++) {
+                let white = Math.random() * 2 - 1;
+                if (type === 'white') output[i] = white;
+                else if (type === 'brown') { b0 = (b0 + (0.02 * white)) / 1.02; output[i] = b0 * 3.5; }
+                else if (type === 'pink') { b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520; b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980; output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11; b6 = white * 0.115926; }
+                else if (type === 'womb') { b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520; b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980; output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11; b6 = white * 0.115926; }
+            }
+            
+            let noiseSrc = offlineCtx.createBufferSource();
+            noiseSrc.buffer = buffer;
+            noiseSrc.loop = true;
+            
+            if (type === 'womb') {
+                let filter = offlineCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 350;
+                let lfo = offlineCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 1.2;
+                let lfoGain = offlineCtx.createGain(); lfoGain.gain.value = 150;
+                lfo.connect(lfoGain); lfoGain.connect(filter.frequency);
+                let gainNode = offlineCtx.createGain(); gainNode.gain.value = 1.5;
+                noiseSrc.connect(filter).connect(gainNode).connect(offlineCtx.destination);
+                lfo.start(); noiseSrc.start();
+            } else {
+                let gainNode = offlineCtx.createGain(); gainNode.gain.value = type === 'white' ? 0.05 : 0.1;
+                noiseSrc.connect(gainNode).connect(offlineCtx.destination);
+                noiseSrc.start();
+            }
+            
+            const renderedBuffer = await offlineCtx.startRendering();
+            const wavBlob = audioBufferToWav(renderedBuffer);
+            const audioUrl = URL.createObjectURL(wavBlob);
+            
+            const audioEl = document.getElementById('keep-alive-audio');
+            if (audioEl.src && audioEl.src.startsWith('blob:')) URL.revokeObjectURL(audioEl.src);
+            audioEl.src = audioUrl;
+            audioEl.loop = true;
+            
+            try {
+                await audioEl.play();
+                isAudioPlaying = true;
+                btn.classList.add('playing');
+                btn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+                
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.metadata = new MediaMetadata({
-                        title: "Ava's Sleep Sound",
-                        artist: "Ava Care App",
-                        album: "Nap Time",
-                        artwork: [
-                            { src: './ava-icon-192.png', sizes: '192x192', type: 'image/png' },
-                            { src: './ava-icon-512.png', sizes: '512x512', type: 'image/png' }
-                        ]
+                        title: 'Ava Sleep Audio',
+                        artist: 'Four Day Care',
+                        album: 'Night Vision',
+                        artwork: [{ src: './ava-icon-512.png', sizes: '512x512', type: 'image/png' }]
                     });
-                    navigator.mediaSession.setActionHandler('play', function() { playAudio(); });
-                    navigator.mediaSession.setActionHandler('pause', function() { stopAudio(); });
-                    navigator.mediaSession.setActionHandler('stop', function() { stopAudio(); });
                 }
+            } catch (err) {
+                console.error("Audio playback failed", err);
+                btn.innerHTML = '<i class="fa-solid fa-play"></i>';
+                alert("Please tap the screen first to enable audio.");
             }
-            
-            const type = document.getElementById('sound-type').value; const bufferSize = audioCtx.sampleRate * 2; 
-            let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate); let output = buffer.getChannelData(0);
-            
-            if (['white', 'brown', 'pink', 'womb'].includes(type)) {
-                let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-                for (let i = 0; i < bufferSize; i++) {
-                    let white = Math.random() * 2 - 1;
-                    if (type === 'white') output[i] = white;
-                    else if (type === 'brown') { b0 = (b0 + (0.02 * white)) / 1.02; output[i] = b0 * 3.5; }
-                    else { b0 = 0.99886 * b0 + white * 0.0555179; b1 = 0.99332 * b1 + white * 0.0750759; b2 = 0.96900 * b2 + white * 0.1538520; b3 = 0.86650 * b3 + white * 0.3104856; b4 = 0.55000 * b4 + white * 0.5329522; b5 = -0.7616 * b5 - white * 0.0168980; output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11; b6 = white * 0.115926; }
-                }
-                let noiseSrc = audioCtx.createBufferSource(); noiseSrc.buffer = buffer; noiseSrc.loop = true;
-                if (type === 'womb') {
-                    let filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 350; 
-                    let lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 1.2; let lfoGain = audioCtx.createGain(); lfoGain.gain.value = 150;
-                    lfo.connect(lfoGain); lfoGain.connect(filter.frequency); let mainGain = audioCtx.createGain(); mainGain.gain.value = 1.0;
-                    noiseSrc.connect(filter).connect(mainGain).connect(audioCtx.destination); lfo.start(); noiseSrc.start();
-                    activeSoundNode = { stop: () => { noiseSrc.stop(); lfo.stop(); }, disconnect: () => { noiseSrc.disconnect(); filter.disconnect(); lfo.disconnect(); } };
-                } else {
-                    let gainNode = audioCtx.createGain(); gainNode.gain.value = type === 'white' ? 0.05 : 0.1;
-                    noiseSrc.connect(gainNode).connect(audioCtx.destination); noiseSrc.start(); activeSoundNode = noiseSrc;
-                }
-            }
-            isAudioPlaying = true; document.getElementById('btn-sound').classList.add('playing'); document.getElementById('btn-sound').innerHTML = '<i class="fa-solid fa-stop"></i>';
         }
 
         function getLocalISODate(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
@@ -1251,6 +1300,27 @@
             } else {
                 document.getElementById('overview-target-time').innerText = "19:00 (Standard)";
             }
+        }
+        
+        function openModalAndFocus(trackerId) {
+            // 1. Open the modal for the currently viewed date on the dashboard
+            openEventModal(currentOverviewDate);
+            
+            // 2. Wait for rendering, then expand and scroll
+            setTimeout(() => {
+                // Because elements don't have explicit IDs, we find the accordion based on the child input id
+                // morningWake, nap, rtnBath etc.
+                const el = document.getElementById(trackerId);
+                if(el) {
+                    const detailsNode = el.closest('details.tracker-group');
+                    if(detailsNode) {
+                        detailsNode.open = true;
+                        setTimeout(() => {
+                            detailsNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 50);
+                    }
+                }
+            }, 100);
         }
         
         // --- SWIPE LOGIC FOR OVERVIEW CARD ---
@@ -1932,4 +2002,4 @@ function removeReminder(index) {
 
 </script>
 </body>
-        </html>
+    </html>
