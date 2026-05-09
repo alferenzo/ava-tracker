@@ -1304,12 +1304,11 @@
         
         function openModalAndFocus(trackerId) {
             // 1. Open the modal for the currently viewed date on the dashboard
-            openEventModal(currentOverviewDate);
+            const localStr = getLocalISODate(currentOverviewDate);
+            openSpecificDay(localStr);
             
             // 2. Wait for rendering, then expand and scroll
             setTimeout(() => {
-                // Because elements don't have explicit IDs, we find the accordion based on the child input id
-                // morningWake, nap, rtnBath etc.
                 const el = document.getElementById(trackerId);
                 if(el) {
                     const detailsNode = el.closest('details.tracker-group');
@@ -1317,10 +1316,10 @@
                         detailsNode.open = true;
                         setTimeout(() => {
                             detailsNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 50);
+                        }, 250); // increased timeout slightly to ensure modal animation completes
                     }
                 }
-            }, 100);
+            }, 300);
         }
         
         // --- SWIPE LOGIC FOR OVERVIEW CARD ---
