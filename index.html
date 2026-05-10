@@ -276,6 +276,24 @@
         .potty-log-item { background: var(--input-bg); padding: 12px 15px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border-color); font-size: 14px; font-weight: 600; color: var(--text-main); }
         .potty-log-item .time { color: var(--text-muted); font-size: 12px; }
         .potty-delete { color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 5px; }
+    
+        /* Gesture Hint Animation */
+        @keyframes swipeDownHint {
+          0% { transform: translate(-50%, 0); opacity: 0; }
+          20% { transform: translate(-50%, 15px); opacity: 1; }
+          80% { transform: translate(-50%, 80px); opacity: 1; }
+          100% { transform: translate(-50%, 100px); opacity: 0; }
+        }
+        .swipe-hint {
+          position: absolute; top: 15%; left: 50%;
+          font-size: 50px; color: var(--text-muted);
+          opacity: 0; z-index: 1000; pointer-events: none;
+          display: none; transform: translateX(-50%);
+        }
+        .swipe-hint.active {
+          display: block; animation: swipeDownHint 1.5s infinite ease-in-out;
+        }
+
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -787,9 +805,23 @@
             }
         }
 
-        function openPottyTracker() { renderPottyTracker(); const overlay = document.getElementById('potty-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); }
+        function openPottyTracker() { renderPottyTracker(); const overlay = document.getElementById('potty-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
+            
+            // Turn 3: Trigger gesture animation hint for 3 seconds
+            const hint = document.getElementById('modal-swipe-hint');
+            if (hint) {
+                hint.classList.add('active');
+                setTimeout(() => hint.classList.remove('active'), 3000); 
+            } }
         function closePottyTracker() { const overlay = document.getElementById('potty-modal'); overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 150); }
-        function openQuickShareModal() { const overlay = document.getElementById('quick-share-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); }
+        function openQuickShareModal() { const overlay = document.getElementById('quick-share-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
+            
+            // Turn 3: Trigger gesture animation hint for 3 seconds
+            const hint = document.getElementById('modal-swipe-hint');
+            if (hint) {
+                hint.classList.add('active');
+                setTimeout(() => hint.classList.remove('active'), 3000); 
+            } }
         function closeQuickShareModal() { const overlay = document.getElementById('quick-share-modal'); overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 150); }
 
         function createTimePickerHTML(id) {
@@ -958,7 +990,7 @@
             
             // Generate a 2-second perfectly loopable chunk of noise. 
             // Womb noise LFO is 1.2Hz. 2 seconds is 2.4 cycles... let's use 2.5 seconds (exactly 3 cycles of 1.2Hz).
-            const duration = type === 'womb' ? 2.5 : 2.0; 
+            const duration = 60.0; // 60s seamless loop 
             
             const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, sampleRate * duration, sampleRate);
             const bufferSize = offlineCtx.sampleRate * duration;
@@ -1180,6 +1212,13 @@
             const overlay = document.getElementById('schedule-settings-dialog');
             overlay.style.display = 'flex';
             setTimeout(() => overlay.classList.add('active'), 10);
+            
+            // Turn 3: Trigger gesture animation hint for 3 seconds
+            const hint = document.getElementById('modal-swipe-hint');
+            if (hint) {
+                hint.classList.add('active');
+                setTimeout(() => hint.classList.remove('active'), 3000); 
+            }
         }
         function closeScheduleSettings() {
             const overlay = document.getElementById('schedule-settings-dialog');
@@ -1304,11 +1343,12 @@
         
         function openModalAndFocus(trackerId) {
             // 1. Open the modal for the currently viewed date on the dashboard
-            const localStr = getLocalISODate(currentOverviewDate);
-            openSpecificDay(localStr);
+            openEventModal(currentOverviewDate);
             
             // 2. Wait for rendering, then expand and scroll
             setTimeout(() => {
+                // Because elements don't have explicit IDs, we find the accordion based on the child input id
+                // morningWake, nap, rtnBath etc.
                 const el = document.getElementById(trackerId);
                 if(el) {
                     const detailsNode = el.closest('details.tracker-group');
@@ -1316,10 +1356,10 @@
                         detailsNode.open = true;
                         setTimeout(() => {
                             detailsNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 250); // increased timeout slightly to ensure modal animation completes
+                        }, 50);
                     }
                 }
-            }, 300);
+            }, 100);
         }
         
         // --- SWIPE LOGIC FOR OVERVIEW CARD ---
@@ -1503,21 +1543,49 @@
             setTimeout(() => location.reload(), 500);
         }
 
-        function openShareDialog() { const overlay = document.getElementById('share-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); }
+        function openShareDialog() { const overlay = document.getElementById('share-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
+            
+            // Turn 3: Trigger gesture animation hint for 3 seconds
+            const hint = document.getElementById('modal-swipe-hint');
+            if (hint) {
+                hint.classList.add('active');
+                setTimeout(() => hint.classList.remove('active'), 3000); 
+            } }
         function closeShareDialog() { const overlay = document.getElementById('share-dialog'); overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 150); }
         function shareTodayWA() { const text = `*Ava's Update: ${document.getElementById('modal-date').innerText}*\nMorning Wake: ${currentTrackers.morningWake||'?'}\nNap: ${currentTrackers.nap}h\nBedtime Started: ${currentTrackers.bedtimeStart||'?'}\nAsleep at: ${currentTrackers.asleepTime||'?'}\n\n*Notes:*\n${document.getElementById('modal-feedback').value||'None'}`; window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank'); closeShareDialog(); }
         function shareTodayPDF() { window.print(); }
 
-        function showModal() { const overlay = document.getElementById('event-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); }
+        function showModal() { const overlay = document.getElementById('event-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
+            
+            // Turn 3: Trigger gesture animation hint for 3 seconds
+            const hint = document.getElementById('modal-swipe-hint');
+            if (hint) {
+                hint.classList.add('active');
+                setTimeout(() => hint.classList.remove('active'), 3000); 
+            } }
         function closeModal() { const overlay = document.getElementById('event-modal'); overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 150); }
 
         function showAppConfirm(title, msg, confirmText, callback) {
             document.getElementById('dialog-title').innerText = title; document.getElementById('dialog-msg').innerHTML = msg; document.getElementById('dialog-confirm').innerText = confirmText; document.getElementById('dialog-cancel').style.display = 'block';
-            const overlay = document.getElementById('custom-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); dialogCallback = callback;
+            const overlay = document.getElementById('custom-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
+            
+            // Turn 3: Trigger gesture animation hint for 3 seconds
+            const hint = document.getElementById('modal-swipe-hint');
+            if (hint) {
+                hint.classList.add('active');
+                setTimeout(() => hint.classList.remove('active'), 3000); 
+            } dialogCallback = callback;
         }
         function showAppAlert(title, msg) {
             document.getElementById('dialog-title').innerText = title; document.getElementById('dialog-msg').innerHTML = msg; document.getElementById('dialog-confirm').innerText = "OK"; document.getElementById('dialog-cancel').style.display = 'none';
-            const overlay = document.getElementById('custom-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); dialogCallback = null;
+            const overlay = document.getElementById('custom-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
+            
+            // Turn 3: Trigger gesture animation hint for 3 seconds
+            const hint = document.getElementById('modal-swipe-hint');
+            if (hint) {
+                hint.classList.add('active');
+                setTimeout(() => hint.classList.remove('active'), 3000); 
+            } dialogCallback = null;
         }
         function closeCustomDialog(result) { const overlay = document.getElementById('custom-dialog'); overlay.classList.remove('active'); setTimeout(() => { overlay.style.display = 'none'; if(result && dialogCallback) dialogCallback(); }, 200); }
 
@@ -1595,6 +1663,13 @@
 
         async function openAIDialog(mode) {
             currentAIMode = mode; const overlay = document.getElementById('ai-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
+            
+            // Turn 3: Trigger gesture animation hint for 3 seconds
+            const hint = document.getElementById('modal-swipe-hint');
+            if (hint) {
+                hint.classList.add('active');
+                setTimeout(() => hint.classList.remove('active'), 3000); 
+            }
             const headerDiv = document.getElementById('ai-dialog-header'); const promptInput = document.getElementById('ai-prompt-input'); const btnFetchSummary = document.getElementById('btn-fetch-summary'); const promptWrapper = document.getElementById('ai-prompt-wrapper');
             document.getElementById('ai-results-area').style.display = 'none'; document.getElementById('btn-copy-ai').style.display = 'none'; rawAIResult = "";
             
