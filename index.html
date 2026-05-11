@@ -165,7 +165,7 @@
         .skeleton { background: linear-gradient(90deg, var(--input-bg) 25%, var(--border-color) 50%, var(--input-bg) 75%); background-size: 200% 100%; animation: skeletonWave 1.4s infinite; border-radius: 6px; }
         @keyframes skeletonWave { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        .cal-wrapper { background: var(--card-bg); border-radius: 20px; padding: 12px 8px 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); backdrop-filter: blur(10px); border: 1px solid var(--border-color); }
+        .cal-wrapper { background: var(--card-bg); border-radius: 20px; padding: 12px 8px 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); backdrop-filter: blur(10px); border: 1px solid var(--border-color); max-width: 340px; margin: 0 auto; }
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 4px; }
         .cal-header button { background: var(--input-bg); border: none; width: 30px; height: 30px; border-radius: 50%; color: var(--text-main); font-size: 13px; cursor: pointer; transition: transform 0.15s; }
         .cal-header button:active { transform: scale(0.88); }
@@ -174,7 +174,7 @@
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; }
         .cal-day-label { font-size: 9px; color: var(--text-muted); font-weight: 700; padding-bottom: 5px; text-transform: uppercase; }
         
-        .cal-cell { aspect-ratio: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 12px; border-radius: 9px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: all 0.15s; position: relative; }
+        .cal-cell { height: 32px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 12px; border-radius: 9px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: all 0.15s; position: relative; }
         .cal-cell:active { transform: scale(0.88); }
         .cal-cell.empty { visibility: hidden; }
         
@@ -451,17 +451,6 @@
                 <div id="cal-days" class="cal-grid"></div>
             </div>
             
-            <!-- ✦ SWIPE HINT — floats between calendar and summary ✦ -->
-            <div id="hint-swipe" aria-hidden="true">
-                <div id="hint-swipe-inner">
-                    <i class="fa-solid fa-hand-pointer" id="hint-hand"></i>
-                    <div id="hint-text-group">
-                        <span id="hint-label">SWIPE CALENDAR</span>
-                        <span id="hint-sub">← for earlier  ·  later →</span>
-                    </div>
-                </div>
-            </div>
-
             <!-- TODAY OVERVIEW WIDGET -->
             <div class="overview-card" id="today-overview-card" style="display: block;">
                 <div class="overview-header">
@@ -493,6 +482,17 @@
                     <div style="flex:1;">
                         <div style="font-size:9px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">AI Recommended Bedtime</div>
                         <div style="font-size:13px; font-weight:800; color:var(--text-main);" id="overview-target-time"><i class="fa-solid fa-spinner fa-spin" style="color:var(--ai-color);"></i> Calculating...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ✦ SWIPE HINT — sits below summary ✦ -->
+            <div id="hint-swipe" aria-hidden="true">
+                <div id="hint-swipe-inner">
+                    <i class="fa-solid fa-hand-pointer" id="hint-hand"></i>
+                    <div id="hint-text-group">
+                        <span id="hint-label">SWIPE SUMMARY DATES</span>
+                        <span id="hint-sub">← for earlier  ·  later →</span>
                     </div>
                 </div>
             </div>
