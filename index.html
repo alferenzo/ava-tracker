@@ -45,7 +45,7 @@
         }
         body.night-vision * { box-shadow: none !important; }
         body.night-vision .header { background: #0f172a; border-bottom: 1px solid var(--border-color); }
-        body.night-vision .cal-cell.today::after { background-color: var(--text-main); }
+        body.night-vision .cal-cell.today { outline-color: var(--text-main); }
         body.night-vision .btn-main, body.night-vision .btn-save, body.night-vision .btn-pill { background: #0f172a; color: var(--text-main); border: 1px solid var(--text-main); }
         body.night-vision .tracker-btn.active-yes, body.night-vision .chk-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
         body.night-vision .tracker-btn.active-no { background: #ef4444; color: white; border-color: #ef4444; }
@@ -78,10 +78,10 @@
         @keyframes pulseText { 0%, 100% { opacity: 0.6; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
 
         /* HEADER UI */
-        .header { padding: max(env(safe-area-inset-top, 20px), 20px) 20px 15px; text-align: center; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.5); z-index: 10; display: flex; justify-content: space-between; align-items: center; position: relative; }
+        .header { padding: max(env(safe-area-inset-top, 10px), 10px) 16px 10px; text-align: center; background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.5); z-index: 10; display: flex; justify-content: space-between; align-items: center; position: relative; }
         .header-text { display: flex; flex-direction: column; align-items: center; flex: 1; }
-        .header h1 { font-size: 22px; color: var(--text-main); font-weight: 800; letter-spacing: -0.5px; }
-        .header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; font-weight: 500; }
+        .header h1 { font-size: 19px; color: var(--text-main); font-weight: 800; letter-spacing: -0.5px; }
+        .header p { color: var(--text-muted); font-size: 12px; margin-top: 2px; font-weight: 500; }
         
         .header-btn { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); width: 40px; height: 40px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; }
         .header-btn:active { transform: scale(0.9); }
@@ -98,7 +98,9 @@
         .sidebar-item:active { background: var(--input-bg); }
 
         /* FIXED BOTTOM DASHBOARD PLAYER */
-        .fixed-bottom-player { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); border: none; border-radius: 25px 25px 0 0; padding: 15px 20px max(env(safe-area-inset-bottom, 15px), 15px); z-index: 90; box-shadow: 0 -8px 25px rgba(0,0,0,0.08); transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.4s; backdrop-filter: blur(10px); display: flex; align-items: center; }
+        .fixed-bottom-player { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); border: none; border-radius: 20px 20px 0 0; padding: 10px 16px max(env(safe-area-inset-bottom, 10px), 10px); z-index: 90; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.4s; backdrop-filter: blur(10px); display: flex; align-items: center; }
+        .sound-player { display: flex; gap: 10px; align-items: center; background: transparent; padding: 0; border-radius: 0; border: none; box-shadow: none; width: 100%; }
+        .btn-play-sound { background: var(--ai-color); color: white; border: none; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 16px; transition: transform 0.2s; flex-shrink: 0; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3); }
 
         #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; padding: 30px; text-align: center; }
         .hero-icon { font-size: 70px; color: var(--alf-color); margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
@@ -107,13 +109,16 @@
         .btn-main:active:not(:disabled) { transform: scale(0.95); }
         .btn-main:disabled { cursor: not-allowed; opacity: 0.5; }
         
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; display: none; animation: fadeIn 0.2s ease-out; }
+        .content-area { flex: 1; overflow-y: auto; padding: 12px 14px; padding-bottom: 90px; display: none; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes popIn { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes popIn { 0% { transform: scale(0.92); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shimmer { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
         
         /* Apply animations to UI elements */
-        .overview-card { animation: fadeIn 0.4s ease-out; }
+        .overview-card { animation: slideInUp 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
         .stat-card, .potty-log-item { animation: slideInRight 0.3s ease-out backwards; }
         .stat-card:nth-child(1) { animation-delay: 0.05s; }
         .stat-card:nth-child(2) { animation-delay: 0.1s; }
@@ -121,40 +126,68 @@
         .potty-log-item:nth-child(2) { animation-delay: 0.1s; }
         .potty-log-item:nth-child(3) { animation-delay: 0.15s; }
         
+        /* Stat tile press feedback */
+        .ov-tile { transition: transform 0.12s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.12s; }
+        .ov-tile:active { transform: scale(0.88) !important; }
+
         .tracker-btn:active, .chk-btn:active { transform: scale(0.85) !important; transition: transform 0.1s; }
         
-        /* Smooth height transition for accordions */
-        details.tracker-group .tracker-content { transform-origin: top; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) backwards; }
+        /* Smooth accordion */
+        details.tracker-group .tracker-content { transform-origin: top; animation: slideDown 0.25s cubic-bezier(0.34,1.2,0.64,1) backwards; }
+        @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); } 70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); } }
         
-        /* Calendar cell pop-in */
-        .cal-cell { animation: popIn 0.3s ease-out backwards; }
-        .cal-cell:nth-child(n+1):nth-child(-n+7) { animation-delay: 0.05s; }
-        .cal-cell:nth-child(n+8):nth-child(-n+14) { animation-delay: 0.1s; }
-        .cal-cell:nth-child(n+15):nth-child(-n+21) { animation-delay: 0.15s; }
-        .cal-cell:nth-child(n+22):nth-child(-n+28) { animation-delay: 0.2s; }
-        .cal-cell:nth-child(n+29) { animation-delay: 0.25s; }
+        /* Calendar cell pop-in — staggered by row */
+        .cal-cell { animation: popIn 0.28s cubic-bezier(0.34,1.3,0.64,1) backwards; }
+        .cal-cell:nth-child(n+1):nth-child(-n+7)   { animation-delay: 0.04s; }
+        .cal-cell:nth-child(n+8):nth-child(-n+14)   { animation-delay: 0.08s; }
+        .cal-cell:nth-child(n+15):nth-child(-n+21)  { animation-delay: 0.12s; }
+        .cal-cell:nth-child(n+22):nth-child(-n+28)  { animation-delay: 0.16s; }
+        .cal-cell:nth-child(n+29)                   { animation-delay: 0.20s; }
+        .cal-cell:hover { transform: scale(1.08); z-index: 1; }
 
-        .cal-wrapper { background: var(--card-bg); border-radius: 24px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); backdrop-filter: blur(10px); border: 1px solid var(--border-color); }
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .cal-header button { background: var(--input-bg); border: none; width: 36px; height: 36px; border-radius: 50%; color: var(--text-main); font-size: 16px; cursor: pointer; }
-        .cal-header h3 { font-size: 18px; font-weight: 700; color: var(--text-main); }
+        /* Sidebar items stagger in */
+        .sidebar-item { animation: slideInRight 0.3s cubic-bezier(0.34,1.3,0.64,1) backwards; }
+        .sidebar-item:nth-child(1) { animation-delay: 0.05s; }
+        .sidebar-item:nth-child(2) { animation-delay: 0.09s; }
+        .sidebar-item:nth-child(3) { animation-delay: 0.13s; }
+        .sidebar-item:nth-child(4) { animation-delay: 0.17s; }
+        .sidebar-item:nth-child(5) { animation-delay: 0.21s; }
+        .sidebar-item:nth-child(6) { animation-delay: 0.25s; }
+        .sidebar-item:nth-child(7) { animation-delay: 0.29s; }
+        .sidebar-item:nth-child(8) { animation-delay: 0.33s; }
+        .sidebar-item:active { background: var(--input-bg); transform: scale(0.97); }
+
+        /* Modal entrance spring */
+        .modal-overlay.active .modal-content { animation: modalSpring 0.3s cubic-bezier(0.34,1.3,0.64,1) both; }
+        @keyframes modalSpring { from { transform: translateY(40px); opacity: 0.4; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Skeleton shimmer for loading states */
+        .skeleton { background: linear-gradient(90deg, var(--input-bg) 25%, var(--border-color) 50%, var(--input-bg) 75%); background-size: 200% 100%; animation: skeletonWave 1.4s infinite; border-radius: 6px; }
+        @keyframes skeletonWave { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .cal-wrapper { background: var(--card-bg); border-radius: 20px; padding: 14px 14px 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); backdrop-filter: blur(10px); border: 1px solid var(--border-color); }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .cal-header button { background: var(--input-bg); border: none; width: 32px; height: 32px; border-radius: 50%; color: var(--text-main); font-size: 14px; cursor: pointer; transition: transform 0.15s; }
+        .cal-header button:active { transform: scale(0.88); }
+        .cal-header h3 { font-size: 16px; font-weight: 700; color: var(--text-main); }
         
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
-        .cal-day-label { font-size: 12px; color: var(--text-muted); font-weight: 700; padding-bottom: 10px; text-transform: uppercase; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        .cal-day-label { font-size: 10px; color: var(--text-muted); font-weight: 700; padding-bottom: 6px; text-transform: uppercase; }
         
-        .cal-cell { aspect-ratio: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 15px; border-radius: 14px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: all 0.2s; position: relative; }
-        .cal-cell:active { transform: scale(0.9); }
+        .cal-cell { aspect-ratio: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 13px; border-radius: 10px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: all 0.15s; position: relative; }
+        .cal-cell:active { transform: scale(0.88); }
         .cal-cell.empty { visibility: hidden; }
         
-        .cal-cell.alf-shift { background: var(--alf-bg); color: var(--alf-color); border: 2px solid rgba(0, 142, 179, 0.2); }
-        .cal-cell.lesly-shift { background: var(--lesly-bg); color: var(--lesly-color); border: 2px solid rgba(219, 39, 119, 0.2); }
-        .cal-cell.today::after { content: ''; position: absolute; bottom: 4px; width: 6px; height: 6px; border-radius: 50%; background-color: var(--text-main); }
+        .cal-cell.alf-shift { background: var(--alf-bg); color: var(--alf-color); border: 1.5px solid rgba(0, 142, 179, 0.2); }
+        .cal-cell.lesly-shift { background: var(--lesly-bg); color: var(--lesly-color); border: 1.5px solid rgba(219, 39, 119, 0.2); }
+        .cal-cell.today { outline: 2px solid var(--text-main); outline-offset: -2px; }
+        .cal-cell.today::after { content: ''; position: absolute; bottom: 3px; width: 4px; height: 4px; border-radius: 50%; background-color: var(--text-main); }
 
-        .overview-card { background: var(--card-bg); border-radius: 16px; padding: 12px; margin-top: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid var(--border-color); display: none; }
-        .overview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .overview-title { font-size: 16px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
-        .overview-badge { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 10px; }
-        .overview-info { background: var(--input-bg); border-radius: 10px; padding: 10px 12px; border: 1px solid var(--border-color); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .overview-card { background: var(--card-bg); border-radius: 14px; padding: 10px; margin-top: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); border: 1px solid var(--border-color); display: none; }
+        .overview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .overview-title { font-size: 13px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
+        .overview-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 8px; }
+        .overview-info { background: var(--input-bg); border-radius: 8px; padding: 8px 10px; border: 1px solid var(--border-color); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
 
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(3px); display: none; justify-content: center; align-items: flex-end; z-index: 100; opacity: 0; transition: opacity 0.15s ease-out; }
         
@@ -179,8 +212,7 @@
         details.tracker-group summary::-webkit-details-marker { display: none; }
         details.tracker-group summary::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: var(--text-muted); transition: transform 0.2s; }
         details.tracker-group[open] summary::after { transform: rotate(180deg); }
-        details.tracker-group .tracker-content { padding: 0 15px 15px 15px; animation: slideDown 0.3s ease-out; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        details.tracker-group .tracker-content { padding: 0 15px 15px 15px; }
 
         .tracker-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         .tracker-row:last-child { margin-bottom: 0; }
@@ -214,8 +246,6 @@
         .chk-btn { padding: 10px 14px; border-radius: 20px; border: 2px solid var(--border-color); background: var(--input-bg); font-size: 13px; font-weight: 700; color: var(--text-main); cursor: pointer; transition: all 0.2s; user-select: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         .chk-btn.active { background: var(--text-main); color: var(--card-bg); border-color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         
-        .sound-player { display: flex; gap: 10px; align-items: center; background: transparent; padding: 0; border-radius: 0; border: none; box-shadow: none;}
-        .btn-play-sound { background: var(--ai-color); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; transition: transform 0.2s; flex-shrink: 0; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);}
         .btn-play-sound.playing { background: #ef4444; animation: pulseSound 2s infinite ease-in-out; box-shadow: none;}
         @keyframes pulseSound { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
@@ -277,22 +307,36 @@
         .potty-log-item .time { color: var(--text-muted); font-size: 12px; }
         .potty-delete { color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 5px; }
     
-        /* Gesture Hint Animation */
-        @keyframes swipeDownHint {
-          0% { transform: translate(-50%, 0); opacity: 0; }
-          20% { transform: translate(-50%, 15px); opacity: 1; }
-          80% { transform: translate(-50%, 80px); opacity: 1; }
-          100% { transform: translate(-50%, 100px); opacity: 0; }
+        /* ── DASHBOARD HINTS (swipe on overview, menu pulse on header) ── */
+        @keyframes chevronLeft  { 0%,100% { transform: translateX(0);   opacity: 0.5; }
+                                   50%    { transform: translateX(-5px); opacity: 1;   } }
+        @keyframes chevronRight { 0%,100% { transform: translateX(0);  opacity: 0.5; }
+                                   50%    { transform: translateX(5px); opacity: 1;   } }
+        #hint-swipe {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            font-size: 11px; font-weight: 800; color: var(--text-muted);
+            letter-spacing: 1px; padding: 6px 0 2px;
+            opacity: 0; transition: opacity 0.6s;
         }
-        .swipe-hint {
-          position: absolute; top: 15%; left: 50%;
-          font-size: 50px; color: var(--text-muted);
-          opacity: 0; z-index: 1000; pointer-events: none;
-          display: none; transform: translateX(-50%);
+        #hint-swipe.visible { opacity: 1; }
+        #hint-swipe i:first-child  { animation: chevronLeft  1.5s ease-in-out infinite; }
+        #hint-swipe i:last-child   { animation: chevronRight 1.5s ease-in-out infinite; }
+
+        /* Menu button pulse hint */
+        @keyframes menuPulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(0,142,179,0.55); }
+            50%      { box-shadow: 0 0 0 9px rgba(0,142,179,0);  }
         }
-        .swipe-hint.active {
-          display: block; animation: swipeDownHint 1.5s infinite ease-in-out;
-        }
+        .header-btn.pulse-hint { animation: menuPulse 1.1s ease-out 3; }
+
+        /* TOAST NOTIFICATION */
+        #save-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: #10b981; color: white; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 700; z-index: 999999; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; box-shadow: 0 8px 20px rgba(16,185,129,0.35); white-space: nowrap; }
+        #save-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        #save-toast.error { background: #ef4444; box-shadow: 0 8px 20px rgba(239,68,68,0.35); }
+
+        /* ONLINE/OFFLINE PILL */
+        #conn-status { position: fixed; top: 8px; right: 12px; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 20px; z-index: 999999; pointer-events: none; transition: opacity 0.4s; opacity: 0; }
+        #conn-status.offline { background: #fef2f2; color: #ef4444; border: 1px solid #fca5a5; opacity: 1; }
 
     </style>
 
@@ -301,6 +345,9 @@
 </head>
 
 <body>
+<div id="save-toast"><i class="fa-solid fa-check-circle"></i> <span id="toast-msg">Saved!</span></div>
+<div id="conn-status"><i class="fa-solid fa-wifi-slash"></i> Offline</div>
+
     <div id="global-loader" style="display: flex; opacity: 1;">
         <div class="css-spinner"></div>
         <div id="loader-percentage" style="font-size: 22px; font-weight: 800; color: var(--alf-color); margin-bottom: 5px; font-variant-numeric: tabular-nums;">0%</div>
@@ -328,7 +375,7 @@
 
     <div class="app-container">
         <div class="header" id="app-header">
-            <button class="header-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <button class="header-btn" id="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
             <div class="header-text">
                 <h1>Ava's Four Day Care</h1>
                 <p>Schedule & Notes</p>
@@ -351,37 +398,43 @@
             </div>
             
             <!-- TODAY OVERVIEW WIDGET -->
-            <div class="overview-card" id="today-overview-card" style="display: block; padding: 12px; margin-top: 10px;">
-                <div class="overview-header" style="margin-bottom: 8px;">
-                    <div class="overview-title" style="font-size: 14px;"><i class="fa-solid fa-clock"></i> Today's Summary</div>
-                    <div class="overview-badge" id="overview-owner-badge" style="background-color: var(--alf-bg); color: var(--alf-color); font-size: 11px; padding: 3px 8px;">Owner</div>
+            <div class="overview-card" id="today-overview-card" style="display: block;">
+                <div class="overview-header">
+                    <div class="overview-title"><i class="fa-solid fa-clock"></i> Today's Summary</div>
+                    <div class="overview-badge" id="overview-owner-badge" style="background-color: var(--alf-bg); color: var(--alf-color);">Owner</div>
                 </div>
                 
-                <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-                    <div onclick="openModalAndFocus('morningWake')" style="flex: 1; background: var(--input-bg); border-radius: 10px; padding: 6px 4px; border: 1px solid var(--border-color); text-align: center; cursor: pointer; transition: transform 0.1s;" onactive="this.style.transform='scale(0.95)'">
-                        <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-sun" style="color: #f59e0b;"></i> Woke</div>
-                        <div style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="ov-morning">--:--</div>
+                <div style="display: flex; gap: 5px; margin-bottom: 7px;">
+                    <div onclick="openModalAndFocus('morningWake')" style="flex: 1; background: var(--input-bg); border-radius: 8px; padding: 5px 3px; border: 1px solid var(--border-color); text-align: center; cursor: pointer; transition: transform 0.12s;">
+                        <div style="font-size: 8px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-sun" style="color: #f59e0b;"></i> Woke</div>
+                        <div style="font-size: 12px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="ov-morning">--:--</div>
                     </div>
-                    <div onclick="openModalAndFocus('nap')" style="flex: 1; background: var(--input-bg); border-radius: 10px; padding: 6px 4px; border: 1px solid var(--border-color); text-align: center; cursor: pointer; transition: transform 0.1s;" onactive="this.style.transform='scale(0.95)'">
-                        <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-bed" style="color: #3b82f6;"></i> Nap</div>
-                        <div style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="ov-nap">--</div>
+                    <div onclick="openModalAndFocus('nap')" style="flex: 1; background: var(--input-bg); border-radius: 8px; padding: 5px 3px; border: 1px solid var(--border-color); text-align: center; cursor: pointer; transition: transform 0.12s;">
+                        <div style="font-size: 8px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-bed" style="color: #3b82f6;"></i> Nap</div>
+                        <div style="font-size: 12px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="ov-nap">--</div>
                     </div>
-                    <div onclick="openModalAndFocus('rtnBath')" style="flex: 1; background: var(--input-bg); border-radius: 10px; padding: 6px 4px; border: 1px solid var(--border-color); text-align: center; cursor: pointer; transition: transform 0.1s;" onactive="this.style.transform='scale(0.95)'">
-                        <div style="font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-bath" style="color: #3b82f6;"></i> Bath</div>
-                        <div style="font-size: 13px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="ov-bath">--</div>
+                    <div onclick="openModalAndFocus('rtnBath')" style="flex: 1; background: var(--input-bg); border-radius: 8px; padding: 5px 3px; border: 1px solid var(--border-color); text-align: center; cursor: pointer; transition: transform 0.12s;">
+                        <div style="font-size: 8px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-bath" style="color: #3b82f6;"></i> Bath</div>
+                        <div style="font-size: 12px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="ov-bath">--</div>
+                    </div>
+                    <div onclick="openModalAndFocus('asleepTime')" style="flex: 1; background: var(--input-bg); border-radius: 8px; padding: 5px 3px; border: 1px solid var(--border-color); text-align: center; cursor: pointer; transition: transform 0.12s;">
+                        <div style="font-size: 8px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;"><i class="fa-solid fa-moon" style="color: #8b5cf6;"></i> Asleep</div>
+                        <div style="font-size: 12px; font-weight: 800; color: var(--text-main); margin-top: 2px;" id="ov-asleep">--:--</div>
                     </div>
                 </div>
 
-                <div class="overview-info" style="margin-bottom: 0; padding: 10px 12px; border-radius: 10px;">
-                    <i class="fa-solid fa-moon" style="font-size:18px; color:var(--ai-color);"></i>
+                <div class="overview-info" style="margin-bottom: 0;">
+                    <i class="fa-solid fa-sparkles" style="font-size:15px; color:var(--ai-color);"></i>
                     <div style="flex:1;">
-                        <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Recommended Bedtime</div>
-                        <div style="font-size:14px; font-weight:800; color:var(--text-main);" id="overview-target-time"><i class="fa-solid fa-sparkles fa-beat" style="color:var(--ai-color);"></i> AI Calc...</div>
+                        <div style="font-size:9px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">AI Recommended Bedtime</div>
+                        <div style="font-size:13px; font-weight:800; color:var(--text-main);" id="overview-target-time"><i class="fa-solid fa-spinner fa-spin" style="color:var(--ai-color);"></i> Calculating...</div>
                     </div>
                 </div>
                 <!-- SWIPE HINT -->
-                <div id="swipe-hint-ui" style="text-align: center; font-size: 11px; font-weight: 800; color: var(--text-muted); opacity: 0.8; letter-spacing: 1px; margin-top: 15px; padding-bottom: 5px;">
-                    <i class="fa-solid fa-chevron-left" style="margin-right: 5px;"></i> SWIPE FOR HISTORY <i class="fa-solid fa-chevron-right" style="margin-left: 5px;"></i>
+                <div id="hint-swipe">
+                    <i class="fa-solid fa-chevron-left"></i>
+                    <span>SWIPE FOR HISTORY</span>
+                    <i class="fa-solid fa-chevron-right"></i>
                 </div>
             </div>
         </div>
@@ -756,22 +809,22 @@
             else document.getElementById('btn-potty-'+type).classList.add('active-yes');
         }
         
-        function savePottyLog() {
-            let logs = JSON.parse(localStorage.getItem('ava_potty_logs') || '[]');
+        async function savePottyLog() {
+            let logs = await appDB.getPottyLogs();
             logs.push({ timestamp: Date.now(), type: selectedPottyType });
-            localStorage.setItem('ava_potty_logs', JSON.stringify(logs));
+            await appDB.savePottyLogs(logs);
             renderPottyTracker();
         }
         
-        function deletePottyLog(index) {
-            let logs = JSON.parse(localStorage.getItem('ava_potty_logs') || '[]');
+        async function deletePottyLog(index) {
+            let logs = await appDB.getPottyLogs();
             logs.splice(index, 1);
-            localStorage.setItem('ava_potty_logs', JSON.stringify(logs));
+            await appDB.savePottyLogs(logs);
             renderPottyTracker();
         }
 
-        function renderPottyTracker() {
-            let logs = JSON.parse(localStorage.getItem('ava_potty_logs') || '[]');
+        async function renderPottyTracker() {
+            let logs = await appDB.getPottyLogs();
             logs.sort((a,b) => b.timestamp - a.timestamp); 
             const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
             const todayLogs = logs.filter(l => l.timestamp >= startOfDay.getTime());
@@ -805,23 +858,9 @@
             }
         }
 
-        function openPottyTracker() { renderPottyTracker(); const overlay = document.getElementById('potty-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
-            
-            // Turn 3: Trigger gesture animation hint for 3 seconds
-            const hint = document.getElementById('modal-swipe-hint');
-            if (hint) {
-                hint.classList.add('active');
-                setTimeout(() => hint.classList.remove('active'), 3000); 
-            } }
+        async function openPottyTracker() { await renderPottyTracker(); const overlay = document.getElementById('potty-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); }
         function closePottyTracker() { const overlay = document.getElementById('potty-modal'); overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 150); }
-        function openQuickShareModal() { const overlay = document.getElementById('quick-share-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
-            
-            // Turn 3: Trigger gesture animation hint for 3 seconds
-            const hint = document.getElementById('modal-swipe-hint');
-            if (hint) {
-                hint.classList.add('active');
-                setTimeout(() => hint.classList.remove('active'), 3000); 
-            } }
+        function openQuickShareModal() { const overlay = document.getElementById('quick-share-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); }
         function closeQuickShareModal() { const overlay = document.getElementById('quick-share-modal'); overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 150); }
 
         function createTimePickerHTML(id) {
@@ -933,6 +972,45 @@
                     });
                     return recs;
                 } catch(e) { console.error("Error exporting:", e); return []; }
+            }
+
+            // --- REMINDERS stored in Firestore, shared across all devices ---
+            async getReminders() {
+                try {
+                    const doc = await db.collection('ava_app_data').doc('reminders').get();
+                    return doc.exists ? (doc.data().list || []) : [];
+                } catch(e) { console.error("getReminders error:", e); return []; }
+            }
+            async saveReminders(list) {
+                try {
+                    await db.collection('ava_app_data').doc('reminders').set({ list });
+                } catch(e) { console.error("saveReminders error:", e); }
+            }
+
+            // --- AUDIT LOGS stored in Firestore, shared across all devices ---
+            async getAuditLogs() {
+                try {
+                    const doc = await db.collection('ava_app_data').doc('audit_logs').get();
+                    return doc.exists ? (doc.data().logs || []) : [];
+                } catch(e) { console.error("getAuditLogs error:", e); return []; }
+            }
+            async saveAuditLogs(logs) {
+                try {
+                    await db.collection('ava_app_data').doc('audit_logs').set({ logs });
+                } catch(e) { console.error("saveAuditLogs error:", e); }
+            }
+
+            // --- POTTY LOGS stored in Firestore, shared across all devices ---
+            async getPottyLogs() {
+                try {
+                    const doc = await db.collection('ava_app_data').doc('potty_logs').get();
+                    return doc.exists ? (doc.data().logs || []) : [];
+                } catch(e) { console.error("getPottyLogs error:", e); return []; }
+            }
+            async savePottyLogs(logs) {
+                try {
+                    await db.collection('ava_app_data').doc('potty_logs').set({ logs });
+                } catch(e) { console.error("savePottyLogs error:", e); }
             }
         }
         const appDB = new FirebaseDBManager();
@@ -1054,6 +1132,25 @@
             }
         }
 
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('save-toast');
+            const label = document.getElementById('toast-msg');
+            label.innerText = msg;
+            toast.className = isError ? 'show error' : 'show';
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(() => { toast.className = ''; }, 2200);
+        }
+
+        // Online / Offline indicator
+        function updateConnStatus() {
+            const el = document.getElementById('conn-status');
+            if (!navigator.onLine) { el.className = 'offline'; }
+            else { el.className = ''; }
+        }
+        window.addEventListener('online', updateConnStatus);
+        window.addEventListener('offline', updateConnStatus);
+        updateConnStatus();
+
         function getLocalISODate(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
         function formatCustomDate(s) { const p = s.split('-'); const d = new Date(p[0], p[1]-1, p[2]); return `${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]}, ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; }
 
@@ -1082,6 +1179,28 @@
         }
 
         
+        
+        function triggerSwipeHint() { /* no-op — hints now only shown on dashboard load */ }
+
+        function showDashboardHints() {
+            // 1. Swipe hint on overview card — fade in after 1s, fade out after 5s
+            const swipeHint = document.getElementById('hint-swipe');
+            if (swipeHint) {
+                setTimeout(() => {
+                    swipeHint.classList.add('visible');
+                    setTimeout(() => swipeHint.classList.remove('visible'), 5000);
+                }, 1000);
+            }
+            // 2. Menu button pulse — 3 gentle pulses after 1.5s
+            const menuBtn = document.getElementById('menu-btn');
+            if (menuBtn) {
+                setTimeout(() => {
+                    menuBtn.classList.add('pulse-hint');
+                    menuBtn.addEventListener('animationend', () => menuBtn.classList.remove('pulse-hint'), { once: true });
+                }, 1500);
+            }
+        }
+
         function setupDragToClose() {
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
                 const modal = overlay.querySelector('.modal-content');
@@ -1132,33 +1251,43 @@
             });
         }
 
+        function hideLoader() {
+            const loaderElement = document.getElementById('global-loader');
+            const loaderPercentage = document.getElementById('loader-percentage');
+            if (!loaderElement) return;
+            if (loaderPercentage) loaderPercentage.innerText = "100%";
+            loaderElement.style.opacity = '0';
+            setTimeout(() => { loaderElement.style.display = 'none'; }, 350);
+        }
+
         window.onload = async function() {
             document.getElementById('picker-morningWake').innerHTML = createTimePickerHTML('trk-morningWake');
             document.getElementById('picker-wakeTime').innerHTML = createTimePickerHTML('trk-wakeTime');
             document.getElementById('picker-bedtimeStart').innerHTML = createTimePickerHTML('trk-bedtimeStart');
             document.getElementById('picker-asleepTime').innerHTML = createTimePickerHTML('trk-asleepTime');
-            
-            await appDB.init(); 
-            await fetchEvents();
-            setupDragToClose();
-            
+
+            // Animate loader percentage while data loads
             let progress = 0;
-            const loaderPercentage = document.getElementById('loader-percentage'); 
-            const loaderElement = document.getElementById('global-loader');
-            
-            if (loaderPercentage && loaderElement) {
-                loaderPercentage.innerText = "0%";
-                const loadInterval = setInterval(() => {
-                    progress += 20;
-                    loaderPercentage.innerText = progress + "%";
-                    if (progress >= 100) {
-                        clearInterval(loadInterval);
-                        setTimeout(() => {
-                            loaderElement.style.opacity = '0';
-                            setTimeout(() => loaderElement.style.display = 'none', 300);
-                        }, 200);
-                    }
-                }, 150); 
+            const loaderPercentage = document.getElementById('loader-percentage');
+            if (loaderPercentage) loaderPercentage.innerText = "0%";
+            const loadInterval = setInterval(() => {
+                if (progress < 80) {
+                    progress += 10;
+                    if (loaderPercentage) loaderPercentage.innerText = progress + "%";
+                }
+            }, 120);
+
+            try {
+                await appDB.init();
+                await fetchEvents();
+                setupDragToClose();
+                checkRemindersOnLoad();
+                showDashboardHints();
+            } catch(e) {
+                console.error("App init error:", e);
+            } finally {
+                clearInterval(loadInterval);
+                hideLoader();
             }
         };
 
@@ -1212,13 +1341,6 @@
             const overlay = document.getElementById('schedule-settings-dialog');
             overlay.style.display = 'flex';
             setTimeout(() => overlay.classList.add('active'), 10);
-            
-            // Turn 3: Trigger gesture animation hint for 3 seconds
-            const hint = document.getElementById('modal-swipe-hint');
-            if (hint) {
-                hint.classList.add('active');
-                setTimeout(() => hint.classList.remove('active'), 3000); 
-            }
         }
         function closeScheduleSettings() {
             const overlay = document.getElementById('schedule-settings-dialog');
@@ -1312,7 +1434,6 @@
                 const diffTime = new Date().getTime() - dateObj.getTime();
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 if (diffDays === 1) titleText = "Yesterday's Summary";
-                else if (diffDays === -1) titleText = "Tomorrow's Summary";
                 else titleText = formatCustomDate(localStr) + " Summary";
             }
             
@@ -1331,6 +1452,7 @@
             document.getElementById('ov-morning').innerText = trks.morningWake || '--:--';
             document.getElementById('ov-nap').innerText = trks.nap ? (trks.nap === '0' ? "None" : trks.nap + "h") : "--";
             document.getElementById('ov-bath').innerText = trks.rtnBath === true ? "Done" : (trks.rtnBath === false ? "Pending" : "--");
+            document.getElementById('ov-asleep').innerText = trks.asleepTime || '--:--';
 
             document.getElementById('overview-target-time').innerHTML = `<i class="fa-solid fa-sparkles fa-beat" style="color:var(--ai-color);"></i> AI Calc...`;
             let aiTime = await fetchAIBedtime(trks.morningWake, trks.nap, trks.wakeTime);
@@ -1444,15 +1566,20 @@
                 if (endMins < startMins) return showAppAlert("Time Error", "Ava cannot fall asleep before her bedtime routine starts! Please fix the times.");
             }
             const feedbackText = document.getElementById('modal-feedback').value;
-        const energySlider = document.getElementById('trk-energy');
-        if(energySlider) currentTrackers.energy = energySlider.value;
+            const energySlider = document.getElementById('trk-energy');
+            if(energySlider) currentTrackers.energy = energySlider.value;
             const allRecs = await appDB.getAllRecords();
             const currentOwner = allRecs[activeDateStr]?.owner || getDefaultOwner(activeDateStr);
-            logSystemAudit(`Saved daily records for ${activeDateStr}`);
-        await appDB.saveRecord(activeDateStr, { feedback: feedbackText, trackers: { ...currentTrackers }, owner: currentOwner });
-            
-            closeModal(); await fetchEvents();
-            setupDragToClose(); 
+            try {
+                logSystemAudit(`Saved daily records for ${activeDateStr}`);
+                await appDB.saveRecord(activeDateStr, { feedback: feedbackText, trackers: { ...currentTrackers }, owner: currentOwner });
+                closeModal();
+                await fetchEvents();
+                setupDragToClose();
+                showToast('Saved successfully!');
+            } catch(e) {
+                showToast('Save failed — check connection', true);
+            }
         }
 
         async function openDashboard() {
@@ -1543,49 +1670,21 @@
             setTimeout(() => location.reload(), 500);
         }
 
-        function openShareDialog() { const overlay = document.getElementById('share-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
-            
-            // Turn 3: Trigger gesture animation hint for 3 seconds
-            const hint = document.getElementById('modal-swipe-hint');
-            if (hint) {
-                hint.classList.add('active');
-                setTimeout(() => hint.classList.remove('active'), 3000); 
-            } }
+        function openShareDialog() { const overlay = document.getElementById('share-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); }
         function closeShareDialog() { const overlay = document.getElementById('share-dialog'); overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 150); }
         function shareTodayWA() { const text = `*Ava's Update: ${document.getElementById('modal-date').innerText}*\nMorning Wake: ${currentTrackers.morningWake||'?'}\nNap: ${currentTrackers.nap}h\nBedtime Started: ${currentTrackers.bedtimeStart||'?'}\nAsleep at: ${currentTrackers.asleepTime||'?'}\n\n*Notes:*\n${document.getElementById('modal-feedback').value||'None'}`; window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank'); closeShareDialog(); }
         function shareTodayPDF() { window.print(); }
 
-        function showModal() { const overlay = document.getElementById('event-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
-            
-            // Turn 3: Trigger gesture animation hint for 3 seconds
-            const hint = document.getElementById('modal-swipe-hint');
-            if (hint) {
-                hint.classList.add('active');
-                setTimeout(() => hint.classList.remove('active'), 3000); 
-            } }
+        function showModal() { const overlay = document.getElementById('event-modal'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); }
         function closeModal() { const overlay = document.getElementById('event-modal'); overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 150); }
 
         function showAppConfirm(title, msg, confirmText, callback) {
             document.getElementById('dialog-title').innerText = title; document.getElementById('dialog-msg').innerHTML = msg; document.getElementById('dialog-confirm').innerText = confirmText; document.getElementById('dialog-cancel').style.display = 'block';
-            const overlay = document.getElementById('custom-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
-            
-            // Turn 3: Trigger gesture animation hint for 3 seconds
-            const hint = document.getElementById('modal-swipe-hint');
-            if (hint) {
-                hint.classList.add('active');
-                setTimeout(() => hint.classList.remove('active'), 3000); 
-            } dialogCallback = callback;
+            const overlay = document.getElementById('custom-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); dialogCallback = callback;
         }
         function showAppAlert(title, msg) {
             document.getElementById('dialog-title').innerText = title; document.getElementById('dialog-msg').innerHTML = msg; document.getElementById('dialog-confirm').innerText = "OK"; document.getElementById('dialog-cancel').style.display = 'none';
-            const overlay = document.getElementById('custom-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
-            
-            // Turn 3: Trigger gesture animation hint for 3 seconds
-            const hint = document.getElementById('modal-swipe-hint');
-            if (hint) {
-                hint.classList.add('active');
-                setTimeout(() => hint.classList.remove('active'), 3000); 
-            } dialogCallback = null;
+            const overlay = document.getElementById('custom-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10); dialogCallback = null;
         }
         function closeCustomDialog(result) { const overlay = document.getElementById('custom-dialog'); overlay.classList.remove('active'); setTimeout(() => { overlay.style.display = 'none'; if(result && dialogCallback) dialogCallback(); }, 200); }
 
@@ -1608,11 +1707,11 @@
                 const allRecs = await appDB.getAllRecords();
                 const localRec = allRecs[activeDateStr] || { feedback: '', trackers: {} };
                 localRec.owner = "DELETED";
-                logSystemAudit(`Swapped shift to ${newOwner} for ${activeDateStr}`);
-        await appDB.saveRecord(activeDateStr, localRec);
+                logSystemAudit(`Cleared day ${activeDateStr}`);
+                await appDB.saveRecord(activeDateStr, localRec);
                 closeModal();
                 await fetchEvents();
-            setupDragToClose();
+                setupDragToClose();
             }); 
         }
         async function restoreSpecificDay(dateStr) {
@@ -1663,13 +1762,6 @@
 
         async function openAIDialog(mode) {
             currentAIMode = mode; const overlay = document.getElementById('ai-dialog'); overlay.style.display = 'flex'; setTimeout(() => overlay.classList.add('active'), 10);
-            
-            // Turn 3: Trigger gesture animation hint for 3 seconds
-            const hint = document.getElementById('modal-swipe-hint');
-            if (hint) {
-                hint.classList.add('active');
-                setTimeout(() => hint.classList.remove('active'), 3000); 
-            }
             const headerDiv = document.getElementById('ai-dialog-header'); const promptInput = document.getElementById('ai-prompt-input'); const btnFetchSummary = document.getElementById('btn-fetch-summary'); const promptWrapper = document.getElementById('ai-prompt-wrapper');
             document.getElementById('ai-results-area').style.display = 'none'; document.getElementById('btn-copy-ai').style.display = 'none'; rawAIResult = "";
             
@@ -1887,14 +1979,16 @@ async function logSystemAudit(action) {
         device: navigator.userAgent.includes("Mobile") ? "Mobile Device" : "Desktop/Laptop", 
         ip: currentIp
     };
-    let logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
+    // Store in Firestore so all devices share the same audit trail
+    let logs = await appDB.getAuditLogs();
     logs.unshift(logEntry);
-    if(logs.length > 50) logs.pop();
-    localStorage.setItem('ava_audit_logs', JSON.stringify(logs));
+    if(logs.length > 50) logs = logs.slice(0, 50);
+    await appDB.saveAuditLogs(logs);
 }
 
-function viewAuditLog() {
-    const logs = JSON.parse(localStorage.getItem('ava_audit_logs') || '[]');
+async function viewAuditLog() {
+    showAppAlert('System Audit Log', '<p style="text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i> Loading logs...</p>');
+    const logs = await appDB.getAuditLogs();
     const logHtml = logs.length ? logs.map(l => `<div style="text-align: left; margin-bottom: 10px; font-size: 13px;"><b>Time:</b> ${l.time || 'N/A'}<br><b>Action:</b> ${l.action || 'System Ping'}<br><b>Device:</b> ${l.device || 'Unknown'}<br><b>IP:</b> ${l.ip || 'Unknown'}</div><hr style="border:0; border-top:1px solid var(--border-color);">`).join('') : '<p>No logs found.</p>';
     showAppAlert('System Audit Log', `<div style="max-height: 300px; overflow-y: auto;">${logHtml}</div>`);
 }
@@ -1948,8 +2042,8 @@ function requestNotificationPermission() {
     }
 }
 
-function checkTimeBasedReminders() {
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+async function checkTimeBasedReminders() {
+    let reminders = await appDB.getReminders();
     if (reminders.length === 0) return;
     
     let now = new Date();
@@ -1979,7 +2073,7 @@ function checkTimeBasedReminders() {
     });
     
     if (updated) {
-        localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+        await appDB.saveReminders(reminders);
         // Refresh hub if it's currently open
         if(document.getElementById('modal-title') && document.getElementById('modal-title').innerText === 'Reminders Hub') {
             checkShiftReminders();
@@ -1995,10 +2089,10 @@ function checkRemindersOnLoad() {
     checkTimeBasedReminders(); // Initial check
 }
 
-function checkShiftReminders() {
+async function checkShiftReminders() {
     const today = new Date().toISOString().split('T')[0];
     const owner = getDefaultOwner(today);
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    let reminders = await appDB.getReminders();
     
     let reminderHtml = `<div style="text-align: center; margin-bottom: 20px;">
         <span style="background: var(--alf-bg); color: var(--alf-color); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Active Shift: ${owner.split(' ')[0]}</span>
@@ -2042,37 +2136,30 @@ function checkShiftReminders() {
     showAppAlert(`Reminders Hub`, reminderHtml);
 }
 
-function addReminder() {
+async function addReminder() {
     const input = document.getElementById('new-reminder-input');
     const timeInput = document.getElementById('new-reminder-time');
     if (!input || !input.value.trim()) return;
     
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+    let reminders = await appDB.getReminders();
     reminders.push({
         text: input.value.trim(),
         time: timeInput ? timeInput.value : "",
         notified: false
     });
     
-    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
-    requestNotificationPermission(); // Ensure permission is requested
-    checkShiftReminders(); // Re-render the UI
-}
-
-function removeReminder(index) {
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
-    reminders.splice(index, 1);
-    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+    await appDB.saveReminders(reminders);
+    requestNotificationPermission();
     checkShiftReminders();
 }
-// ------------------------------------------
 
-function removeReminder(index) {
-    let reminders = JSON.parse(localStorage.getItem('ava_reminders') || '[]');
+async function removeReminder(index) {
+    let reminders = await appDB.getReminders();
     reminders.splice(index, 1);
-    localStorage.setItem('ava_reminders', JSON.stringify(reminders));
+    await appDB.saveReminders(reminders);
     checkShiftReminders();
 }
+
 
 </script>
 </body>
