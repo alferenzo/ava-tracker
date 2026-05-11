@@ -165,16 +165,16 @@
         .skeleton { background: linear-gradient(90deg, var(--input-bg) 25%, var(--border-color) 50%, var(--input-bg) 75%); background-size: 200% 100%; animation: skeletonWave 1.4s infinite; border-radius: 6px; }
         @keyframes skeletonWave { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        .cal-wrapper { background: var(--card-bg); border-radius: 20px; padding: 14px 14px 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); backdrop-filter: blur(10px); border: 1px solid var(--border-color); }
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .cal-header button { background: var(--input-bg); border: none; width: 32px; height: 32px; border-radius: 50%; color: var(--text-main); font-size: 14px; cursor: pointer; transition: transform 0.15s; }
+        .cal-wrapper { background: var(--card-bg); border-radius: 20px; padding: 12px 8px 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); backdrop-filter: blur(10px); border: 1px solid var(--border-color); }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 4px; }
+        .cal-header button { background: var(--input-bg); border: none; width: 30px; height: 30px; border-radius: 50%; color: var(--text-main); font-size: 13px; cursor: pointer; transition: transform 0.15s; }
         .cal-header button:active { transform: scale(0.88); }
-        .cal-header h3 { font-size: 16px; font-weight: 700; color: var(--text-main); }
+        .cal-header h3 { font-size: 15px; font-weight: 700; color: var(--text-main); }
         
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-        .cal-day-label { font-size: 10px; color: var(--text-muted); font-weight: 700; padding-bottom: 6px; text-transform: uppercase; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; }
+        .cal-day-label { font-size: 9px; color: var(--text-muted); font-weight: 700; padding-bottom: 5px; text-transform: uppercase; }
         
-        .cal-cell { aspect-ratio: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 13px; border-radius: 10px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: all 0.15s; position: relative; }
+        .cal-cell { aspect-ratio: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 12px; border-radius: 9px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: all 0.15s; position: relative; }
         .cal-cell:active { transform: scale(0.88); }
         .cal-cell.empty { visibility: hidden; }
         
@@ -307,20 +307,74 @@
         .potty-log-item .time { color: var(--text-muted); font-size: 12px; }
         .potty-delete { color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; padding: 5px; }
     
-        /* ── DASHBOARD HINTS (swipe on overview, menu pulse on header) ── */
-        @keyframes chevronLeft  { 0%,100% { transform: translateX(0);   opacity: 0.5; }
-                                   50%    { transform: translateX(-5px); opacity: 1;   } }
-        @keyframes chevronRight { 0%,100% { transform: translateX(0);  opacity: 0.5; }
-                                   50%    { transform: translateX(5px); opacity: 1;   } }
-        #hint-swipe {
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            font-size: 11px; font-weight: 800; color: var(--text-muted);
-            letter-spacing: 1px; padding: 6px 0 2px;
-            opacity: 0; transition: opacity 0.6s;
+        /* ══════════════════════════════════════════
+           SWIPE HINT  — big standalone strip
+           ══════════════════════════════════════════ */
+        @keyframes handWiggle {
+            0%,100% { transform: rotate(-12deg) translateX(0px);  }
+            30%      { transform: rotate(10deg)  translateX(6px);  }
+            60%      { transform: rotate(-8deg)  translateX(-4px); }
         }
-        #hint-swipe.visible { opacity: 1; }
-        #hint-swipe i:first-child  { animation: chevronLeft  1.5s ease-in-out infinite; }
-        #hint-swipe i:last-child   { animation: chevronRight 1.5s ease-in-out infinite; }
+        @keyframes hintSlideIn {
+            from { opacity: 0; transform: translateY(-12px) scale(0.92); }
+            to   { opacity: 1; transform: translateY(0)     scale(1);    }
+        }
+        @keyframes hintFadeOut {
+            to { opacity: 0; transform: scale(0.9); pointer-events: none; }
+        }
+        @keyframes chevronLeft  { 0%,100% { transform: translateX(0);   opacity: 0.45; }
+                                   50%    { transform: translateX(-6px); opacity: 1;    } }
+        @keyframes chevronRight { 0%,100% { transform: translateX(0);   opacity: 0.45; }
+                                   50%    { transform: translateX(6px);  opacity: 1;    } }
+
+        #hint-swipe {
+            margin: 10px 0 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+        #hint-swipe.visible {
+            opacity: 1;
+            pointer-events: auto;
+            animation: hintSlideIn 0.5s cubic-bezier(0.34,1.3,0.64,1) both;
+        }
+        #hint-swipe.hiding {
+            animation: hintFadeOut 0.4s ease forwards;
+        }
+        #hint-swipe-inner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            background: var(--card-bg);
+            border: 1.5px solid var(--border-color);
+            border-radius: 18px;
+            padding: 13px 20px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+        }
+        #hint-hand {
+            font-size: 30px;
+            color: var(--ai-color);
+            animation: handWiggle 1.8s ease-in-out infinite;
+            filter: drop-shadow(0 3px 8px rgba(139,92,246,0.35));
+        }
+        #hint-text-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        #hint-label {
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--text-main);
+            letter-spacing: 1.5px;
+        }
+        #hint-sub {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
 
         /* Menu button pulse hint */
         @keyframes menuPulse {
@@ -397,6 +451,17 @@
                 <div id="cal-days" class="cal-grid"></div>
             </div>
             
+            <!-- ✦ SWIPE HINT — floats between calendar and summary ✦ -->
+            <div id="hint-swipe" aria-hidden="true">
+                <div id="hint-swipe-inner">
+                    <i class="fa-solid fa-hand-pointer" id="hint-hand"></i>
+                    <div id="hint-text-group">
+                        <span id="hint-label">SWIPE CALENDAR</span>
+                        <span id="hint-sub">← for earlier  ·  later →</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- TODAY OVERVIEW WIDGET -->
             <div class="overview-card" id="today-overview-card" style="display: block;">
                 <div class="overview-header">
@@ -429,12 +494,6 @@
                         <div style="font-size:9px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">AI Recommended Bedtime</div>
                         <div style="font-size:13px; font-weight:800; color:var(--text-main);" id="overview-target-time"><i class="fa-solid fa-spinner fa-spin" style="color:var(--ai-color);"></i> Calculating...</div>
                     </div>
-                </div>
-                <!-- SWIPE HINT -->
-                <div id="hint-swipe">
-                    <i class="fa-solid fa-chevron-left"></i>
-                    <span>SWIPE FOR HISTORY</span>
-                    <i class="fa-solid fa-chevron-right"></i>
                 </div>
             </div>
         </div>
@@ -1183,16 +1242,39 @@
         function triggerSwipeHint() { /* no-op — hints now only shown on dashboard load */ }
 
         function showDashboardHints() {
-            // 1. Swipe hint on overview card — fade in after 1s, fade out after 5s
-            const swipeHint = document.getElementById('hint-swipe');
-            if (swipeHint) {
+            const hint = document.getElementById('hint-swipe');
+            const menuBtn = document.getElementById('menu-btn');
+
+            // 1. Big swipe hint — slides in after 1s, auto-dismisses after 6s
+            //    or immediately when user taps/swipes the calendar
+            if (hint) {
                 setTimeout(() => {
-                    swipeHint.classList.add('visible');
-                    setTimeout(() => swipeHint.classList.remove('visible'), 5000);
+                    hint.classList.add('visible');
+
+                    let dismissed = false;
+                    function dismissHint() {
+                        if (dismissed) return;
+                        dismissed = true;
+                        hint.classList.remove('visible');
+                        hint.classList.add('hiding');
+                        hint.addEventListener('animationend', () => { hint.style.display = 'none'; }, { once: true });
+                    }
+
+                    const autoDismiss = setTimeout(dismissHint, 6000);
+
+                    // Dismiss on any calendar interaction
+                    const targets = [
+                        document.getElementById('calendar-grid'),
+                        ...document.querySelectorAll('.cal-header button')
+                    ].filter(Boolean);
+                    targets.forEach(el => {
+                        el.addEventListener('click',      () => { clearTimeout(autoDismiss); dismissHint(); }, { once: true });
+                        el.addEventListener('touchstart', () => { clearTimeout(autoDismiss); dismissHint(); }, { once: true, passive: true });
+                    });
                 }, 1000);
             }
-            // 2. Menu button pulse — 3 gentle pulses after 1.5s
-            const menuBtn = document.getElementById('menu-btn');
+
+            // 2. Menu button — 3 ripple pulses at 1.5s
             if (menuBtn) {
                 setTimeout(() => {
                     menuBtn.classList.add('pulse-hint');
