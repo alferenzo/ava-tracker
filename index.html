@@ -297,17 +297,13 @@
         .ov-stat-tile .tile-value { font-size:13px; font-weight:800; color:var(--text-main); margin-top:2px; }
 
         .overview-info {
-            background:linear-gradient(135deg,var(--ai-bg),var(--input-bg));
+            background: var(--input-bg);
             border-radius:12px; padding:10px 12px;
-            border:1px solid rgba(124,58,237,.18);
+            border:1px solid var(--border-color);
             display:flex; align-items:center; gap:10px;
         }
         .overview-info-icon {
-            width:32px; height:32px; border-radius:9px;
-            background:var(--ai-color); color:white;
-            display:flex; justify-content:center; align-items:center;
-            font-size:14px; flex-shrink:0;
-            box-shadow:0 4px 10px rgba(124,58,237,.3);
+            font-size:18px; flex-shrink:0; line-height:1;
         }
 
         /* ═══════════════════════════════════════════════════════════
@@ -420,11 +416,11 @@
         #hint-swipe { margin:9px 0 4px; opacity:0; pointer-events:none; transition:opacity .4s; }
         #hint-swipe.visible { opacity:1; pointer-events:auto; animation:hintSlideIn .45s cubic-bezier(0.34,1.3,0.64,1) both; }
         #hint-swipe.hiding  { animation:hintFadeOut .35s ease forwards; }
-        #hint-swipe-inner { display:flex; align-items:center; justify-content:center; gap:10px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:50px; padding:8px 18px; box-shadow:var(--shadow-sm); width:fit-content; margin:0 auto; }
-        #hint-hand { font-size:16px; color:var(--ai-color); animation:handWiggle 1.9s ease-in-out infinite; }
+        #hint-swipe-inner { display:flex; align-items:center; justify-content:center; gap:12px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:50px; padding:10px 22px; box-shadow:var(--shadow-md); width:fit-content; margin:0 auto; }
+        #hint-hand { font-size:28px; color:var(--ai-color); animation:handWiggle 1.9s ease-in-out infinite; filter:drop-shadow(0 3px 8px rgba(124,58,237,0.35)); }
         #hint-text-group { display:flex; flex-direction:column; gap:1px; }
-        #hint-label { font-size:10.5px; font-weight:900; color:var(--text-main); letter-spacing:1.1px; }
-        #hint-sub   { font-size:9.5px;  font-weight:600; color:var(--text-muted); letter-spacing:0.3px; }
+        #hint-label { font-size:12px; font-weight:900; color:var(--text-main); letter-spacing:1.2px; }
+        #hint-sub   { font-size:10px; font-weight:600; color:var(--text-muted); letter-spacing:0.3px; }
 
         /* MISC */
         @keyframes menuPulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,142,179,.5)} 50%{box-shadow:0 0 0 8px rgba(0,142,179,0)} }
@@ -434,6 +430,57 @@
         #save-toast.error { background:#ef4444; box-shadow:0 8px 20px rgba(239,68,68,.35); }
         #conn-status { position:fixed; top:8px; right:12px; font-size:10px; font-weight:800; padding:3px 9px; border-radius:20px; z-index:999999; pointer-events:none; transition:opacity .4s; opacity:0; }
         #conn-status.offline { background:#fef2f2; color:#ef4444; border:1px solid #fca5a5; opacity:1; }
+
+        /* ═══════════════════════════════════════════════════════════
+           SYNC STATUS INDICATOR
+           ═══════════════════════════════════════════════════════════ */
+        #sync-status {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 10px; font-weight: 800; letter-spacing: 0.3px;
+            padding: 4px 9px; border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            cursor: default;
+        }
+        #sync-status .sync-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--text-muted);
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        /* synced state */
+        #sync-status.synced {
+            color: #059669;
+            border-color: rgba(5,150,105,0.25);
+            background: #f0fdf4;
+        }
+        #sync-status.synced .sync-dot { background: #10b981; }
+        /* syncing state */
+        #sync-status.syncing {
+            color: var(--alf-color);
+            border-color: rgba(2,132,199,0.25);
+            background: var(--alf-bg);
+        }
+        #sync-status.syncing .sync-dot {
+            background: var(--alf-color);
+            animation: syncPulse 0.8s ease-in-out infinite;
+        }
+        /* error state */
+        #sync-status.sync-error {
+            color: #dc2626;
+            border-color: rgba(220,38,38,0.25);
+            background: #fef2f2;
+        }
+        #sync-status.sync-error .sync-dot { background: #ef4444; }
+        /* dark mode overrides */
+        body.night-vision #sync-status { background: var(--input-bg); border-color: var(--border-color); color: var(--text-muted); }
+        body.night-vision #sync-status.synced { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.3); color: #34d399; }
+        body.night-vision #sync-status.syncing { background: var(--alf-bg); border-color: rgba(56,189,248,0.3); color: var(--alf-color); }
+        body.night-vision #sync-status.sync-error { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.3); color: #f87171; }
+        @keyframes syncPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
 
     </style>
 
@@ -477,7 +524,13 @@
                 <h1>Ava's Four Day Care</h1>
                 <p>Schedule & Notes</p>
             </div>
-            <button class="header-btn" onclick="toggleNightVision()"><i class="fa-solid fa-moon"></i></button>
+            <div style="display:flex; align-items:center; gap:7px;">
+                <div id="sync-status" title="Firebase sync status">
+                    <span class="sync-dot"></span>
+                    <span id="sync-label">—</span>
+                </div>
+                <button class="header-btn" onclick="toggleNightVision()"><i class="fa-solid fa-moon"></i></button>
+            </div>
         </div>
 
         <div id="app-content" class="content-area" style="display: block;">
@@ -525,7 +578,7 @@
                 </div>
 
                 <div class="overview-info" style="margin-bottom:0;">
-                    <div class="overview-info-icon"><i class="fa-solid fa-sparkles"></i></div>
+                    <div class="overview-info-icon">✨</div>
                     <div style="flex:1;">
                         <div style="font-size:9px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">AI Recommended Bedtime</div>
                         <div style="font-size:13px;font-weight:800;color:var(--text-main);" id="overview-target-time"><i class="fa-solid fa-spinner fa-spin" style="color:var(--ai-color);"></i> Calculating...</div>
@@ -1119,6 +1172,67 @@
             }
         }
         const appDB = new FirebaseDBManager();
+
+        // ── SYNC STATUS HELPER ─────────────────────────────────────
+        let syncTimer = null;
+        function setSyncStatus(state, label) {
+            const el = document.getElementById('sync-status');
+            const lbl = document.getElementById('sync-label');
+            if (!el || !lbl) return;
+            el.className = 'sync-' + state === 'sync-error' ? 'sync-error' : state;
+            // fix: use direct class set
+            el.setAttribute('class', state === 'error' ? 'sync-error' : state);
+            lbl.textContent = label;
+            if (syncTimer) clearTimeout(syncTimer);
+            // Auto-hide "Synced" after 3s back to idle
+            if (state === 'synced') {
+                syncTimer = setTimeout(() => {
+                    el.setAttribute('class', '');
+                    lbl.textContent = '—';
+                }, 3000);
+            }
+        }
+
+        // Patch DB methods to drive sync indicator
+        const _origSaveRecord = appDB.saveRecord.bind(appDB);
+        appDB.saveRecord = async function(dateStr, dataObj) {
+            setSyncStatus('syncing', 'Saving…');
+            try {
+                await _origSaveRecord(dateStr, dataObj);
+                setSyncStatus('synced', 'Synced ✓');
+            } catch(e) {
+                setSyncStatus('error', 'Failed');
+                throw e;
+            }
+        };
+        const _origSaveSettings = appDB.saveSettings.bind(appDB);
+        appDB.saveSettings = async function(s) {
+            setSyncStatus('syncing', 'Saving…');
+            try { await _origSaveSettings(s); setSyncStatus('synced', 'Synced ✓'); }
+            catch(e) { setSyncStatus('error', 'Failed'); throw e; }
+        };
+        const _origSavePotty = appDB.savePottyLogs.bind(appDB);
+        appDB.savePottyLogs = async function(logs) {
+            setSyncStatus('syncing', 'Saving…');
+            try { await _origSavePotty(logs); setSyncStatus('synced', 'Synced ✓'); }
+            catch(e) { setSyncStatus('error', 'Failed'); throw e; }
+        };
+        const _origSaveReminders = appDB.saveReminders.bind(appDB);
+        appDB.saveReminders = async function(list) {
+            setSyncStatus('syncing', 'Saving…');
+            try { await _origSaveReminders(list); setSyncStatus('synced', 'Synced ✓'); }
+            catch(e) { setSyncStatus('error', 'Failed'); throw e; }
+        };
+        const _origSaveAudit = appDB.saveAuditLogs.bind(appDB);
+        appDB.saveAuditLogs = async function(logs) {
+            setSyncStatus('syncing', 'Saving…');
+            try { await _origSaveAudit(logs); setSyncStatus('synced', 'Synced ✓'); }
+            catch(e) { setSyncStatus('error', 'Failed'); throw e; }
+        };
+        // Show "Online" once Firebase confirms connectivity
+        db.collection('ava_daily_records').doc('_system_settings_').get()
+            .then(() => setSyncStatus('synced', 'Online'))
+            .catch(() => setSyncStatus('error', 'Offline'));
 
         let isNightVision = localStorage.getItem('ava_night_vision') === 'true';
         if(isNightVision) document.body.classList.add('night-vision');
@@ -2291,4 +2405,4 @@ async function removeReminder(index) {
 
 </script>
 </body>
-                                                                                                                          </html>
+                            </html>
