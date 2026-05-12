@@ -106,9 +106,122 @@
         /* ═══════════════════════════════════════════════════════════
            LOADER
            ═══════════════════════════════════════════════════════════ */
-        #global-loader { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg-color); z-index:99999; display:flex; flex-direction:column; justify-content:center; align-items:center; transition: opacity 0.4s; }
-        .css-spinner { width:60px; height:60px; border:5px solid var(--input-bg); border-top-color:var(--alf-color); border-bottom-color:var(--lesly-color); border-radius:50%; animation:cssSpin 1s cubic-bezier(0.68,-0.55,0.265,1.55) infinite; margin-bottom:20px; }
-        .loader-text { animation:pulseText 1.5s ease-in-out infinite; font-size:16px; font-weight:700; color:var(--text-main); }
+        /* ══════════════════════════════════════════════════════
+           LOADER — immersive brand splash
+           ══════════════════════════════════════════════════════ */
+        #global-loader {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: var(--bg-color);
+            z-index:99999;
+            display:flex; flex-direction:column;
+            justify-content:center; align-items:center;
+            transition: opacity 0.5s ease-out;
+            overflow: hidden;
+        }
+        /* subtle radial glow behind the spinner */
+        #global-loader::before {
+            content: '';
+            position: absolute;
+            width: 280px; height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(2,132,199,0.12) 0%,
+                rgba(124,58,237,0.08) 45%,
+                transparent 70%);
+            animation: loaderGlow 3s ease-in-out infinite;
+        }
+        @keyframes loaderGlow {
+            0%,100% { transform: scale(1);   opacity: 0.7; }
+            50%      { transform: scale(1.2); opacity: 1;   }
+        }
+
+        /* ring wrapper */
+        .loader-rings {
+            position: relative;
+            width: 110px; height: 110px;
+            margin-bottom: 28px;
+            flex-shrink: 0;
+        }
+        /* outer ring — alf blue */
+        .loader-ring-outer {
+            position: absolute; inset: 0;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top-color: var(--alf-color);
+            border-right-color: rgba(2,132,199,0.25);
+            animation: spinOuter 1.1s cubic-bezier(0.4,0,0.2,1) infinite;
+        }
+        /* middle ring — AI purple */
+        .loader-ring-mid {
+            position: absolute; inset: 14px;
+            border-radius: 50%;
+            border: 3.5px solid transparent;
+            border-bottom-color: var(--ai-color);
+            border-left-color: rgba(124,58,237,0.2);
+            animation: spinMid 0.85s cubic-bezier(0.4,0,0.2,1) infinite reverse;
+        }
+        /* inner ring — lesly pink */
+        .loader-ring-inner {
+            position: absolute; inset: 26px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--lesly-color);
+            border-right-color: rgba(219,39,119,0.2);
+            animation: spinOuter 0.65s linear infinite;
+        }
+        /* emoji in the centre */
+        .loader-emoji {
+            position: absolute;
+            inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            animation: loaderBreathe 2.2s ease-in-out infinite;
+        }
+        @keyframes spinOuter { to { transform: rotate(360deg); } }
+        @keyframes spinMid   { to { transform: rotate(360deg); } }
+        @keyframes loaderBreathe {
+            0%,100% { transform: scale(1)    translateY(0); }
+            50%      { transform: scale(1.12) translateY(-3px); }
+        }
+
+        /* app name */
+        .loader-app-name {
+            font-size: 21px; font-weight: 900; color: var(--text-main);
+            letter-spacing: -0.5px; margin-bottom: 4px;
+        }
+        .loader-app-name span { color: var(--alf-color); }
+
+        /* rotating status messages */
+        .loader-status {
+            font-size: 12px; font-weight: 600; color: var(--text-muted);
+            letter-spacing: 0.3px; margin-bottom: 32px;
+            height: 18px; overflow: hidden; text-align: center;
+        }
+        .loader-status-inner {
+            transition: transform 0.4s cubic-bezier(0.34,1.3,0.64,1), opacity 0.3s;
+        }
+
+        /* progress bar */
+        .loader-bar-track {
+            width: 160px; height: 3px;
+            background: var(--border-color);
+            border-radius: 4px; overflow: hidden;
+        }
+        .loader-bar-fill {
+            height: 100%; width: 0%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--alf-color), var(--ai-color), var(--lesly-color));
+            transition: width 0.35s ease-out;
+        }
+
+        /* dark mode tweaks */
+        body.night-vision #global-loader::before {
+            background: radial-gradient(circle,
+                rgba(56,189,248,0.1) 0%,
+                rgba(167,139,250,0.07) 45%,
+                transparent 70%);
+        }
+
         @keyframes cssSpin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
         @keyframes pulseText { 0%,100%{opacity:0.5;transform:translateY(0)} 50%{opacity:1;transform:translateY(-3px)} }
 
@@ -463,34 +576,16 @@
 
 
         /* FUTURE DATE CALENDAR CELLS */
-        .cal-cell.future-date {
-            opacity: 0.5;
-        }
-        /* future: keep the brand colour but fade it visually */
+        /* future dates: full colour, no opacity change */
         .cal-cell.future-date.alf-shift {
             background: var(--alf-bg);
             color: var(--alf-color);
-            border-color: rgba(2,132,199,0.15);
+            border-color: rgba(2,132,199,0.22);
         }
         .cal-cell.future-date.lesly-shift {
             background: var(--lesly-bg);
             color: var(--lesly-color);
-            border-color: rgba(219,39,119,0.15);
-        }
-        /* tiny lock icon overlay on future cells */
-        .cal-cell.future-date::after {
-            content: '';
-            position: absolute;
-            bottom: 3px;
-            width: 4px; height: 4px;
-            border-radius: 50%;
-            background: currentColor;
-            opacity: 0.35;
-        }
-        /* don't conflict with .today::after dot */
-        .cal-cell.future-date.today::after {
-            background: var(--text-main);
-            opacity: 1;
+            border-color: rgba(219,39,119,0.2);
         }
 
         /* ACCORDION STEP NUMBERS */
@@ -596,9 +691,23 @@
 <div id="conn-status"><i class="fa-solid fa-wifi-slash"></i> Offline</div>
 
     <div id="global-loader" style="display: flex; opacity: 1;">
-        <div class="css-spinner"></div>
-        <div id="loader-percentage" style="font-size: 22px; font-weight: 800; color: var(--alf-color); margin-bottom: 5px; font-variant-numeric: tabular-nums;">0%</div>
-        <h2 class="loader-text">Loading Ava's Care...</h2>
+        <!-- triple ring spinner -->
+        <div class="loader-rings">
+            <div class="loader-ring-outer"></div>
+            <div class="loader-ring-mid"></div>
+            <div class="loader-ring-inner"></div>
+            <div class="loader-emoji">🌙</div>
+        </div>
+        <!-- app name -->
+        <div class="loader-app-name">Ava's <span>Four Day</span> Care</div>
+        <!-- rotating status message -->
+        <div class="loader-status">
+            <div class="loader-status-inner" id="loader-status-text">Waking up...</div>
+        </div>
+        <!-- thin progress bar -->
+        <div class="loader-bar-track">
+            <div class="loader-bar-fill" id="loader-bar-fill"></div>
+        </div>
     </div>
 
     <!-- SIDEBAR UI -->
@@ -658,22 +767,22 @@
                 </div>
                 
                 <div class="ov-stat-row">
-                    <div class="ov-stat-tile ov-tile" onclick="openModalAndFocus('morningWake')">
+                    <div class="ov-stat-tile ov-tile" onclick="openSpecificDay(getLocalISODate(currentOverviewDate))">
                         <div class="tile-icon">🌅</div>
                         <div class="tile-label">Woke</div>
                         <div class="tile-value" id="ov-morning">--:--</div>
                     </div>
-                    <div class="ov-stat-tile ov-tile" onclick="openModalAndFocus('nap')">
+                    <div class="ov-stat-tile ov-tile" onclick="openSpecificDay(getLocalISODate(currentOverviewDate))">
                         <div class="tile-icon">🛏️</div>
                         <div class="tile-label">Nap</div>
                         <div class="tile-value" id="ov-nap">--</div>
                     </div>
-                    <div class="ov-stat-tile ov-tile" onclick="openModalAndFocus('rtnBath')">
+                    <div class="ov-stat-tile ov-tile" onclick="openSpecificDay(getLocalISODate(currentOverviewDate))">
                         <div class="tile-icon">🛁</div>
                         <div class="tile-label">Bath</div>
                         <div class="tile-value" id="ov-bath">--</div>
                     </div>
-                    <div class="ov-stat-tile ov-tile" onclick="openModalAndFocus('asleepTime')">
+                    <div class="ov-stat-tile ov-tile" onclick="openSpecificDay(getLocalISODate(currentOverviewDate))">
                         <div class="tile-icon">🌙</div>
                         <div class="tile-label">Asleep</div>
                         <div class="tile-value" id="ov-asleep">--:--</div>
@@ -682,12 +791,12 @@
 
                 <!-- Compact bottom row: AI bedtime + open day button + notes -->
                 <div class="ov-bottom-row">
-                    <div class="ov-ai-chip" onclick="openEventModal(currentOverviewDate)" title="Open day details">
+                    <div class="ov-ai-chip" onclick="openSpecificDay(getLocalISODate(currentOverviewDate))" title="Open day details">
                         <span class="ov-ai-chip-icon">✨</span>
                         <span id="overview-target-time" class="ov-ai-chip-time">–:––</span>
                         <i class="fa-solid fa-chevron-right" style="font-size:8px;color:var(--text-muted);margin-left:2px;"></i>
                     </div>
-                    <div class="ov-notes-row" id="ov-notes-row" onclick="openEventModal(currentOverviewDate)" style="display:none;">
+                    <div class="ov-notes-row" id="ov-notes-row" onclick="openSpecificDay(getLocalISODate(currentOverviewDate))" style="display:none;">
                         <i class="fa-regular fa-comment-dots ov-notes-icon"></i>
                         <span class="ov-notes-text" id="ov-notes-text"></span>
                     </div>
@@ -1457,6 +1566,47 @@
         window.addEventListener('offline', updateConnStatus);
         updateConnStatus();
 
+        // Fast local bedtime estimator for the summary card
+        // Uses the same heuristic as the AI: nap end + awake window
+        function estimateBedtime(morningWake, nap, wakeTime) {
+            // Parse a HH:MM string into total minutes
+            function toMins(t) {
+                if (!t || !t.includes(':')) return null;
+                const [h, m] = t.split(':').map(Number);
+                return h * 60 + m;
+            }
+            function toTime(mins) {
+                const h = Math.floor(mins / 60) % 24;
+                const m = mins % 60;
+                return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            }
+
+            const napHours = parseFloat(nap) || 0;
+
+            // If we know when nap ended, add the recommended awake window
+            const wakeMin = toMins(wakeTime);
+            if (wakeMin !== null) {
+                // Awake window after nap: ~3.5h for short naps, ~4h for long naps
+                const awakeWindow = napHours >= 2 ? 240 : 210;
+                const bedtime = wakeMin + awakeWindow;
+                // Clamp to 17:30–20:30
+                const clamped = Math.max(17*60+30, Math.min(20*60+30, bedtime));
+                return toTime(clamped);
+            }
+
+            // Fallback: use morning wake time + total awake time heuristic
+            const morningMin = toMins(morningWake);
+            if (morningMin !== null) {
+                // Total awake time target ~11-12h minus nap
+                const totalAwake = 11.5 * 60 - (napHours * 60);
+                const bedtime = morningMin + totalAwake;
+                const clamped = Math.max(17*60+30, Math.min(20*60+30, bedtime));
+                return toTime(clamped);
+            }
+
+            return "19:00"; // hard default
+        }
+
         function getLocalISODate(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
         function formatCustomDate(s) { const p = s.split('-'); const d = new Date(p[0], p[1]-1, p[2]); return `${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]}, ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`; }
 
@@ -1582,11 +1732,24 @@
 
         function hideLoader() {
             const loaderElement = document.getElementById('global-loader');
-            const loaderPercentage = document.getElementById('loader-percentage');
             if (!loaderElement) return;
-            if (loaderPercentage) loaderPercentage.innerText = "100%";
-            loaderElement.style.opacity = '0';
-            setTimeout(() => { loaderElement.style.display = 'none'; }, 350);
+            // Complete bar to 100%, then fade out
+            const barFill = document.getElementById('loader-bar-fill');
+            const statusEl = document.getElementById('loader-status-text');
+            if (barFill) barFill.style.width = '100%';
+            if (statusEl) {
+                statusEl.style.opacity = '0';
+                statusEl.style.transform = 'translateY(-8px)';
+                setTimeout(() => {
+                    statusEl.textContent = 'Ready ✓';
+                    statusEl.style.opacity = '1';
+                    statusEl.style.transform = 'translateY(0)';
+                }, 200);
+            }
+            setTimeout(() => {
+                loaderElement.style.opacity = '0';
+                setTimeout(() => { loaderElement.style.display = 'none'; }, 500);
+            }, 350);
         }
 
         window.onload = async function() {
@@ -1595,16 +1758,35 @@
             document.getElementById('picker-bedtimeStart').innerHTML = createTimePickerHTML('trk-bedtimeStart');
             document.getElementById('picker-asleepTime').innerHTML = createTimePickerHTML('trk-asleepTime');
 
-            // Animate loader percentage while data loads
+            // Animate progress bar + rotate status messages
+            const loaderMessages = [
+                "Waking up…",
+                "Syncing Ava's schedule…",
+                "Checking the 4-day cycle…",
+                "Loading sleep data…",
+                "Almost ready…"
+            ];
             let progress = 0;
-            const loaderPercentage = document.getElementById('loader-percentage');
-            if (loaderPercentage) loaderPercentage.innerText = "0%";
+            let msgIndex = 0;
+            const barFill = document.getElementById('loader-bar-fill');
+            const statusEl = document.getElementById('loader-status-text');
+
             const loadInterval = setInterval(() => {
-                if (progress < 80) {
-                    progress += 10;
-                    if (loaderPercentage) loaderPercentage.innerText = progress + "%";
+                if (progress < 82) {
+                    progress += 14;
+                    if (barFill) barFill.style.width = Math.min(progress, 82) + '%';
                 }
-            }, 120);
+                if (statusEl && msgIndex < loaderMessages.length - 1) {
+                    msgIndex++;
+                    statusEl.style.opacity = '0';
+                    statusEl.style.transform = 'translateY(-8px)';
+                    setTimeout(() => {
+                        statusEl.textContent = loaderMessages[msgIndex];
+                        statusEl.style.opacity = '1';
+                        statusEl.style.transform = 'translateY(0)';
+                    }, 220);
+                }
+            }, 320);
 
             try {
                 await appDB.init();
@@ -1784,14 +1966,25 @@
             document.getElementById('ov-bath').innerText = trks.rtnBath === true ? "Done" : (trks.rtnBath === false ? "Pending" : "--");
             document.getElementById('ov-asleep').innerText = trks.asleepTime || '--:--';
 
+            const aiChip = document.querySelector('.ov-ai-chip');
             const aiTimeEl = document.getElementById('overview-target-time');
-            if (aiTimeEl) aiTimeEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="font-size:10px;color:var(--ai-color);"></i>`;
-            let aiTime = await fetchAIBedtime(trks.morningWake, trks.nap, trks.wakeTime);
-            if (aiTimeEl) {
-                if(aiTime) {
-                    aiTimeEl.innerHTML = `✨ ${aiTime}`;
+            const hasData = trks.morningWake || trks.nap || trks.wakeTime;
+
+            if (!hasData) {
+                // No tracking data — hide the chip entirely
+                if (aiChip) aiChip.style.display = 'none';
+            } else {
+                if (aiChip) aiChip.style.display = 'inline-flex';
+                // Check sessionStorage cache first (set when modal was opened with full AI)
+                const cacheKey = `ai_bed_${trks.morningWake}_${trks.nap}_${trks.wakeTime}`;
+                const cached = sessionStorage.getItem(cacheKey);
+                if (cached) {
+                    // Full AI result available
+                    if (aiTimeEl) aiTimeEl.innerHTML = `AI · ${cached}`;
                 } else {
-                    aiTimeEl.textContent = "19:00";
+                    // Local estimate — clearly labelled as estimate, not AI
+                    const estimated = estimateBedtime(trks.morningWake, trks.nap, trks.wakeTime);
+                    if (aiTimeEl) aiTimeEl.innerHTML = `Est. ${estimated}`;
                 }
             }
 
@@ -1807,19 +2000,13 @@
                 notesRow.style.display = 'none';
             }
 
-            // Update AI chip label
-            const aiChipTime = document.getElementById('overview-target-time');
-            if (aiChipTime) {
-                aiChipTime.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="color:var(--ai-color);font-size:10px;"></i>`;
-            }
-
         }
 
 
         
         function openModalAndFocus(trackerId) {
             // 1. Open the modal for the currently viewed date on the dashboard
-            openEventModal(currentOverviewDate);
+            openSpecificDay(getLocalISODate(currentOverviewDate));
             
             // 2. Wait for rendering, then expand and scroll
             setTimeout(() => {
