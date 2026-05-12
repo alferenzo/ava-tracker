@@ -270,6 +270,18 @@
         .cal-cell.alf-shift   { background:var(--alf-bg);   color:var(--alf-color);   border:1.5px solid rgba(2,132,199,.22); }
         .cal-cell.lesly-shift { background:var(--lesly-bg); color:var(--lesly-color); border:1.5px solid rgba(219,39,119,.2); }
         .cal-cell.today { box-shadow:0 0 0 2px var(--text-main); font-weight:900; }
+        /* swipe-synced highlight — brief pulse ring */
+        .cal-cell.swipe-active {
+            box-shadow: 0 0 0 2.5px var(--ai-color) !important;
+            background: var(--ai-bg) !important;
+            color: var(--ai-color) !important;
+            transition: box-shadow 0.2s, background 0.2s, color 0.2s;
+        }
+        body.night-vision .cal-cell.swipe-active {
+            box-shadow: 0 0 0 2.5px var(--ai-color) !important;
+            background: rgba(167,139,250,0.18) !important;
+            color: var(--ai-color) !important;
+        }
         .cal-cell.today::after { content:''; position:absolute; bottom:4px; width:4px; height:4px; border-radius:50%; background:var(--text-main); }
 
         /* ═══════════════════════════════════════════════════════════
@@ -432,6 +444,34 @@
         #conn-status.offline { background:#fef2f2; color:#ef4444; border:1px solid #fca5a5; opacity:1; }
 
         /* ═══════════════════════════════════════════════════════════
+           OVERVIEW NOTES SNIPPET
+           ═══════════════════════════════════════════════════════════ */
+        .ov-notes-row {
+            display: flex; align-items: flex-start; gap: 8px;
+            margin-top: 7px;
+            padding: 8px 10px;
+            background: var(--input-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        .ov-notes-row:active { opacity: 0.7; }
+        .ov-notes-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; color: var(--text-muted); }
+        .ov-notes-text {
+            font-size: 11.5px; font-weight: 500; color: var(--text-muted);
+            line-height: 1.45;
+            /* clamp to 2 lines */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+            font-style: italic;
+        }
+        .ov-notes-text.has-notes { color: var(--text-main); font-style: normal; }
+
+        /* ═══════════════════════════════════════════════════════════
            SYNC STATUS INDICATOR
            ═══════════════════════════════════════════════════════════ */
         #sync-status {
@@ -583,6 +623,11 @@
                         <div style="font-size:9px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">AI Recommended Bedtime</div>
                         <div style="font-size:13px;font-weight:800;color:var(--text-main);" id="overview-target-time"><i class="fa-solid fa-spinner fa-spin" style="color:var(--ai-color);"></i> Calculating...</div>
                     </div>
+                </div>
+                <!-- Daily notes snippet — tappable, 2-line clamp -->
+                <div class="ov-notes-row" id="ov-notes-row" onclick="openModalAndFocus('modal-feedback')" style="display:none;">
+                    <i class="fa-regular fa-comment-dots ov-notes-icon"></i>
+                    <span class="ov-notes-text" id="ov-notes-text">No notes yet</span>
                 </div>
             </div>
             <!-- ✦ SWIPE HINT — below summary ✦ -->
@@ -1569,9 +1614,9 @@
                 const classes = `cal-cell ${dateStr === localTodayStr ? 'today' : ''} ${shiftClass}`;
                 
                 if(owner !== "DELETED") {
-                    calDays.innerHTML += `<div class="${classes}" onclick="openSpecificDay('${dateStr}')">${i}</div>`;
+                    calDays.innerHTML += `<div class="${classes}" data-date="${dateStr}" onclick="openSpecificDay('${dateStr}')">${i}</div>`;
                 } else {
-                    calDays.innerHTML += `<div class="${classes}" onclick="restoreSpecificDay('${dateStr}')">${i}</div>`;
+                    calDays.innerHTML += `<div class="${classes}" data-date="${dateStr}" onclick="restoreSpecificDay('${dateStr}')">${i}</div>`;
                 }
             }
         }
@@ -1703,6 +1748,18 @@
             } else {
                 document.getElementById('overview-target-time').innerText = "19:00 (Standard)";
             }
+
+            // Update daily notes snippet
+            const notesRow = document.getElementById('ov-notes-row');
+            const notesText = document.getElementById('ov-notes-text');
+            const feedback = localRec.feedback || '';
+            if (feedback && feedback.trim()) {
+                notesRow.style.display = 'flex';
+                notesText.textContent = feedback.trim();
+                notesText.classList.add('has-notes');
+            } else {
+                notesRow.style.display = 'none';
+            }
         }
         
         function openModalAndFocus(trackerId) {
@@ -1745,22 +1802,47 @@
         });
         
         function handleOverviewSwipe() {
-            const threshold = 50; // Minimum distance to be considered a swipe
+            const threshold = 50;
+            let targetDay = null;
             if (overviewTouchEndX < overviewTouchStartX - threshold) {
-                // Swiped Left -> Go forward in time (up to today, or tomorrow)
-                let nextDay = new Date(currentOverviewDate);
-                nextDay.setDate(nextDay.getDate() + 1);
-                // Optional: prevent going into future by checking against today
-                // const today = new Date();
-                // if (nextDay <= today) {
-                updateTodayOverview(nextDay);
-                // }
+                targetDay = new Date(currentOverviewDate);
+                targetDay.setDate(targetDay.getDate() + 1);
             } else if (overviewTouchEndX > overviewTouchStartX + threshold) {
-                // Swiped Right -> Go back in time (yesterday)
-                let prevDay = new Date(currentOverviewDate);
-                prevDay.setDate(prevDay.getDate() - 1);
-                updateTodayOverview(prevDay);
+                targetDay = new Date(currentOverviewDate);
+                targetDay.setDate(targetDay.getDate() - 1);
             }
+            if (!targetDay) return;
+            updateTodayOverview(targetDay);
+            syncCalendarToDate(targetDay);
+        }
+
+        function syncCalendarToDate(dateObj) {
+            const targetStr = getLocalISODate(dateObj);
+            const targetMonth = dateObj.getMonth();
+            const targetYear = dateObj.getFullYear();
+
+            // If the calendar is not on the right month, navigate it
+            if (currentMonth.getMonth() !== targetMonth || currentMonth.getFullYear() !== targetYear) {
+                currentMonth = new Date(targetYear, targetMonth, 1);
+                renderCalendar();
+            }
+
+            // After render (next tick), highlight the matching cell
+            setTimeout(() => {
+                // Remove any existing swipe-highlight
+                document.querySelectorAll('.cal-cell.swipe-active').forEach(el => {
+                    el.classList.remove('swipe-active');
+                });
+                // Find the cell whose data-date matches
+                const cell = document.querySelector(`.cal-cell[data-date="${targetStr}"]`);
+                if (cell) {
+                    cell.classList.add('swipe-active');
+                    // Scroll it into view softly
+                    cell.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    // Remove highlight after 1.8s
+                    setTimeout(() => cell.classList.remove('swipe-active'), 1800);
+                }
+            }, 30);
         }
 
 
@@ -2405,4 +2487,4 @@ async function removeReminder(index) {
 
 </script>
 </body>
-                            </html>
+                                        </html>
