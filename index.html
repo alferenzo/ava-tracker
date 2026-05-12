@@ -444,6 +444,69 @@
         #conn-status.offline { background:#fef2f2; color:#ef4444; border:1px solid #fca5a5; opacity:1; }
 
         /* ═══════════════════════════════════════════════════════════
+           OVERVIEW — BOTTOM ROW (AI chip + notes)
+           ═══════════════════════════════════════════════════════════ */
+        .ov-bottom-row {
+            display: flex; align-items: center; gap: 7px; margin-top: 7px;
+        }
+        .ov-ai-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: 20px; padding: 5px 10px;
+            cursor: pointer; flex-shrink: 0;
+            transition: opacity 0.15s;
+        }
+        .ov-ai-chip:active { opacity: 0.7; }
+        .ov-ai-chip-icon { font-size: 12px; }
+        .ov-ai-chip-time { font-size: 12px; font-weight: 800; color: var(--ai-color); }
+
+
+
+        /* FUTURE DATE CALENDAR CELLS */
+        .cal-cell.future-date {
+            opacity: 0.5;
+        }
+        /* future: keep the brand colour but fade it visually */
+        .cal-cell.future-date.alf-shift {
+            background: var(--alf-bg);
+            color: var(--alf-color);
+            border-color: rgba(2,132,199,0.15);
+        }
+        .cal-cell.future-date.lesly-shift {
+            background: var(--lesly-bg);
+            color: var(--lesly-color);
+            border-color: rgba(219,39,119,0.15);
+        }
+        /* tiny lock icon overlay on future cells */
+        .cal-cell.future-date::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            width: 4px; height: 4px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.35;
+        }
+        /* don't conflict with .today::after dot */
+        .cal-cell.future-date.today::after {
+            background: var(--text-main);
+            opacity: 1;
+        }
+
+        /* ACCORDION STEP NUMBERS */
+        .accordion-step {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--border-color); color: var(--text-muted);
+            font-size: 10px; font-weight: 900;
+            margin-right: 8px; flex-shrink: 0;
+            transition: background 0.2s, color 0.2s;
+        }
+        details.tracker-group[open] .accordion-step {
+            background: var(--ai-color); color: white;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
            OVERVIEW NOTES SNIPPET
            ═══════════════════════════════════════════════════════════ */
         .ov-notes-row {
@@ -617,17 +680,17 @@
                     </div>
                 </div>
 
-                <div class="overview-info" style="margin-bottom:0;">
-                    <div class="overview-info-icon">✨</div>
-                    <div style="flex:1;">
-                        <div style="font-size:9px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">AI Recommended Bedtime</div>
-                        <div style="font-size:13px;font-weight:800;color:var(--text-main);" id="overview-target-time"><i class="fa-solid fa-spinner fa-spin" style="color:var(--ai-color);"></i> Calculating...</div>
+                <!-- Compact bottom row: AI bedtime + open day button + notes -->
+                <div class="ov-bottom-row">
+                    <div class="ov-ai-chip" onclick="openEventModal(currentOverviewDate)" title="Open day details">
+                        <span class="ov-ai-chip-icon">✨</span>
+                        <span id="overview-target-time" class="ov-ai-chip-time">–:––</span>
+                        <i class="fa-solid fa-chevron-right" style="font-size:8px;color:var(--text-muted);margin-left:2px;"></i>
                     </div>
-                </div>
-                <!-- Daily notes snippet — tappable, 2-line clamp -->
-                <div class="ov-notes-row" id="ov-notes-row" onclick="openModalAndFocus('modal-feedback')" style="display:none;">
-                    <i class="fa-regular fa-comment-dots ov-notes-icon"></i>
-                    <span class="ov-notes-text" id="ov-notes-text">No notes yet</span>
+                    <div class="ov-notes-row" id="ov-notes-row" onclick="openEventModal(currentOverviewDate)" style="display:none;">
+                        <i class="fa-regular fa-comment-dots ov-notes-icon"></i>
+                        <span class="ov-notes-text" id="ov-notes-text"></span>
+                    </div>
                 </div>
             </div>
             <!-- ✦ SWIPE HINT — below summary ✦ -->
@@ -690,7 +753,7 @@
                     <div id="interactive-content">
                         <!-- ACCORDION TRACKERS -->
                         <details class="tracker-group">
-                            <summary><i class="fa-regular fa-sun" style="width:25px; color: #f59e0b;"></i> Daytime Tracking</summary>
+                            <summary><span class="accordion-step">1</span><i class="fa-regular fa-sun" style="width:20px; color: #f59e0b;"></i> Daytime Tracking</summary>
                             <div class="tracker-content">
                                 <div class="tracker-row">
                                     <span class="tracker-label">☀️ Morning Wake Up</span>
@@ -720,7 +783,7 @@
                         </details>
 
                         <details class="tracker-group">
-                            <summary><i class="fa-solid fa-bath" style="width:25px; color: #3b82f6;"></i> Wind-Down Routine</summary>
+                            <summary><span class="accordion-step">2</span><i class="fa-solid fa-bath" style="width:20px; color: #3b82f6;"></i> Wind-Down Routine</summary>
                             <div class="tracker-content">
                                 <div class="chk-group">
                                     <div class="chk-btn" id="chk-rtnBath" onclick="toggleRoutine('rtnBath')">🛁 Bath</div>
@@ -733,7 +796,7 @@
                         </details>
 
                         <details class="tracker-group">
-                            <summary><i class="fa-solid fa-moon" style="width:25px; color: var(--ai-color);"></i> Night Tracking</summary>
+                            <summary><span class="accordion-step">3</span><i class="fa-solid fa-moon" style="width:20px; color: var(--ai-color);"></i> Night Tracking</summary>
                             <div class="tracker-content">
                                 <div class="tracker-row">
                                     <span class="tracker-label" style="color: var(--ai-color);">🌙 Bedtime Routine Started</span>
@@ -1238,43 +1301,22 @@
             }
         }
 
-        // Patch DB methods to drive sync indicator
+        // Only patch the main user-triggered save — avoids noisy background writes
         const _origSaveRecord = appDB.saveRecord.bind(appDB);
         appDB.saveRecord = async function(dateStr, dataObj) {
-            setSyncStatus('syncing', 'Saving…');
+            // Delay showing "Saving…" by 350ms — if it's instant, user never sees it
+            const savingTimer = setTimeout(() => setSyncStatus('syncing', 'Saving…'), 350);
             try {
                 await _origSaveRecord(dateStr, dataObj);
+                clearTimeout(savingTimer);
                 setSyncStatus('synced', 'Synced ✓');
             } catch(e) {
+                clearTimeout(savingTimer);
                 setSyncStatus('error', 'Failed');
                 throw e;
             }
         };
-        const _origSaveSettings = appDB.saveSettings.bind(appDB);
-        appDB.saveSettings = async function(s) {
-            setSyncStatus('syncing', 'Saving…');
-            try { await _origSaveSettings(s); setSyncStatus('synced', 'Synced ✓'); }
-            catch(e) { setSyncStatus('error', 'Failed'); throw e; }
-        };
-        const _origSavePotty = appDB.savePottyLogs.bind(appDB);
-        appDB.savePottyLogs = async function(logs) {
-            setSyncStatus('syncing', 'Saving…');
-            try { await _origSavePotty(logs); setSyncStatus('synced', 'Synced ✓'); }
-            catch(e) { setSyncStatus('error', 'Failed'); throw e; }
-        };
-        const _origSaveReminders = appDB.saveReminders.bind(appDB);
-        appDB.saveReminders = async function(list) {
-            setSyncStatus('syncing', 'Saving…');
-            try { await _origSaveReminders(list); setSyncStatus('synced', 'Synced ✓'); }
-            catch(e) { setSyncStatus('error', 'Failed'); throw e; }
-        };
-        const _origSaveAudit = appDB.saveAuditLogs.bind(appDB);
-        appDB.saveAuditLogs = async function(logs) {
-            setSyncStatus('syncing', 'Saving…');
-            try { await _origSaveAudit(logs); setSyncStatus('synced', 'Synced ✓'); }
-            catch(e) { setSyncStatus('error', 'Failed'); throw e; }
-        };
-        // Show "Online" once Firebase confirms connectivity
+        // Show connectivity status once on load
         db.collection('ava_daily_records').doc('_system_settings_').get()
             .then(() => setSyncStatus('synced', 'Online'))
             .catch(() => setSyncStatus('error', 'Offline'));
@@ -1611,7 +1653,8 @@
                     shiftClass = owner.toLowerCase().includes('alferenzo') ? 'alf-shift' : 'lesly-shift';
                 }
 
-                const classes = `cal-cell ${dateStr === localTodayStr ? 'today' : ''} ${shiftClass}`;
+                const isFuture = dateStr > localTodayStr;
+                const classes = `cal-cell ${dateStr === localTodayStr ? 'today' : ''} ${shiftClass} ${isFuture ? 'future-date' : ''}`.trim();
                 
                 if(owner !== "DELETED") {
                     calDays.innerHTML += `<div class="${classes}" data-date="${dateStr}" onclick="openSpecificDay('${dateStr}')">${i}</div>`;
@@ -1741,12 +1784,15 @@
             document.getElementById('ov-bath').innerText = trks.rtnBath === true ? "Done" : (trks.rtnBath === false ? "Pending" : "--");
             document.getElementById('ov-asleep').innerText = trks.asleepTime || '--:--';
 
-            document.getElementById('overview-target-time').innerHTML = `<i class="fa-solid fa-sparkles fa-beat" style="color:var(--ai-color);"></i> AI Calc...`;
+            const aiTimeEl = document.getElementById('overview-target-time');
+            if (aiTimeEl) aiTimeEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="font-size:10px;color:var(--ai-color);"></i>`;
             let aiTime = await fetchAIBedtime(trks.morningWake, trks.nap, trks.wakeTime);
-            if(aiTime) {
-                document.getElementById('overview-target-time').innerHTML = `<i class="fa-solid fa-sparkles" style="color:var(--ai-color);"></i> AI Recommend: ${aiTime}`;
-            } else {
-                document.getElementById('overview-target-time').innerText = "19:00 (Standard)";
+            if (aiTimeEl) {
+                if(aiTime) {
+                    aiTimeEl.innerHTML = `✨ ${aiTime}`;
+                } else {
+                    aiTimeEl.textContent = "19:00";
+                }
             }
 
             // Update daily notes snippet
@@ -1760,7 +1806,16 @@
             } else {
                 notesRow.style.display = 'none';
             }
+
+            // Update AI chip label
+            const aiChipTime = document.getElementById('overview-target-time');
+            if (aiChipTime) {
+                aiChipTime.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="color:var(--ai-color);font-size:10px;"></i>`;
+            }
+
         }
+
+
         
         function openModalAndFocus(trackerId) {
             // 1. Open the modal for the currently viewed date on the dashboard
@@ -2487,4 +2542,4 @@ async function removeReminder(index) {
 
 </script>
 </body>
-                                        </html>
+    </html>
