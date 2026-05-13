@@ -478,6 +478,31 @@
         .chk-btn { padding:9px 13px; border-radius:20px; border:1.5px solid var(--border-color); background:var(--input-bg); font-size:13px; font-weight:700; color:var(--text-main); cursor:pointer; transition:all .18s; user-select:none; }
         .chk-btn.active { background:var(--text-main); color:var(--card-bg); border-color:var(--text-main); box-shadow:0 4px 10px rgba(0,0,0,.12); }
 
+        /* volume slider */
+        .vol-row {
+            display: flex; align-items: center; gap: 8px;
+            margin-top: 6px;
+        }
+        .vol-icon { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+        .vol-slider {
+            flex: 1; -webkit-appearance: none; appearance: none;
+            height: 3px; border-radius: 4px; outline: none; cursor: pointer;
+            background: linear-gradient(to right, var(--ai-color) 0%, var(--ai-color) 70%, var(--border-color) 70%);
+        }
+        .vol-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 14px; height: 14px; border-radius: 50%;
+            background: var(--ai-color); cursor: pointer;
+            box-shadow: 0 2px 6px rgba(124,58,237,0.4);
+            transition: transform 0.15s;
+        }
+        .vol-slider::-webkit-slider-thumb:active { transform: scale(1.3); }
+        .vol-slider::-moz-range-thumb {
+            width: 14px; height: 14px; border-radius: 50%;
+            background: var(--ai-color); cursor: pointer; border: none;
+        }
+        body.night-vision .vol-slider { background: linear-gradient(to right, var(--ai-color) 0%, var(--ai-color) 70%, var(--border-color) 70%); }
+
         .btn-play-sound.playing { background:#ef4444; animation:pulseSound 2s infinite ease-in-out; }
         @keyframes pulseSound { 0%{box-shadow:0 0 0 0 rgba(239,68,68,.4)} 70%{box-shadow:0 0 0 12px rgba(239,68,68,0)} 100%{box-shadow:0 0 0 0 rgba(239,68,68,0)} }
 
@@ -538,6 +563,15 @@
         @keyframes handWiggle { 0%,100%{transform:rotate(-14deg) translateX(0)} 30%{transform:rotate(10deg) translateX(5px)} 60%{transform:rotate(-8deg) translateX(-3px)} }
         @keyframes hintSlideIn { from{opacity:0;transform:translateY(8px) scale(0.94)} to{opacity:1;transform:translateY(0) scale(1)} }
         @keyframes hintFadeOut { to{opacity:0;transform:scale(0.9);pointer-events:none} }
+        .ov-swipe-track {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2px; margin-bottom: 6px; pointer-events: none;
+        }
+        .ov-swipe-arrow { font-size: 11px; color: var(--border-color); font-weight: 900; user-select: none; }
+        .ov-swipe-label { font-size: 9px; font-weight: 700; color: var(--border-color); text-transform: uppercase; letter-spacing: 0.8px; }
+        @keyframes arrowPulse { 0%,100%{color:var(--border-color)} 50%{color:var(--text-muted)} }
+        .ov-swipe-track.pulse .ov-swipe-arrow { animation: arrowPulse 1.2s ease-in-out 2; }
+
         #hint-swipe { margin:9px 0 4px; opacity:0; pointer-events:none; transition:opacity .4s; }
         #hint-swipe.visible { opacity:1; pointer-events:auto; animation:hintSlideIn .45s cubic-bezier(0.34,1.3,0.64,1) both; }
         #hint-swipe.hiding  { animation:hintFadeOut .35s ease forwards; }
@@ -765,24 +799,29 @@
                     <div class="overview-title"><i class="fa-solid fa-clock"></i> Today's Summary</div>
                     <div class="overview-badge" id="overview-owner-badge" style="background-color: var(--alf-bg); color: var(--alf-color);">Owner</div>
                 </div>
+                <div class="ov-swipe-track" id="ov-swipe-track">
+                    <span class="ov-swipe-arrow">‹‹</span>
+                    <span class="ov-swipe-label">swipe for other days</span>
+                    <span class="ov-swipe-arrow">››</span>
+                </div>
                 
                 <div class="ov-stat-row">
-                    <div class="ov-stat-tile ov-tile" onclick="openSpecificDay(getLocalISODate(currentOverviewDate))">
+                    <div class="ov-stat-tile ov-tile" onclick="openModalAndFocus('trk-morningWake')">
                         <div class="tile-icon">🌅</div>
                         <div class="tile-label">Woke</div>
                         <div class="tile-value" id="ov-morning">--:--</div>
                     </div>
-                    <div class="ov-stat-tile ov-tile" onclick="openSpecificDay(getLocalISODate(currentOverviewDate))">
+                    <div class="ov-stat-tile ov-tile" onclick="openModalAndFocus('trk-nap')">
                         <div class="tile-icon">🛏️</div>
                         <div class="tile-label">Nap</div>
                         <div class="tile-value" id="ov-nap">--</div>
                     </div>
-                    <div class="ov-stat-tile ov-tile" onclick="openSpecificDay(getLocalISODate(currentOverviewDate))">
+                    <div class="ov-stat-tile ov-tile" onclick="openModalAndFocus('chk-rtnBath')">
                         <div class="tile-icon">🛁</div>
                         <div class="tile-label">Bath</div>
                         <div class="tile-value" id="ov-bath">--</div>
                     </div>
-                    <div class="ov-stat-tile ov-tile" onclick="openSpecificDay(getLocalISODate(currentOverviewDate))">
+                    <div class="ov-stat-tile ov-tile" onclick="openModalAndFocus('trk-asleepTime')">
                         <div class="tile-icon">🌙</div>
                         <div class="tile-label">Asleep</div>
                         <div class="tile-value" id="ov-asleep">--:--</div>
@@ -1160,6 +1199,13 @@
                         <option value="humming">Soft Humming Rhythm</option>
                         <option value="white">White Noise (Static)</option>
                     </select>
+                    <div class="vol-row">
+                        <i class="fa-solid fa-volume-low vol-icon"></i>
+                        <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="70"
+                            oninput="setAudioVolume(this.value)"
+                            style="background: linear-gradient(to right, var(--ai-color) 0%, var(--ai-color) 70%, var(--border-color) 70%);">
+                        <i class="fa-solid fa-volume-high vol-icon"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1531,6 +1577,9 @@
                 isAudioPlaying = true;
                 btn.classList.add('playing');
                 btn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+                // Apply current volume slider value
+                const volSlider = document.getElementById('vol-slider');
+                if (volSlider) audioEl.volume = volSlider.value / 100;
                 
                 if ('mediaSession' in navigator) {
                     navigator.mediaSession.metadata = new MediaMetadata({
@@ -1544,6 +1593,16 @@
                 console.error("Audio playback failed", err);
                 btn.innerHTML = '<i class="fa-solid fa-play"></i>';
                 alert("Please tap the screen first to enable audio.");
+            }
+        }
+
+        function setAudioVolume(val) {
+            const audio = document.getElementById('keep-alive-audio');
+            if (audio) audio.volume = val / 100;
+            // Update slider gradient fill
+            const slider = document.getElementById('vol-slider');
+            if (slider) {
+                slider.style.background = `linear-gradient(to right, var(--ai-color) 0%, var(--ai-color) ${val}%, var(--border-color) ${val}%)`;
             }
         }
 
@@ -1605,6 +1664,43 @@
             }
 
             return "19:00"; // hard default
+        }
+
+        // Estimate bedtime for a future date using the 4-day cycle + historical averages
+        async function estimateFutureBedtime(futureDateStr, allRecs) {
+            // 1. Determine who owns this future date
+            const owner = getDefaultOwner(futureDateStr);
+            const isAlf = owner.toLowerCase().includes('alferenzo');
+
+            // 2. Gather the last 14 days of records for that owner
+            const ownerRecs = Object.entries(allRecs)
+                .filter(([d, r]) => d < futureDateStr && r.trackers &&
+                    (r.owner || '').toLowerCase().includes(isAlf ? 'alferenzo' : 'lesly'))
+                .sort((a, b) => b[0].localeCompare(a[0]))
+                .slice(0, 14)
+                .map(([, r]) => r.trackers);
+
+            if (ownerRecs.length === 0) return '19:00';
+
+            // 3. Average their morningWake, nap duration, wakeTime
+            function avgTime(times) {
+                const mins = times.map(t => {
+                    if (!t || !t.includes(':')) return null;
+                    const [h, m] = t.split(':').map(Number);
+                    return h * 60 + m;
+                }).filter(m => m !== null);
+                if (!mins.length) return null;
+                const avg = Math.round(mins.reduce((a, b) => a + b, 0) / mins.length);
+                return `${String(Math.floor(avg/60)).padStart(2,'0')}:${String(avg%60).padStart(2,'0')}`;
+            }
+
+            const avgMorning  = avgTime(ownerRecs.map(r => r.morningWake));
+            const avgNap      = (ownerRecs.map(r => parseFloat(r.nap)||0)
+                                  .reduce((a,b)=>a+b,0) / ownerRecs.length).toFixed(1);
+            const avgWakeTime = avgTime(ownerRecs.map(r => r.wakeTime));
+
+            // 4. Run through the same local estimator
+            return estimateBedtime(avgMorning, avgNap, avgWakeTime);
         }
 
         function getLocalISODate(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
@@ -1941,12 +2037,20 @@
             overviewCard.style.display = 'block';
             
             // Update the title to reflect the date
-            let titleText = "Today's Summary";
-            if (localStr !== todayStr) {
-                const diffTime = new Date().getTime() - dateObj.getTime();
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                if (diffDays === 1) titleText = "Yesterday's Summary";
-                else titleText = formatCustomDate(localStr) + " Summary";
+            let titleText;
+            if (localStr === todayStr) {
+                titleText = "Today";
+            } else {
+                const todayMid = new Date(); todayMid.setHours(0,0,0,0);
+                const dateMid  = new Date(dateObj); dateMid.setHours(0,0,0,0);
+                const diffDays = Math.round((todayMid - dateMid) / 86400000);
+                if (diffDays === 1)       titleText = "Yesterday";
+                else if (diffDays === -1) titleText = "Tomorrow";
+                else {
+                    const days   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    titleText = `${days[dateObj.getDay()]} ${dateObj.getDate()} ${months[dateObj.getMonth()]}`;
+                }
             }
             
             // Update DOM title
@@ -1958,6 +2062,12 @@
             ownerBadge.innerText = isAlf ? "Alferenzo's Turn" : "Lesly's Turn"; 
             ownerBadge.style.backgroundColor = isAlf ? 'var(--alf-bg)' : 'var(--lesly-bg)'; 
             ownerBadge.style.color = isAlf ? 'var(--alf-color)' : 'var(--lesly-color)';
+            const swipeTrack = document.getElementById('ov-swipe-track');
+            if (swipeTrack && !swipeTrack.dataset.pulsed) {
+                swipeTrack.dataset.pulsed = '1';
+                swipeTrack.classList.add('pulse');
+                swipeTrack.addEventListener('animationend', () => swipeTrack.classList.remove('pulse'), {once:true});
+            }
 
             const localRec = allRecs[localStr] || {};
             let trks = localRec.trackers || {};
@@ -1968,21 +2078,24 @@
 
             const aiChip = document.querySelector('.ov-ai-chip');
             const aiTimeEl = document.getElementById('overview-target-time');
+            const isFutureDate = localStr > todayStr;
             const hasData = trks.morningWake || trks.nap || trks.wakeTime;
 
-            if (!hasData) {
-                // No tracking data — hide the chip entirely
+            if (isFutureDate) {
+                // For future dates: estimate from 4-day cycle + historical averages
+                if (aiChip) aiChip.style.display = 'inline-flex';
+                const futureEst = await estimateFutureBedtime(localStr, allRecs);
+                if (aiTimeEl) aiTimeEl.innerHTML = `Est. ${futureEst}`;
+            } else if (!hasData) {
+                // Past/today with no data — hide chip
                 if (aiChip) aiChip.style.display = 'none';
             } else {
                 if (aiChip) aiChip.style.display = 'inline-flex';
-                // Check sessionStorage cache first (set when modal was opened with full AI)
                 const cacheKey = `ai_bed_${trks.morningWake}_${trks.nap}_${trks.wakeTime}`;
                 const cached = sessionStorage.getItem(cacheKey);
                 if (cached) {
-                    // Full AI result available
                     if (aiTimeEl) aiTimeEl.innerHTML = `AI · ${cached}`;
                 } else {
-                    // Local estimate — clearly labelled as estimate, not AI
                     const estimated = estimateBedtime(trks.morningWake, trks.nap, trks.wakeTime);
                     if (aiTimeEl) aiTimeEl.innerHTML = `Est. ${estimated}`;
                 }
@@ -2008,18 +2121,28 @@
             // 1. Open the modal for the currently viewed date on the dashboard
             openSpecificDay(getLocalISODate(currentOverviewDate));
             
-            // 2. Wait for rendering, then expand and scroll
+            // 2. After modal renders, find the accordion containing this element and open+scroll to it
             setTimeout(() => {
-                // Because elements don't have explicit IDs, we find the accordion based on the child input id
-                // morningWake, nap, rtnBath etc.
-                const el = document.getElementById(trackerId);
+                // Try direct ID first, then look inside picker wrappers
+                let el = document.getElementById(trackerId);
+                // For picker-wrapped elements (e.g. trk-morningWake lives inside #picker-morningWake)
+                if (!el) {
+                    const pickerKey = trackerId.replace('trk-', '');
+                    const pickerWrap = document.getElementById('picker-' + pickerKey);
+                    el = pickerWrap || document.getElementById(trackerId);
+                }
                 if(el) {
                     const detailsNode = el.closest('details.tracker-group');
                     if(detailsNode) {
                         detailsNode.open = true;
                         setTimeout(() => {
-                            detailsNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 50);
+                            detailsNode.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            // Brief highlight on the row
+                            const row = el.closest('.tracker-row') || el.closest('.chk-group') || el;
+                            row.style.transition = 'background 0.3s';
+                            row.style.background = 'rgba(124,58,237,0.08)';
+                            setTimeout(() => { row.style.background = ''; }, 1200);
+                        }, 80);
                     }
                 }
             }, 100);
@@ -2131,21 +2254,55 @@
                 if (endParts[0] <= 6 && startParts[0] >= 12) endMins += 24 * 60;
                 if (endMins < startMins) return showAppAlert("Time Error", "Ava cannot fall asleep before her bedtime routine starts! Please fix the times.");
             }
+
             const feedbackText = document.getElementById('modal-feedback').value;
             const energySlider = document.getElementById('trk-energy');
             if(energySlider) currentTrackers.energy = energySlider.value;
+
+            // Detect new vs edit
             const allRecs = await appDB.getAllRecords();
-            const currentOwner = allRecs[activeDateStr]?.owner || getDefaultOwner(activeDateStr);
-            try {
-                logSystemAudit(`Saved daily records for ${activeDateStr}`);
-                await appDB.saveRecord(activeDateStr, { feedback: feedbackText, trackers: { ...currentTrackers }, owner: currentOwner });
-                closeModal();
-                await fetchEvents();
-                setupDragToClose();
-                showToast('Saved successfully!');
-            } catch(e) {
-                showToast('Save failed — check connection', true);
-            }
+            const existingRec = allRecs[activeDateStr];
+            const isEdit = existingRec && existingRec.trackers && Object.keys(existingRec.trackers).some(k => existingRec.trackers[k]);
+            const currentOwner = existingRec?.owner || getDefaultOwner(activeDateStr);
+
+            // Build a human-readable summary of what's being saved
+            const trk = currentTrackers;
+            const summaryLines = [];
+            if (trk.morningWake)  summaryLines.push(`🌅 Woke: ${trk.morningWake}`);
+            if (trk.nap && trk.nap !== '0') summaryLines.push(`🛏️ Nap: ${trk.nap}h`);
+            if (trk.wakeTime)     summaryLines.push(`⏰ Nap end: ${trk.wakeTime}`);
+            if (trk.asleepTime)   summaryLines.push(`🌙 Asleep: ${trk.asleepTime}`);
+            if (trk.rtnBath)      summaryLines.push(`🛁 Bath done`);
+            if (feedbackText && feedbackText.trim()) summaryLines.push(`📝 Notes added`);
+            const summaryHtml = summaryLines.length
+                ? summaryLines.map(l => `<span style="display:block;font-size:13px;margin:2px 0;">${l}</span>`).join('')
+                : '<span style="font-size:13px;color:var(--text-muted);">No tracking data entered</span>';
+
+            const dialogTitle = isEdit ? `Update ${activeDateStr}?` : `Save ${activeDateStr}?`;
+            const dialogMsg = `${summaryHtml}`;
+
+            showAppConfirm(dialogTitle, dialogMsg, isEdit ? 'Update' : 'Save', async (confirmed) => {
+                if (!confirmed) return;
+                try {
+                    // Rich audit entry
+                    const changedFields = Object.entries(trk)
+                        .filter(([k,v]) => v && v !== '0' && v !== false && v !== '')
+                        .map(([k,v]) => `${k}=${v}`)
+                        .join(', ');
+                    logSystemAudit(
+                        isEdit
+                          ? `EDIT: Updated records for ${activeDateStr} — ${changedFields || 'no fields'}`
+                          : `NEW: Saved records for ${activeDateStr} — ${changedFields || 'no fields'}`
+                    );
+                    await appDB.saveRecord(activeDateStr, { feedback: feedbackText, trackers: { ...currentTrackers }, owner: currentOwner });
+                    closeModal();
+                    await fetchEvents();
+                    setupDragToClose();
+                    showToast(isEdit ? 'Updated successfully!' : 'Saved successfully!');
+                } catch(e) {
+                    showToast('Save failed — check connection', true);
+                }
+            });
         }
 
         async function openDashboard() {
