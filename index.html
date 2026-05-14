@@ -443,9 +443,9 @@
             transition:transform .12s cubic-bezier(0.34,1.56,0.64,1);
         }
         .ov-stat-tile:active { transform:scale(0.88); }
-        .ov-stat-tile .tile-icon  { font-size:9px; margin-bottom:1px; }
-        .ov-stat-tile .tile-label { font-size:5.5px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.4px; }
-        .ov-stat-tile .tile-value { font-size:9px; font-weight:800; color:var(--text-main); margin-top:1px; }
+        .ov-stat-tile .tile-icon  { font-size:11px; margin-bottom:1px; }
+        .ov-stat-tile .tile-label { font-size:7px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.4px; }
+        .ov-stat-tile .tile-value { font-size:11px; font-weight:800; color:var(--text-main); margin-top:1px; }
 
         .overview-info {
             background: var(--input-bg);
@@ -1915,7 +1915,39 @@
                 return toTime(clamped);
             }
 
-            return "19:00"; // hard default
+            return "19:00"; // hard default — should not reach here normally
+        }
+
+        // Estimate bedtime for today with no tracker data: use owner's historical averages
+        async function estimateBedtimeFromHistory(dateStr, allRecs) {
+            const owner = getDefaultOwner(dateStr);
+            const isAlf = owner.toLowerCase().includes('alferenzo');
+
+            const ownerRecs = Object.entries(allRecs)
+                .filter(([d, r]) => d <= dateStr && r.trackers &&
+                    (r.owner || '').toLowerCase().includes(isAlf ? 'alferenzo' : 'lesly'))
+                .sort((a, b) => b[0].localeCompare(a[0]))
+                .slice(0, 14)
+                .map(([, r]) => r.trackers);
+
+            if (ownerRecs.length === 0) return null; // no history at all
+
+            function avgTime(times) {
+                const mins = times.map(t => {
+                    if (!t || !t.includes(':')) return null;
+                    const [h, m] = t.split(':').map(Number);
+                    return h * 60 + m;
+                }).filter(m => m !== null);
+                if (!mins.length) return null;
+                const avg = Math.round(mins.reduce((a, b) => a + b, 0) / mins.length);
+                return `${String(Math.floor(avg/60)).padStart(2,'0')}:${String(avg%60).padStart(2,'0')}`;
+            }
+
+            const avgMorning  = avgTime(ownerRecs.map(r => r.morningWake));
+            const avgNap      = (ownerRecs.map(r => parseFloat(r.nap)||0).reduce((a,b)=>a+b,0) / ownerRecs.length).toFixed(1);
+            const avgWakeTime = avgTime(ownerRecs.map(r => r.wakeTime));
+
+            return estimateBedtime(avgMorning, avgNap, avgWakeTime);
         }
 
         // Estimate bedtime for a future date using the 4-day cycle + historical averages
@@ -2414,15 +2446,24 @@
                 const futureEst = await estimateFutureBedtime(localStr, allRecs);
                 if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: ${futureEst}`;
             } else {
-                // Today or past — always show chip, use tracker data if available else default
+                // Today or past — always show chip
                 if (aiChip) aiChip.style.display = 'inline-flex';
+                const hasData = trks.morningWake || trks.nap || trks.wakeTime;
                 const cacheKey = `ai_bed_${trks.morningWake}_${trks.nap}_${trks.wakeTime}`;
                 const cached = sessionStorage.getItem(cacheKey);
                 if (cached) {
                     if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: ${cached}`;
-                } else {
+                } else if (hasData) {
                     const estimated = estimateBedtime(trks.morningWake || null, trks.nap || 0, trks.wakeTime || null);
                     if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: ${estimated}`;
+                } else {
+                    // No tracker data yet — use owner's historical averages from 4-day cycle
+                    const histEst = await estimateBedtimeFromHistory(localStr, allRecs);
+                    if (histEst) {
+                        if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: ${histEst}`;
+                    } else {
+                        if (aiChip) aiChip.style.display = 'none'; // truly no data anywhere
+                    }
                 }
             }
 
@@ -3206,4 +3247,4 @@ async function removeReminder(index) {
 
 </script>
 </body>
-    </html>
+                </html>
