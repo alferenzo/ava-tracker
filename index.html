@@ -98,7 +98,15 @@
             background: var(--bg-color);
             display: flex; justify-content: center;
             min-height: 100vh; overflow-x: hidden;
-            transition: background 0.4s ease;
+            transition: background 0.4s ease, color 0.3s ease;
+        }
+        /* smooth colour transition on all elements when toggling dark mode */
+        *, *::before, *::after {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease !important;
+        }
+        /* but keep animations snappy */
+        .cal-cell, .tracker-btn, .chk-btn, .header-btn, .pp-btn, .audio-pill, .timer-pill {
+            transition: all 0.15s cubic-bezier(0.34,1.3,0.64,1) !important;
         }
         input, textarea { -webkit-user-select: auto; user-select: auto; }
         .app-container { width: 100%; max-width: 450px; height: 100vh; max-height: 900px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
@@ -301,7 +309,7 @@
            BOTTOM PLAYER
            ═══════════════════════════════════════════════════════════ */
         .fixed-bottom-player { position:fixed; bottom:0; left:0; width:100%; background:var(--card-bg); border-radius:20px 20px 0 0; padding:10px 16px max(env(safe-area-inset-bottom,10px),10px); z-index:90; box-shadow:0 -4px 24px rgba(0,0,0,0.08); transition:transform .25s cubic-bezier(.175,.885,.32,1.2),opacity .4s; backdrop-filter:blur(10px); display:flex; align-items:center; border-top:1px solid var(--border-color); }
-        .sound-player { display:flex; gap:10px; align-items:center; width:100%; }
+        .sound-player { display:flex; gap:0; align-items:stretch; width:100%; }
         .btn-play-sound { background:var(--ai-color); color:white; border:none; width:38px; height:38px; border-radius:50%; cursor:pointer; display:flex; justify-content:center; align-items:center; font-size:15px; transition:transform .2s; flex-shrink:0; box-shadow:0 4px 12px rgba(124,58,237,.35); }
 
         /* ═══════════════════════════════════════════════════════════
@@ -318,6 +326,7 @@
            CONTENT & ANIMATIONS
            ═══════════════════════════════════════════════════════════ */
         .content-area { flex:1; overflow-y:auto; padding:14px 13px; padding-bottom:96px; display:none; animation:fadeIn 0.2s ease-out; }
+
         @keyframes fadeIn      { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes popIn       { 0%{transform:scale(0.88);opacity:0} 100%{transform:scale(1);opacity:1} }
         @keyframes slideInRight{ from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:translateX(0)} }
@@ -356,8 +365,25 @@
             padding: 14px 10px 12px;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-color);
+            position: relative;
         }
         .cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 4px; }
+        .cal-month-pill {
+            font-size:15px; font-weight:800; color:var(--text-main);
+            background: var(--input-bg); border:1px solid var(--border-color);
+            border-radius:20px; padding:5px 14px; cursor:pointer;
+            transition: all 0.15s cubic-bezier(0.34,1.3,0.64,1);
+            user-select:none;
+        }
+        .cal-month-pill:active { transform:scale(0.94); }
+        .month-picker-btn {
+            padding:7px 4px; border-radius:10px; border:1.5px solid transparent;
+            background:transparent; color:var(--text-muted); font-size:12px;
+            font-weight:700; cursor:pointer; text-align:center;
+            transition: all 0.15s;
+        }
+        .month-picker-btn:hover { background:var(--input-bg); color:var(--text-main); }
+        .month-picker-btn.active { background:var(--text-main); color:var(--card-bg); border-color:var(--text-main); }
         .cal-header button {
             background:var(--input-bg); border:1px solid var(--border-color);
             width:32px; height:32px; border-radius:50%; color:var(--text-main); font-size:12px;
@@ -367,7 +393,7 @@
         .cal-header button:active { transform:scale(0.86); background:var(--border-color); }
         .cal-header h3 { font-size:15px; font-weight:800; color:var(--text-main); letter-spacing:-0.2px; }
         .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center; }
-        .cal-day-label { font-size:9.5px; color:var(--text-muted); font-weight:800; padding-bottom:6px; text-transform:uppercase; letter-spacing:0.4px; }
+        .cal-day-label { font-size:11px; color:var(--text-muted); font-weight:800; padding-bottom:7px; text-transform:uppercase; letter-spacing:0.3px; }
 
         /* KEY: fixed height for wider cells */
         .cal-cell {
@@ -411,15 +437,15 @@
 
         .ov-stat-row { display:flex; gap:6px; margin-bottom:8px; }
         .ov-stat-tile {
-            flex:1; background:var(--input-bg); border-radius:12px;
-            padding:9px 4px; border:1px solid var(--border-color);
+            flex:1; background:var(--input-bg); border-radius:8px;
+            padding:4px 3px; border:1px solid var(--border-color);
             text-align:center; cursor:pointer;
             transition:transform .12s cubic-bezier(0.34,1.56,0.64,1);
         }
         .ov-stat-tile:active { transform:scale(0.88); }
-        .ov-stat-tile .tile-icon  { font-size:14px; margin-bottom:3px; }
-        .ov-stat-tile .tile-label { font-size:7.5px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.4px; }
-        .ov-stat-tile .tile-value { font-size:13px; font-weight:800; color:var(--text-main); margin-top:2px; }
+        .ov-stat-tile .tile-icon  { font-size:9px; margin-bottom:1px; }
+        .ov-stat-tile .tile-label { font-size:5.5px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.4px; }
+        .ov-stat-tile .tile-value { font-size:9px; font-weight:800; color:var(--text-main); margin-top:1px; }
 
         .overview-info {
             background: var(--input-bg);
@@ -439,7 +465,8 @@
         .modal-overlay.active { opacity:1; }
         .modal-overlay.active .modal-content { transform:translateY(0); }
         .modal-header-sticky { position:sticky; top:0; background:var(--card-bg); z-index:10; padding-top:18px; padding-bottom:14px; border-bottom:1px solid var(--border-color); margin-bottom:18px; touch-action:none; }
-        .modal-drag-bar { width:36px; height:4px; background:var(--border-color); border-radius:4px; margin:0 auto 14px; cursor:grab; }
+        .modal-drag-bar { width:48px; height:5px; background:var(--text-muted); border-radius:4px; margin:0 auto 14px; cursor:grab; opacity:0.35; transition:opacity 0.2s, width 0.2s; }
+        .modal-header-sticky:active .modal-drag-bar { opacity:0.7; width:56px; }
         .modal-header { display:flex; justify-content:space-between; align-items:flex-start; }
         .modal-header h2 { font-size:21px; font-weight:800; color:var(--text-main); margin-bottom:4px; }
         .modal-date { font-size:12px; font-weight:700; display:inline-block; padding:4px 10px; border-radius:20px; }
@@ -462,6 +489,11 @@
         .tracker-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:13px; }
         .tracker-row:last-child { margin-bottom:0; }
         .tracker-label { font-size:14px; font-weight:600; color:var(--text-main); display:flex; align-items:center; gap:8px; }
+        .req-badge {
+            font-size:8px; font-weight:900; color:var(--lesly-color);
+            background:var(--lesly-bg); border-radius:4px;
+            padding:1px 4px; letter-spacing:0.3px; margin-left:2px;
+        }
         .tracker-btn-group { display:flex; gap:5px; }
         .tracker-btn { padding:8px 14px; border-radius:12px; border:1.5px solid var(--border-color); background:var(--card-bg); font-size:13px; font-weight:700; color:var(--text-main); cursor:pointer; transition:all .18s; }
         .tracker-btn.active-yes { background:#10b981; color:white; border-color:#10b981; box-shadow:0 4px 10px rgba(16,185,129,.25); }
@@ -478,12 +510,42 @@
         .chk-btn { padding:9px 13px; border-radius:20px; border:1.5px solid var(--border-color); background:var(--input-bg); font-size:13px; font-weight:700; color:var(--text-main); cursor:pointer; transition:all .18s; user-select:none; }
         .chk-btn.active { background:var(--text-main); color:var(--card-bg); border-color:var(--text-main); box-shadow:0 4px 10px rgba(0,0,0,.12); }
 
+        /* audio type pills */
+        .audio-pills {
+            display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;
+            scrollbar-width:none; -ms-overflow-style:none; margin-bottom:6px;
+        }
+        .audio-pills::-webkit-scrollbar { display:none; }
+        .audio-pill {
+            flex-shrink:0; padding:5px 11px; border-radius:20px;
+            border:1.5px solid var(--border-color); background:var(--input-bg);
+            color:var(--text-muted); font-size:11px; font-weight:700;
+            cursor:pointer; transition:all 0.15s cubic-bezier(0.34,1.3,0.64,1);
+            white-space:nowrap;
+        }
+        .audio-pill:active { transform:scale(0.9); }
+        .audio-pill.active {
+            background:var(--ai-color); color:white;
+            border-color:var(--ai-color);
+            box-shadow:0 3px 10px rgba(124,58,237,0.3);
+        }
+
         /* volume slider */
         .vol-row {
             display: flex; align-items: center; gap: 8px;
             margin-top: 6px;
         }
         .vol-icon { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+        .timer-pills { display:flex; gap:5px; flex:1; }
+        .timer-pill {
+            padding:4px 9px; border-radius:20px;
+            border:1.5px solid var(--border-color); background:var(--input-bg);
+            color:var(--text-muted); font-size:10px; font-weight:800;
+            cursor:pointer; transition:all 0.15s;
+        }
+        .timer-pill.active { background:var(--ai-color); color:white; border-color:var(--ai-color); }
+        .timer-pill:active { transform:scale(0.88); }
+
         .vol-slider {
             flex: 1; -webkit-appearance: none; appearance: none;
             height: 3px; border-radius: 4px; outline: none; cursor: pointer;
@@ -572,7 +634,7 @@
         @keyframes arrowPulse { 0%,100%{color:var(--border-color)} 50%{color:var(--text-muted)} }
         .ov-swipe-track.pulse .ov-swipe-arrow { animation: arrowPulse 1.2s ease-in-out 2; }
 
-        #hint-swipe { margin:9px 0 4px; opacity:0; pointer-events:none; transition:opacity .4s; }
+        #hint-swipe { margin:9px 0 4px; margin-bottom: 20px; opacity:0; pointer-events:none; transition:opacity .4s; position: relative; z-index: 95; }
         #hint-swipe.visible { opacity:1; pointer-events:auto; animation:hintSlideIn .45s cubic-bezier(0.34,1.3,0.64,1) both; }
         #hint-swipe.hiding  { animation:hintFadeOut .35s ease forwards; }
         #hint-swipe-inner { display:flex; align-items:center; justify-content:center; gap:12px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:50px; padding:10px 22px; box-shadow:var(--shadow-md); width:fit-content; margin:0 auto; }
@@ -605,6 +667,8 @@
         }
 
         #conn-status { position:fixed; top:8px; right:12px; font-size:10px; font-weight:800; padding:3px 9px; border-radius:20px; z-index:999999; pointer-events:none; transition:opacity .4s; opacity:0; }
+        #offline-banner { opacity:0; transition:opacity 0.3s; }
+        #offline-banner.visible { opacity:1; }
         #conn-status.offline { background:#fef2f2; color:#ef4444; border:1px solid #fca5a5; opacity:1; }
 
         /* ═══════════════════════════════════════════════════════════
@@ -761,6 +825,12 @@
         </div>
     </div>
 
+    <!-- OFFLINE BANNER -->
+    <div id="offline-banner" style="display:none; align-items:center; justify-content:center; gap:8px; padding:8px 16px; background:#fef2f2; border-bottom:1px solid #fca5a5; transition:opacity 0.3s; opacity:0;" class="">
+        <i class="fa-solid fa-wifi-slash" style="color:#ef4444;font-size:13px;"></i>
+        <span style="font-size:12px;font-weight:700;color:#dc2626;">You're offline — changes will save when connection returns</span>
+    </div>
+
     <!-- SIDEBAR UI -->
     <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
@@ -792,7 +862,7 @@
                     <span class="sync-dot"></span>
                     <span id="sync-label">—</span>
                 </div>
-                <button class="header-btn" onclick="toggleNightVision()"><i class="fa-solid fa-moon"></i></button>
+                <button class="header-btn" id="btn-night-vision" onclick="toggleNightVision()"><i class="fa-solid fa-moon"></i></button>
             </div>
         </div>
 
@@ -800,8 +870,17 @@
             <div class="cal-wrapper">
                 <div class="cal-header">
                     <button onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-                    <h3 id="cal-month-title">Month</h3>
+                    <div id="cal-month-title" class="cal-month-pill" onclick="toggleMonthPicker()">Month <i class="fa-solid fa-chevron-down" style="font-size:9px;margin-left:2px;"></i></div>
                     <button onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <!-- month jump picker -->
+                <div id="month-picker" style="display:none; position:absolute; top:44px; left:0; right:0; z-index:50; background:var(--card-bg); border-radius:16px; padding:10px; box-shadow:var(--shadow-lg); border:1px solid var(--border-color); margin:0 8px; opacity:0; transition:opacity 0.2s ease;">
+                    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-bottom:8px;" id="month-picker-months"></div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 2px 0;">
+                        <button onclick="changePickerYear(-1)" style="background:var(--input-bg);border:1px solid var(--border-color);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--text-main);cursor:pointer;">‹</button>
+                        <span id="picker-year-label" style="font-size:13px;font-weight:800;color:var(--text-main);"></span>
+                        <button onclick="changePickerYear(1)" style="background:var(--input-bg);border:1px solid var(--border-color);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--text-main);cursor:pointer;">›</button>
+                    </div>
                 </div>
                 <div class="cal-grid">
                     <div class="cal-day-label">Su</div><div class="cal-day-label">Mo</div><div class="cal-day-label">Tu</div>
@@ -1224,17 +1303,21 @@
 
         <!-- FIXED BOTTOM AUDIO PLAYER -->
         <div class="fixed-bottom-player" id="dashboard-audio-player" style="display: flex;">
-            <div class="sound-player" style="width: 100%;">
-                <button class="btn-play-sound" id="btn-sound" onclick="toggleAudio()"><i class="fa-solid fa-play"></i></button>
-                <div style="flex:1;">
-                    <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; margin-left: 5px;">Sleep Audio Player</div>
-                    <select class="tracker-select" style="width: 100%; padding: 8px 12px;" id="sound-type" onchange="changeAudioType()">
-                        <option value="womb">Heartbeat & Womb (Deep)</option>
-                        <option value="brown">Deep Brown Noise</option>
-                        <option value="pink">Pink Noise (Rain/Waterfall)</option>
-                        <option value="humming">Soft Humming Rhythm</option>
-                        <option value="white">White Noise (Static)</option>
-                    </select>
+            <div class="sound-player" style="width:100%; flex-direction:column; gap:8px;">
+                <!-- top row: play btn + label -->
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <button class="btn-play-sound" id="btn-sound" onclick="toggleAudio()"><i class="fa-solid fa-play"></i></button>
+                    <span style="font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Sleep Audio</span>
+                </div>
+                <!-- audio type pills row -->
+                <div style="min-width:0; width:100%;">
+                    <div class="audio-pills" id="audio-pills">
+                        <button class="audio-pill active" data-val="womb"    onclick="selectAudioPill(this)">🫀 Womb</button>
+                        <button class="audio-pill"         data-val="brown"  onclick="selectAudioPill(this)">🟤 Brown</button>
+                        <button class="audio-pill"         data-val="pink"   onclick="selectAudioPill(this)">🌧️ Pink</button>
+                        <button class="audio-pill"         data-val="humming" onclick="selectAudioPill(this)">🎵 Hum</button>
+                        <button class="audio-pill"         data-val="white"  onclick="selectAudioPill(this)">📻 White</button>
+                    </div>
                     <div class="vol-row">
                         <i class="fa-solid fa-volume-low vol-icon"></i>
                         <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="70"
@@ -1242,6 +1325,17 @@
                             style="background: linear-gradient(to right, var(--ai-color) 0%, var(--ai-color) 70%, var(--border-color) 70%);">
                         <i class="fa-solid fa-volume-high vol-icon"></i>
                     </div>
+                    <!-- sleep timer -->
+                    <div class="vol-row" style="margin-top:4px;">
+                        <i class="fa-regular fa-clock vol-icon"></i>
+                        <div class="timer-pills" id="timer-pills">
+                            <button class="timer-pill active" data-mins="0"  onclick="setSleepTimer(this)">∞</button>
+                            <button class="timer-pill"        data-mins="30" onclick="setSleepTimer(this)">30m</button>
+                            <button class="timer-pill"        data-mins="45" onclick="setSleepTimer(this)">45m</button>
+                            <button class="timer-pill"        data-mins="60" onclick="setSleepTimer(this)">1h</button>
+                            <button class="timer-pill"        data-mins="90" onclick="setSleepTimer(this)">90m</button>
+                        </div>
+                        <span id="timer-countdown" style="font-size:11px;font-weight:800;color:var(--ai-color);min-width:32px;text-align:right;display:none;"></span>
                 </div>
             </div>
         </div>
@@ -1513,8 +1607,45 @@
             .catch(() => setSyncStatus('error', 'Offline'));
 
         let isNightVision = localStorage.getItem('ava_night_vision') === 'true';
-        if(isNightVision) document.body.classList.add('night-vision');
-        function toggleNightVision() { isNightVision = !isNightVision; localStorage.setItem('ava_night_vision', isNightVision); document.body.classList.toggle('night-vision'); updateTodayOverview(); }
+        if(isNightVision) {
+            document.body.classList.add('night-vision');
+            // Restore volume preference
+        window.addEventListener('load', () => {
+            const savedVol = localStorage.getItem('ava_vol');
+            if (savedVol) {
+                const slider = document.getElementById('vol-slider');
+                if (slider) {
+                    slider.value = savedVol;
+                    slider.style.background = `linear-gradient(to right, var(--ai-color) 0%, var(--ai-color) ${savedVol}%, var(--border-color) ${savedVol}%)`;
+                    const audio = document.getElementById('keep-alive-audio');
+                    if (audio) audio.volume = savedVol / 100;
+                }
+            }
+        });
+
+        // Style moon button as active on load
+            document.addEventListener('DOMContentLoaded', () => {
+                const moonBtn = document.getElementById('btn-night-vision');
+                if (moonBtn) {
+                    moonBtn.style.background = 'var(--text-main)';
+                    moonBtn.style.color = 'var(--card-bg)';
+                    const ic = moonBtn.querySelector('i');
+                    if (ic) ic.className = 'fa-solid fa-moon';
+                }
+            });
+        }
+        function toggleNightVision() {
+            isNightVision = !isNightVision;
+            localStorage.setItem('ava_night_vision', isNightVision);
+            document.body.classList.toggle('night-vision');
+            const moonBtn = document.getElementById('btn-night-vision');
+            if (moonBtn) {
+                moonBtn.style.background = isNightVision ? 'var(--text-main)' : '';
+                moonBtn.style.color = isNightVision ? 'var(--card-bg)' : '';
+                moonBtn.querySelector('i').className = isNightVision ? 'fa-solid fa-moon' : 'fa-regular fa-moon';
+            }
+            updateTodayOverview();
+        }
 
         let currentMonth = new Date();
         let activeDateStr = null;  
@@ -1524,6 +1655,11 @@
         let audioCtx; let activeSoundNode = null; let isAudioPlaying = false;
         function toggleAudio() { if (isAudioPlaying) stopAudio(); else playAudio(); }
         function changeAudioType() { if (isAudioPlaying) { stopAudio(); playAudio(); } }
+        function selectAudioPill(btn) {
+            document.querySelectorAll('.audio-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            changeAudioType();
+        }
         function stopAudio() {
             const keepAlive = document.getElementById('keep-alive-audio');
             if (keepAlive) keepAlive.pause();
@@ -1560,7 +1696,7 @@
             const btn = document.getElementById('btn-sound');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; // Loading state
 
-            const type = document.getElementById('sound-type').value; 
+            const activePill = document.querySelector('.audio-pill.active'); const type = activePill ? activePill.dataset.val : 'womb'; 
             const sampleRate = 44100;
             
             // Generate a 2-second perfectly loopable chunk of noise. 
@@ -1632,10 +1768,48 @@
             }
         }
 
+        // ── SLEEP TIMER ──────────────────────────────────────────────────
+        let sleepTimerInterval = null;
+        let sleepTimerSecsLeft = 0;
+
+        function setSleepTimer(btn) {
+            // Clear existing timer
+            if (sleepTimerInterval) { clearInterval(sleepTimerInterval); sleepTimerInterval = null; }
+            document.querySelectorAll('.timer-pill').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            const mins = parseInt(btn.dataset.mins);
+            const countdown = document.getElementById('timer-countdown');
+            if (mins === 0) {
+                if (countdown) countdown.style.display = 'none';
+                return; // infinite — no timer
+            }
+            sleepTimerSecsLeft = mins * 60;
+            if (countdown) { countdown.style.display = 'inline'; countdown.textContent = formatTimer(sleepTimerSecsLeft); }
+            sleepTimerInterval = setInterval(() => {
+                sleepTimerSecsLeft--;
+                if (countdown) countdown.textContent = formatTimer(sleepTimerSecsLeft);
+                if (sleepTimerSecsLeft <= 0) {
+                    clearInterval(sleepTimerInterval); sleepTimerInterval = null;
+                    stopAudio();
+                    if (countdown) { countdown.style.display = 'none'; }
+                    // Reset to ∞
+                    const infBtn = document.querySelector('.timer-pill[data-mins="0"]');
+                    if (infBtn) { document.querySelectorAll('.timer-pill').forEach(p => p.classList.remove('active')); infBtn.classList.add('active'); }
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                }
+            }, 1000);
+        }
+
+        function formatTimer(secs) {
+            const m = Math.floor(secs / 60);
+            const s = secs % 60;
+            return m > 0 ? `${m}:${String(s).padStart(2,'0')}` : `0:${String(s).padStart(2,'0')}`;
+        }
+
         function setAudioVolume(val) {
             const audio = document.getElementById('keep-alive-audio');
             if (audio) audio.volume = val / 100;
-            // Update slider gradient fill
+            localStorage.setItem('ava_vol', val);
             const slider = document.getElementById('vol-slider');
             if (slider) {
                 slider.style.background = `linear-gradient(to right, var(--ai-color) 0%, var(--ai-color) ${val}%, var(--border-color) ${val}%)`;
@@ -1683,12 +1857,25 @@
         // Online / Offline indicator
         function updateConnStatus() {
             const el = document.getElementById('conn-status');
-            if (!navigator.onLine) { el.className = 'offline'; }
-            else { el.className = ''; }
+            const banner = document.getElementById('offline-banner');
+            if (!navigator.onLine) {
+                el.className = 'offline';
+                if (banner) { banner.style.display = 'flex'; setTimeout(() => banner.classList.add('visible'), 10); }
+            } else {
+                el.className = '';
+                if (banner) { banner.classList.remove('visible'); setTimeout(() => { banner.style.display = 'none'; }, 300); }
+            }
         }
         window.addEventListener('online', updateConnStatus);
+        // Close month picker on outside tap
+        document.addEventListener('touchstart', e => {
+            if (monthPickerOpen && !e.target.closest('.cal-wrapper')) closeMonthPicker();
+        }, { passive: true });
         window.addEventListener('offline', updateConnStatus);
         updateConnStatus();
+
+        // Auto-refresh every 5 minutes — silently syncs when online
+        setInterval(async () => { if (navigator.onLine) await fetchEvents(); }, 300000);
 
         // Fast local bedtime estimator for the summary card
         // Uses the same heuristic as the AI: nap end + awake window
@@ -1803,33 +1990,39 @@
             const hint = document.getElementById('hint-swipe');
             const menuBtn = document.getElementById('menu-btn');
 
-            // 1. Big swipe hint — slides in after 1s, auto-dismisses after 6s
-            //    or immediately when user taps/swipes the calendar
+            // 1. Big swipe hint — show max 5 times total, tracked in localStorage
             if (hint) {
-                setTimeout(() => {
-                    hint.classList.add('visible');
+                const HINT_KEY = 'ava_swipe_hint_count';
+                const shown = parseInt(localStorage.getItem(HINT_KEY) || '0', 10);
+                if (shown < 5) {
+                    localStorage.setItem(HINT_KEY, shown + 1);
+                    setTimeout(() => {
+                        hint.classList.add('visible');
 
-                    let dismissed = false;
-                    function dismissHint() {
-                        if (dismissed) return;
-                        dismissed = true;
-                        hint.classList.remove('visible');
-                        hint.classList.add('hiding');
-                        hint.addEventListener('animationend', () => { hint.style.display = 'none'; }, { once: true });
-                    }
+                        let dismissed = false;
+                        function dismissHint() {
+                            if (dismissed) return;
+                            dismissed = true;
+                            hint.classList.remove('visible');
+                            hint.classList.add('hiding');
+                            hint.addEventListener('animationend', () => { hint.style.display = 'none'; }, { once: true });
+                        }
 
-                    const autoDismiss = setTimeout(dismissHint, 6000);
+                        const autoDismiss = setTimeout(dismissHint, 6000);
 
-                    // Dismiss on any calendar interaction
-                    const targets = [
-                        document.getElementById('calendar-grid'),
-                        ...document.querySelectorAll('.cal-header button')
-                    ].filter(Boolean);
-                    targets.forEach(el => {
-                        el.addEventListener('click',      () => { clearTimeout(autoDismiss); dismissHint(); }, { once: true });
-                        el.addEventListener('touchstart', () => { clearTimeout(autoDismiss); dismissHint(); }, { once: true, passive: true });
-                    });
-                }, 1000);
+                        // Dismiss on any calendar interaction
+                        const targets = [
+                            document.getElementById('calendar-grid'),
+                            ...document.querySelectorAll('.cal-header button')
+                        ].filter(Boolean);
+                        targets.forEach(el => {
+                            el.addEventListener('click',      () => { clearTimeout(autoDismiss); dismissHint(); }, { once: true });
+                            el.addEventListener('touchstart', () => { clearTimeout(autoDismiss); dismissHint(); }, { once: true, passive: true });
+                        });
+                    }, 1000);
+                } else {
+                    hint.style.display = 'none';
+                }
             }
 
             // 2. Menu button — 3 ripple pulses at 1.5s
@@ -1839,6 +2032,19 @@
                     menuBtn.addEventListener('animationend', () => menuBtn.classList.remove('pulse-hint'), { once: true });
                 }, 1500);
             }
+        }
+
+        function setupKeyboardScroll() {
+            // When any input/textarea inside a modal gets focus,
+            // scroll the save button into view after keyboard appears
+            document.querySelectorAll('.modal-content input, .modal-content textarea, .modal-content select').forEach(el => {
+                el.addEventListener('focus', () => {
+                    setTimeout(() => {
+                        const saveBtn = el.closest('.modal-content')?.querySelector('.btn-save');
+                        if (saveBtn) saveBtn.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    }, 350); // wait for keyboard animation
+                });
+            });
         }
 
         function setupDragToClose() {
@@ -1968,9 +2174,64 @@
             await updateTodayOverview();
         }
 
+        // ── MONTH PICKER ─────────────────────────────────────────────────
+        let pickerYear = new Date().getFullYear();
+        let monthPickerOpen = false;
+        const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const MONTH_NAMES_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+        function toggleMonthPicker() {
+            const picker = document.getElementById('month-picker');
+            monthPickerOpen = !monthPickerOpen;
+            if (monthPickerOpen) {
+                pickerYear = currentMonth.getFullYear();
+                renderMonthPicker();
+                picker.style.display = 'block';
+                setTimeout(() => picker.style.opacity = '1', 10);
+            } else {
+                closeMonthPicker();
+            }
+        }
+
+        function closeMonthPicker() {
+            const picker = document.getElementById('month-picker');
+            picker.style.opacity = '0';
+            setTimeout(() => { picker.style.display = 'none'; }, 200);
+            monthPickerOpen = false;
+        }
+
+        function renderMonthPicker() {
+            const grid = document.getElementById('month-picker-months');
+            const yearEl = document.getElementById('picker-year-label');
+            if (!grid || !yearEl) return;
+            yearEl.textContent = pickerYear;
+            grid.innerHTML = MONTH_NAMES.map((m, i) => {
+                const isCurrent = (i === currentMonth.getMonth() && pickerYear === currentMonth.getFullYear());
+                return `<button class="month-picker-btn${isCurrent ? ' active' : ''}" onclick="jumpToMonth(${i})">${m}</button>`;
+            }).join('');
+        }
+
+        function changePickerYear(dir) {
+            pickerYear += dir;
+            renderMonthPicker();
+        }
+
+        function jumpToMonth(monthIndex) {
+            currentMonth = new Date(pickerYear, monthIndex, 1);
+            updateCalMonthTitle();
+            renderCalendar();
+            closeMonthPicker();
+        }
+
+        function updateCalMonthTitle() {
+            const el = document.getElementById('cal-month-title');
+            if (el) el.innerHTML = `${MONTH_NAMES_FULL[currentMonth.getMonth()]} ${currentMonth.getFullYear()} <i class="fa-solid fa-chevron-down" style="font-size:9px;margin-left:2px;"></i>`;
+        }
+
+        // Patch changeMonth to also update pill text
         function changeMonth(dir) { 
             currentMonth.setMonth(currentMonth.getMonth() + dir); 
-            document.getElementById('cal-month-title').innerText = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            updateCalMonthTitle();
             const calDays = document.getElementById('cal-days');
             calDays.innerHTML = '<div style="grid-column: 1 / -1; padding: 50px 0; display: flex; flex-direction: column; align-items: center; color: var(--alf-color);"><i class="fa-solid fa-circle-notch fa-spin" style="font-size: 32px; margin-bottom: 15px;"></i><span style="font-size: 14px; font-weight: 700; color: var(--text-muted);">Syncing Month Data...</span></div>';
             setTimeout(renderCalendar, 10); 
@@ -1978,7 +2239,7 @@
         
         async function renderCalendar() {
             const year = currentMonth.getFullYear(); const month = currentMonth.getMonth();
-            document.getElementById('cal-month-title').innerText = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            updateCalMonthTitle();
             const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate();
             const calDays = document.getElementById('cal-days'); calDays.innerHTML = '';
             const localTodayStr = getLocalISODate(new Date());
@@ -2121,6 +2382,8 @@
             // Update DOM title
             const titleEl = overviewCard.querySelector('.overview-title');
             if(titleEl) titleEl.innerHTML = `<i class="fa-solid fa-clock"></i> ${titleText}`;
+            // Update browser tab title
+            document.title = localStr === todayStr ? "Ava's Care — Today" : `Ava's Care — ${titleText}`;
 
             const ownerBadge = document.getElementById('overview-owner-badge'); 
             const isAlf = activeOwner.toLowerCase().includes('alferenzo');
@@ -2144,25 +2407,22 @@
             const aiChip = document.querySelector('.ov-ai-chip');
             const aiTimeEl = document.getElementById('overview-target-time');
             const isFutureDate = localStr > todayStr;
-            const hasData = trks.morningWake || trks.nap || trks.wakeTime;
 
             if (isFutureDate) {
                 // For future dates: estimate from 4-day cycle + historical averages
                 if (aiChip) aiChip.style.display = 'inline-flex';
                 const futureEst = await estimateFutureBedtime(localStr, allRecs);
-                if (aiTimeEl) aiTimeEl.innerHTML = `Est. ${futureEst}`;
-            } else if (!hasData) {
-                // Past/today with no data — hide chip
-                if (aiChip) aiChip.style.display = 'none';
+                if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: ${futureEst}`;
             } else {
+                // Today or past — always show chip, use tracker data if available else default
                 if (aiChip) aiChip.style.display = 'inline-flex';
                 const cacheKey = `ai_bed_${trks.morningWake}_${trks.nap}_${trks.wakeTime}`;
                 const cached = sessionStorage.getItem(cacheKey);
                 if (cached) {
-                    if (aiTimeEl) aiTimeEl.innerHTML = `AI · ${cached}`;
+                    if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: ${cached}`;
                 } else {
-                    const estimated = estimateBedtime(trks.morningWake, trks.nap, trks.wakeTime);
-                    if (aiTimeEl) aiTimeEl.innerHTML = `Est. ${estimated}`;
+                    const estimated = estimateBedtime(trks.morningWake || null, trks.nap || 0, trks.wakeTime || null);
+                    if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: ${estimated}`;
                 }
             }
 
@@ -2356,6 +2616,7 @@
                         closeModal();
                         await fetchEvents();
                         setupDragToClose();
+                        if (navigator.vibrate) navigator.vibrate(50);
                         showToast(isEdit ? 'Updated successfully!' : 'Saved successfully!');
                     } catch(e) {
                         showToast('Save failed — check connection', true);
