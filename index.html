@@ -1877,10 +1877,9 @@
         // Auto-refresh every 5 minutes — silently syncs when online
         setInterval(async () => { if (navigator.onLine) await fetchEvents(); }, 300000);
 
-        // Fast local bedtime estimator for the summary card
-        // Uses the same heuristic as the AI: nap end + awake window
-        function estimateBedtime(morningWake, nap, wakeTime) {
-            // Parse a HH:MM string into total minutes
+        // ── AI-POWERED BEDTIME RECOMMENDATION ────────────────────────────
+        // Calls Groq with real tracker + historical context. Returns "HH:MM" string.
+        async function getAIBedtimeRecommendation(dateStr, todayTrackers, allRecs) {
             function toMins(t) {
                 if (!t || !t.includes(':')) return null;
                 const [h, m] = t.split(':').map(Number);
@@ -1891,100 +1890,95 @@
                 const m = mins % 60;
                 return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
             }
-
-            const napHours = parseFloat(nap) || 0;
-
-            // If we know when nap ended, add the recommended awake window
-            const wakeMin = toMins(wakeTime);
-            if (wakeMin !== null) {
-                // Awake window after nap: ~3.5h for short naps, ~4h for long naps
-                const awakeWindow = napHours >= 2 ? 240 : 210;
-                const bedtime = wakeMin + awakeWindow;
-                // Clamp to 17:30–20:30
-                const clamped = Math.max(17*60+30, Math.min(20*60+30, bedtime));
-                return toTime(clamped);
+            function avgTime(times) {
+                const mins = times.map(t => toMins(t)).filter(m => m !== null);
+                if (!mins.length) return null;
+                return toTime(Math.round(mins.reduce((a,b)=>a+b,0)/mins.length));
             }
 
-            // Fallback: use morning wake time + total awake time heuristic
-            const morningMin = toMins(morningWake);
-            if (morningMin !== null) {
-                // Total awake time target ~11-12h minus nap
-                const totalAwake = 11.5 * 60 - (napHours * 60);
-                const bedtime = morningMin + totalAwake;
-                const clamped = Math.max(17*60+30, Math.min(20*60+30, bedtime));
-                return toTime(clamped);
-            }
-
-            return "19:00"; // hard default — should not reach here normally
-        }
-
-        // Estimate bedtime for today with no tracker data: use owner's historical averages
-        async function estimateBedtimeFromHistory(dateStr, allRecs) {
+            // Build historical context for this owner (last 10 entries)
             const owner = getDefaultOwner(dateStr);
             const isAlf = owner.toLowerCase().includes('alferenzo');
-
             const ownerRecs = Object.entries(allRecs)
-                .filter(([d, r]) => d <= dateStr && r.trackers &&
-                    (r.owner || '').toLowerCase().includes(isAlf ? 'alferenzo' : 'lesly'))
-                .sort((a, b) => b[0].localeCompare(a[0]))
-                .slice(0, 14)
-                .map(([, r]) => r.trackers);
+                .filter(([d, r]) => d < dateStr && r.trackers &&
+                    (r.owner||'').toLowerCase().includes(isAlf ? 'alferenzo' : 'lesly'))
+                .sort((a,b) => b[0].localeCompare(a[0]))
+                .slice(0, 10);
 
-            if (ownerRecs.length === 0) return null; // no history at all
+            let historyLines = '';
+            ownerRecs.forEach(([d, r]) => {
+                const t = r.trackers;
+                historyLines += `  ${d}: wake=${t.morningWake||'?'}, nap=${t.nap||0}h, napEnd=${t.wakeTime||'?'}, asleep=${t.asleepTime||'?'}, settle=${t.settle||'?'}, wakings=${t.wakings||0}\n`;
+            });
 
-            function avgTime(times) {
-                const mins = times.map(t => {
-                    if (!t || !t.includes(':')) return null;
-                    const [h, m] = t.split(':').map(Number);
-                    return h * 60 + m;
-                }).filter(m => m !== null);
-                if (!mins.length) return null;
-                const avg = Math.round(mins.reduce((a, b) => a + b, 0) / mins.length);
-                return `${String(Math.floor(avg/60)).padStart(2,'0')}:${String(avg%60).padStart(2,'0')}`;
+            const avgAsleep = avgTime(ownerRecs.map(([,r]) => r.trackers?.asleepTime).filter(Boolean));
+            const avgNapEnd = avgTime(ownerRecs.map(([,r]) => r.trackers?.wakeTime).filter(Boolean));
+
+            const todayLines = todayTrackers
+                ? `Today's data so far:\n  Morning wake: ${todayTrackers.morningWake||'not set'}\n  Nap duration: ${todayTrackers.nap||0}h\n  Nap ended: ${todayTrackers.wakeTime||'not set'}\n  Ate well: ${todayTrackers.eat||'unknown'}`
+                : `No tracker data entered for today yet.`;
+
+            const prompt = `You are a pediatric sleep expert. Based on Ava's actual history and today's data, recommend the optimal bedtime START for tonight.
+
+${todayLines}
+
+Recent history (${isAlf ? 'Alferenzo' : 'Lesly'}'s shifts):
+${historyLines || '  No history available yet.'}
+Historical average nap-end time: ${avgNapEnd || 'unknown'}
+Historical average asleep time: ${avgAsleep || 'unknown'}
+
+Rules:
+- Bedtime should be 3h–4.5h after nap ends (shorter nap = earlier bedtime)
+- If no nap today, bedtime should be ~11h after morning wake
+- Must be between 17:30 and 20:30
+- Account for Ava's historical patterns above
+- If today's data is missing, use historical averages to project
+
+Respond with ONLY a JSON object, no explanation, no markdown:
+{"bedtime":"HH:MM","reason":"one short sentence why"}`;
+
+            // Cache key: hash of today's trackers + history summary
+            function hashStr(str) {
+                let h = 2166136261;
+                for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = (h * 16777619) >>> 0; }
+                return h.toString(36);
             }
+            const cacheKey = 'ai_bedtime_' + hashStr(prompt);
+            try {
+                const cached = sessionStorage.getItem(cacheKey);
+                if (cached) return JSON.parse(cached);
+            } catch(e) {}
 
-            const avgMorning  = avgTime(ownerRecs.map(r => r.morningWake));
-            const avgNap      = (ownerRecs.map(r => parseFloat(r.nap)||0).reduce((a,b)=>a+b,0) / ownerRecs.length).toFixed(1);
-            const avgWakeTime = avgTime(ownerRecs.map(r => r.wakeTime));
-
-            return estimateBedtime(avgMorning, avgNap, avgWakeTime);
-        }
-
-        // Estimate bedtime for a future date using the 4-day cycle + historical averages
-        async function estimateFutureBedtime(futureDateStr, allRecs) {
-            // 1. Determine who owns this future date
-            const owner = getDefaultOwner(futureDateStr);
-            const isAlf = owner.toLowerCase().includes('alferenzo');
-
-            // 2. Gather the last 14 days of records for that owner
-            const ownerRecs = Object.entries(allRecs)
-                .filter(([d, r]) => d < futureDateStr && r.trackers &&
-                    (r.owner || '').toLowerCase().includes(isAlf ? 'alferenzo' : 'lesly'))
-                .sort((a, b) => b[0].localeCompare(a[0]))
-                .slice(0, 14)
-                .map(([, r]) => r.trackers);
-
-            if (ownerRecs.length === 0) return '19:00';
-
-            // 3. Average their morningWake, nap duration, wakeTime
-            function avgTime(times) {
-                const mins = times.map(t => {
-                    if (!t || !t.includes(':')) return null;
-                    const [h, m] = t.split(':').map(Number);
-                    return h * 60 + m;
-                }).filter(m => m !== null);
-                if (!mins.length) return null;
-                const avg = Math.round(mins.reduce((a, b) => a + b, 0) / mins.length);
-                return `${String(Math.floor(avg/60)).padStart(2,'0')}:${String(avg%60).padStart(2,'0')}`;
+            // Groq API call
+            try {
+                if (typeof GROQ_API_KEY === 'undefined' || GROQ_API_KEY === 'YOUR_GROQ_API_KEY_HERE') throw new Error('No API key');
+                const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+                    body: JSON.stringify({ model: GROQ_MODEL, messages: [{ role: 'user', content: prompt }], temperature: 0.3, max_tokens: 80 })
+                });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+                const text = data.choices[0].message.content.trim().replace(/```json|```/g, '');
+                const parsed = JSON.parse(text);
+                sessionStorage.setItem(cacheKey, JSON.stringify(parsed));
+                return parsed;
+            } catch(e) {
+                // Fallback: local math if API unavailable
+                const napHours = parseFloat(todayTrackers?.nap) || 0;
+                const wakeMin = toMins(todayTrackers?.wakeTime);
+                const morningMin = toMins(todayTrackers?.morningWake);
+                let bed;
+                if (wakeMin !== null) {
+                    bed = Math.max(17*60+30, Math.min(20*60+30, wakeMin + (napHours >= 2 ? 240 : 210)));
+                } else if (morningMin !== null) {
+                    bed = Math.max(17*60+30, Math.min(20*60+30, morningMin + 11.5*60 - napHours*60));
+                } else {
+                    const avgAsleepMins = toMins(avgAsleep);
+                    bed = avgAsleepMins ? Math.max(17*60+30, Math.min(20*60+30, avgAsleepMins - 30)) : 19*60;
+                }
+                return { bedtime: toTime(bed), reason: 'Estimated from tracker data' };
             }
-
-            const avgMorning  = avgTime(ownerRecs.map(r => r.morningWake));
-            const avgNap      = (ownerRecs.map(r => parseFloat(r.nap)||0)
-                                  .reduce((a,b)=>a+b,0) / ownerRecs.length).toFixed(1);
-            const avgWakeTime = avgTime(ownerRecs.map(r => r.wakeTime));
-
-            // 4. Run through the same local estimator
-            return estimateBedtime(avgMorning, avgNap, avgWakeTime);
         }
 
         function getLocalISODate(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
@@ -2334,47 +2328,15 @@
             badge.innerHTML = `<i class="fa-solid fa-sparkles fa-beat"></i> AI Analyzing...`;
             clearTimeout(aiBedtimeTimeout);
             aiBedtimeTimeout = setTimeout(async () => {
-                let aiTime = await fetchAIBedtime(currentTrackers.morningWake, currentTrackers.nap, currentTrackers.wakeTime);
-                if (aiTime) {
-                    badge.innerHTML = `<i class="fa-solid fa-sparkles"></i> AI Recommend: ${aiTime}`;
+                const allRecs = await appDB.getAllRecords();
+                const result = await getAIBedtimeRecommendation(activeDateStr || getLocalISODate(new Date()), currentTrackers, allRecs);
+                if (result && result.bedtime) {
+                    badge.innerHTML = `<i class="fa-solid fa-sparkles"></i> AI Recommend: ${result.bedtime}`;
+                    if (result.reason) badge.title = result.reason;
                 } else {
                     badge.innerHTML = `<i class="fa-solid fa-moon"></i> Target: 19:00`;
                 }
             }, 800);
-        }
-
-        async function fetchAIBedtime(morning, nap, wakeTime) {
-            const cacheKey = `ai_bed_${morning}_${nap}_${wakeTime}`;
-            if(sessionStorage.getItem(cacheKey)) return sessionStorage.getItem(cacheKey);
-
-            const prompt = `You are a pediatric sleep expert AI calculating a toddler's bedtime. Today she woke up at ${morning||'unknown'}. Nap duration: ${nap} hours. She woke up from nap at ${wakeTime||'unknown'}. What is the exact optimal time to start her bedtime routine?\n\nCRITICAL RULES:\n1. ONLY return the time in 24-hour format (e.g., 18:30, 19:00, 19:30).\n2. DO NOT include any other text, just the time.\n3. The bedtime MUST be an evening time strictly between 17:30 and 20:30. NEVER recommend a morning time like 06:00.`;
-            
-            try {
-                if (GROQ_API_KEY === "YOUR_GROQ_API_KEY_HERE") return null; // Failsafe if key isn't set
-                const requestPayload = {
-                    "model": GROQ_MODEL,
-                    "messages": [{"role": "user", "content": String(prompt)}],
-                    "temperature": 0.5
-                };
-                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
-                    body: JSON.stringify(requestPayload)
-                });
-                if(!response.ok) {
-                    const errData = await response.json();
-                    console.error("Groq Bedtime Error:", errData);
-                    return null;
-                }
-                const data = await response.json();
-                let timeText = data.choices[0].message.content.trim();
-                const match = timeText.match(/([01]?[0-9]|2[0-3]):[0-5][0-9]/);
-                if (match) {
-                    sessionStorage.setItem(cacheKey, match[0]);
-                    return match[0];
-                }
-                return null;
-            } catch(e) { return null; }
         }
 
         
@@ -2438,33 +2400,25 @@
 
             const aiChip = document.querySelector('.ov-ai-chip');
             const aiTimeEl = document.getElementById('overview-target-time');
-            const isFutureDate = localStr > todayStr;
 
-            if (isFutureDate) {
-                // For future dates: estimate from 4-day cycle + historical averages
-                if (aiChip) aiChip.style.display = 'inline-flex';
-                const futureEst = await estimateFutureBedtime(localStr, allRecs);
-                if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: ${futureEst}`;
-            } else {
-                // Today or past — always show chip
-                if (aiChip) aiChip.style.display = 'inline-flex';
-                const hasData = trks.morningWake || trks.nap || trks.wakeTime;
-                const cacheKey = `ai_bed_${trks.morningWake}_${trks.nap}_${trks.wakeTime}`;
-                const cached = sessionStorage.getItem(cacheKey);
-                if (cached) {
-                    if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: ${cached}`;
-                } else if (hasData) {
-                    const estimated = estimateBedtime(trks.morningWake || null, trks.nap || 0, trks.wakeTime || null);
-                    if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: ${estimated}`;
-                } else {
-                    // No tracker data yet — use owner's historical averages from 4-day cycle
-                    const histEst = await estimateBedtimeFromHistory(localStr, allRecs);
-                    if (histEst) {
-                        if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: ${histEst}`;
-                    } else {
-                        if (aiChip) aiChip.style.display = 'none'; // truly no data anywhere
+            if (aiChip) aiChip.style.display = 'inline-flex';
+            if (aiTimeEl) aiTimeEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="font-size:9px"></i> Calculating...`;
+
+            const aiResult = await getAIBedtimeRecommendation(localStr, trks, allRecs);
+            if (aiResult && aiResult.bedtime) {
+                if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: <b>${aiResult.bedtime}</b>`;
+                if (aiResult.reason) {
+                    let reasonEl = document.getElementById('ov-ai-reason');
+                    if (!reasonEl) {
+                        reasonEl = document.createElement('div');
+                        reasonEl.id = 'ov-ai-reason';
+                        reasonEl.style.cssText = 'font-size:9px;color:var(--text-muted);margin-top:3px;padding:0 2px;line-height:1.3;';
+                        aiTimeEl.parentNode.insertAdjacentElement('afterend', reasonEl);
                     }
+                    reasonEl.textContent = aiResult.reason;
                 }
+            } else {
+                if (aiChip) aiChip.style.display = 'none';
             }
 
             // Update daily notes snippet
