@@ -2677,7 +2677,12 @@
             const resultBox = document.getElementById('analytics-results');
             const resText = document.getElementById('analytics-text');
             
-            const cacheKey = 'ai_analytics_' + getLocalISODate(new Date());
+            function hashStr(str) {
+                let h = 2166136261;
+                for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = (h * 16777619) >>> 0; }
+                return h.toString(36);
+            }
+            const cacheKey = 'ai_analytics_' + hashStr(dataStr);
             const cachedData = localStorage.getItem(cacheKey);
             
             if (cachedData) {
@@ -2886,8 +2891,17 @@ RULES:
 
 ${currentNotes}`;
             
-            const promptHash = safePromptText.length + '_' + safePromptText.substring(0, 15).replace(/[^a-zA-Z]/g, '');
-            const cacheKey = 'ai_tips_' + currentAIMode + '_' + promptHash;
+            // Build a proper cache key from the full prompt content (FNV-1a hash)
+            function hashStr(str) {
+                let h = 2166136261;
+                for (let i = 0; i < str.length; i++) {
+                    h ^= str.charCodeAt(i);
+                    h = (h * 16777619) >>> 0;
+                }
+                return h.toString(36);
+            }
+            const hourBucket = Math.floor(Date.now() / (1000 * 60 * 60)); // changes every hour
+            const cacheKey = 'ai_tips_' + currentAIMode + '_' + hashStr(safePromptText) + '_' + hourBucket;
             const cachedRes = sessionStorage.getItem(cacheKey);
             
             if (cachedRes) {
@@ -2909,7 +2923,7 @@ ${currentNotes}`;
                 rawPayloadStr = JSON.stringify({
                     "model": GROQ_MODEL,
                     "messages": [{"role": "user", "content": String(safePromptText)}],
-                    "temperature": 0.5
+                    "temperature": 0.85
                 });
                 
                 let response;
@@ -3247,4 +3261,4 @@ async function removeReminder(index) {
 
 </script>
 </body>
-                </html>
+    </html>
