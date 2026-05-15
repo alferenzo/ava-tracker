@@ -2833,8 +2833,36 @@ Respond with ONLY a JSON object, no explanation, no markdown:
                 energyLevelText = `The parent currently on shift has reported a Personal Burnout/Energy Level of ${energySlider.value}%. `;
             }
 
-            let safePromptText = currentAIMode === 'advice' ? 
-                `Ava's parents are struggling to get her to sleep. ${energyLevelText}Here are tonight's notes: "${currentNotes}". Give 2 short, highly practical tips tailored to both the child's sleep and the parent's current energy level. Format as bulleted list.` 
+            // Build Ava's current context as background for the assistant
+            const allRecs = await appDB.getAllRecords();
+            const todayStr = getLocalISODate(new Date());
+            const todayRec = allRecs[todayStr] || {};
+            const trks = todayRec.trackers || {};
+            const owner = todayRec.owner || getDefaultOwner(todayStr);
+            const isAlf = owner.toLowerCase().includes('alferenzo');
+
+            const recentEntries = Object.entries(allRecs)
+                .filter(([d]) => d <= todayStr)
+                .sort((a,b) => b[0].localeCompare(a[0]))
+                .slice(0, 5)
+                .map(([d, r]) => {
+                    const t = r.trackers || {};
+                    return `${d}: wake=${t.morningWake||'?'}, nap=${t.nap||0}h, napEnd=${t.wakeTime||'?'}, asleep=${t.asleepTime||'?'}, settle=${t.settle||'?'}, wakings=${t.wakings||0}`;
+                }).join('\n');
+
+            const contextBlock = `[Background context — use only if relevant to the question]
+Child: Ava (toddler), current carer: ${isAlf ? 'Alferenzo' : 'Lesly'}
+Today: morningWake=${trks.morningWake||'?'}, nap=${trks.nap||0}h, napEnd=${trks.wakeTime||'?'}, ate=${trks.eat||'?'}
+Energy level of carer: ${energySlider ? energySlider.value + '%' : 'unknown'}
+Recent history:
+${recentEntries || 'No history yet'}`;
+
+            let safePromptText = currentAIMode === 'advice'
+                ? `You are a helpful assistant for parents using a childcare tracking app called "Ava's Four Day Care". Answer the user's question directly and naturally. If the question is about Ava's sleep or care, use the background context below to give a personalised answer. If it's a general question (like "what is a lion"), just answer it normally — don't force it into a sleep context.
+
+${contextBlock}
+
+User's question: ${currentNotes}` 
                 : `You are creating a shift handover report for a childcare handover. ${energyLevelText}Analyze the following raw data and format it beautifully. 
 
 RULES:
