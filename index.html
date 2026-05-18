@@ -744,6 +744,117 @@
         }
         .ov-notes-text.has-notes { color: var(--text-main); font-style: normal; opacity: 1; }
 
+        /* ── SLEEP VISUALISER ─────────────────────────────────────── */
+        .slv-wrap {
+            margin-top: 7px;
+            background: linear-gradient(135deg, var(--input-bg) 0%, var(--card-bg) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 10px 11px 9px;
+            display: none;
+        }
+        .slv-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .slv-title {
+            font-size: 9px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.8px; color: var(--text-muted);
+            display: flex; align-items: center; gap: 4px;
+        }
+        .slv-score {
+            font-size: 9px; font-weight: 900; padding: 2px 9px;
+            border-radius: 20px; letter-spacing: 0.3px;
+        }
+        .slv-score.great  { background: linear-gradient(90deg,#bbf7d0,#86efac); color: #166534; }
+        .slv-score.good   { background: linear-gradient(90deg,#fef08a,#fde047); color: #854d0e; }
+        .slv-score.rough  { background: linear-gradient(90deg,#fecaca,#fca5a5); color: #991b1b; }
+        body.night-vision .slv-score.great { background: linear-gradient(90deg,rgba(22,163,74,0.3),rgba(22,163,74,0.15)); color: #4ade80; }
+        body.night-vision .slv-score.good  { background: linear-gradient(90deg,rgba(202,138,4,0.3),rgba(202,138,4,0.15));  color: #facc15; }
+        body.night-vision .slv-score.rough { background: linear-gradient(90deg,rgba(220,38,38,0.3),rgba(220,38,38,0.15));  color: #f87171; }
+
+        /* Timeline track */
+        .slv-bar-wrap {
+            position: relative; height: 28px;
+            border-radius: 20px; overflow: hidden;
+            background: var(--border-color);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+        }
+        body.night-vision .slv-bar-wrap { box-shadow: inset 0 1px 4px rgba(0,0,0,0.4); }
+
+        .slv-segment {
+            position: absolute; top: 0; height: 100%;
+            transition: width 0.7s cubic-bezier(0.34,1.1,0.64,1),
+                        left  0.7s cubic-bezier(0.34,1.1,0.64,1),
+                        opacity 0.4s;
+        }
+        /* Pre-routine — cool grey */
+        .slv-seg-pre {
+            background: linear-gradient(90deg, #cbd5e1 0%, #94a3b8 100%);
+            opacity: 0.5;
+        }
+        /* Settling — warm amber glow */
+        .slv-seg-settle {
+            background: linear-gradient(90deg, #fde68a 0%, #f59e0b 60%, #d97706 100%);
+            box-shadow: 0 0 8px rgba(245,158,11,0.4);
+        }
+        /* Asleep — cool green */
+        .slv-seg-sleep {
+            background: linear-gradient(90deg, #6ee7b7 0%, #10b981 50%, #059669 100%);
+            box-shadow: 0 0 10px rgba(16,185,129,0.35);
+        }
+        /* Waking — red pulse */
+        .slv-seg-waking {
+            background: linear-gradient(90deg, rgba(252,165,165,0.9) 0%, #ef4444 50%, rgba(252,165,165,0.9) 100%);
+            box-shadow: 0 0 8px rgba(239,68,68,0.5);
+            z-index: 2;
+        }
+        body.night-vision .slv-seg-pre    { background: linear-gradient(90deg,#1e2d45,#2d3f57); opacity:0.7; }
+        body.night-vision .slv-seg-settle { background: linear-gradient(90deg,#92400e,#d97706,#b45309); box-shadow:0 0 8px rgba(217,119,6,0.35); }
+        body.night-vision .slv-seg-sleep  { background: linear-gradient(90deg,#065f46,#059669,#047857); box-shadow:0 0 10px rgba(5,150,105,0.35); }
+        body.night-vision .slv-seg-waking { background: linear-gradient(90deg,rgba(153,27,27,0.9),#dc2626,rgba(153,27,27,0.9)); box-shadow:0 0 8px rgba(220,38,38,0.4); }
+
+        /* Waking ticks */
+        .slv-tick {
+            position: absolute; top: 15%; width: 2px; height: 70%;
+            background: rgba(255,255,255,0.85);
+            border-radius: 2px; z-index: 3;
+            box-shadow: 0 0 4px rgba(0,0,0,0.3);
+        }
+
+        /* Time labels */
+        .slv-labels {
+            position: relative; height: 16px;
+            margin-top: 4px;
+        }
+        .slv-label {
+            position: absolute;
+            font-size: 8px; font-weight: 800; color: var(--text-muted);
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        /* Stats row */
+        .slv-stats {
+            display: flex; gap: 5px; margin-top: 8px;
+        }
+        .slv-stat {
+            flex: 1; text-align: center;
+            background: var(--card-bg);
+            border-radius: 10px; padding: 5px 2px;
+            border: 1px solid var(--border-color);
+        }
+        .slv-stat-val { font-size: 13px; font-weight: 900; color: var(--text-main); line-height: 1; }
+        .slv-stat-lbl { font-size: 7px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+
+        /* Legend */
+        .slv-legend {
+            display: flex; gap: 10px; margin-top: 7px; flex-wrap: wrap; justify-content: center;
+        }
+        .slv-legend-item { display: flex; align-items: center; gap: 4px; }
+        .slv-legend-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .slv-legend-lbl  { font-size: 8px; font-weight: 700; color: var(--text-muted); }
+
         /* ═══════════════════════════════════════════════════════════
            SYNC STATUS INDICATOR
            ═══════════════════════════════════════════════════════════ */
@@ -934,6 +1045,36 @@
                     <div class="ov-notes-row" id="ov-notes-row" onclick="openSpecificDay(getLocalISODate(currentOverviewDate))" style="display:none;">
                         <i class="fa-regular fa-comment-dots ov-notes-icon"></i>
                         <span class="ov-notes-text" id="ov-notes-text"></span>
+                    </div>
+                </div>
+
+                <!-- SLEEP VISUALISER -->
+                <div class="slv-wrap" id="slv-wrap">
+                    <div class="slv-header">
+                        <div class="slv-title"><i class="fa-solid fa-moon"></i> Night Timeline</div>
+                        <div class="slv-score" id="slv-score"></div>
+                    </div>
+                    <div class="slv-bar-wrap" id="slv-bar"></div>
+                    <div class="slv-labels" id="slv-labels"></div>
+                    <div class="slv-stats">
+                        <div class="slv-stat">
+                            <div class="slv-stat-val" id="slv-total">–</div>
+                            <div class="slv-stat-lbl">Total Sleep</div>
+                        </div>
+                        <div class="slv-stat">
+                            <div class="slv-stat-val" id="slv-settle">–</div>
+                            <div class="slv-stat-lbl">Settle Time</div>
+                        </div>
+                        <div class="slv-stat">
+                            <div class="slv-stat-val" id="slv-wakings">–</div>
+                            <div class="slv-stat-lbl">Wakings</div>
+                        </div>
+                    </div>
+                    <div class="slv-legend">
+                        <div class="slv-legend-item"><div class="slv-legend-dot" style="background:linear-gradient(135deg,#fde68a,#f59e0b)"></div><span class="slv-legend-lbl">Settling</span></div>
+                        <div class="slv-legend-item"><div class="slv-legend-dot" style="background:linear-gradient(135deg,#6ee7b7,#059669)"></div><span class="slv-legend-lbl">Asleep</span></div>
+                        <div class="slv-legend-item"><div class="slv-legend-dot" style="background:linear-gradient(135deg,#fca5a5,#ef4444)"></div><span class="slv-legend-lbl">Waking</span></div>
+                        <div class="slv-legend-item"><div class="slv-legend-dot" style="background:linear-gradient(135deg,#e2e8f0,#94a3b8)"></div><span class="slv-legend-lbl">Pre-routine</span></div>
                     </div>
                 </div>
             </div>
@@ -2207,8 +2348,15 @@ Respond with ONLY a JSON object, no explanation, no markdown:
             }, 320);
 
             try {
-                await appDB.init();
-                await fetchEvents();
+                // Race DB init against a timeout so loader never hangs
+                await Promise.race([
+                    appDB.init(),
+                    new Promise(res => setTimeout(res, 8000))
+                ]);
+                await Promise.race([
+                    fetchEvents(),
+                    new Promise(res => setTimeout(res, 6000))
+                ]);
                 setupDragToClose();
                 checkRemindersOnLoad();
                 showDashboardHints();
@@ -2437,7 +2585,7 @@ Respond with ONLY a JSON object, no explanation, no markdown:
                     if (!reasonEl) {
                         reasonEl = document.createElement('div');
                         reasonEl.id = 'ov-ai-reason';
-                        reasonEl.style.cssText = 'font-size:15px;color:var(--text-muted);margin-top:3px;padding:0 4px;line-height:1.4;width:100%;';
+                        reasonEl.style.cssText = 'font-size:15px;color:var(--text-muted);margin-top:4px;padding:0 4px;line-height:1.4;width:100%;';
                         aiTimeEl.parentNode.insertAdjacentElement('afterend', reasonEl);
                     }
                     reasonEl.textContent = aiResult.reason;
@@ -2458,11 +2606,127 @@ Respond with ONLY a JSON object, no explanation, no markdown:
                 notesRow.style.display = 'none';
             }
 
+            // Render sleep visualiser if we have bedtime data
+            renderSleepVisualiser(trks);
+        }
+
+
+        function renderSleepVisualiser(trks) {
+            const wrap = document.getElementById('slv-wrap');
+            if (!wrap) return;
+
+            const bedStart  = trks.bedtimeStart;
+            const asleep    = trks.asleepTime;
+            const morningWake = trks.morningWake;
+            const wakings   = parseInt(trks.wakings) || 0;
+
+            // Need at least bedtime start + asleep time to draw anything meaningful
+            if (!bedStart || !asleep) { wrap.style.display = 'none'; return; }
+
+            function toMins(t) {
+                if (!t || !t.includes(':')) return null;
+                const [h, m] = t.split(':').map(Number);
+                let mins = h * 60 + m;
+                // Treat early morning hours (< 8am) as next day
+                if (h < 8) mins += 24 * 60;
+                return mins;
+            }
+            function fmtMins(m) {
+                const h = Math.floor(m / 60) % 24;
+                const mm = m % 60;
+                return `${String(h).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+            }
+            function durLabel(m) {
+                if (m < 60) return `${m}m`;
+                const h = Math.floor(m / 60), rem = m % 60;
+                return rem ? `${h}h ${rem}m` : `${h}h`;
+            }
+
+            const bedMins    = toMins(bedStart);
+            const asleepMins = toMins(asleep);
+            const wakeMins   = morningWake ? toMins(morningWake) + 24 * 60 : asleepMins + 600; // fallback 10h
+
+            if (!bedMins || !asleepMins || asleepMins <= bedMins) { wrap.style.display = 'none'; return; }
+
+            wrap.style.display = 'block';
+
+            // Timeline window: bedStart – 30min before → morningWake + 30min
+            const winStart = bedMins - 20;
+            const winEnd   = wakeMins + 20;
+            const winLen   = winEnd - winStart;
+
+            function pct(mins) { return Math.max(0, Math.min(100, ((mins - winStart) / winLen) * 100)); }
+
+            // Build segments
+            const bar = document.getElementById('slv-bar');
+            bar.innerHTML = '';
+
+            function addSeg(cls, fromMins, toMins) {
+                if (toMins <= fromMins) return;
+                const seg = document.createElement('div');
+                seg.className = `slv-segment ${cls}`;
+                seg.style.left  = pct(fromMins) + '%';
+                seg.style.width = (pct(toMins) - pct(fromMins)) + '%';
+                seg.title = `${fmtMins(fromMins % (24*60))} – ${fmtMins(toMins % (24*60))} (${durLabel(toMins - fromMins)})`;
+                bar.appendChild(seg);
+            }
+
+            // Pre-routine (before bedStart)
+            addSeg('slv-seg-pre', winStart + 20, bedMins);
+            // Settling (bedStart → asleep)
+            addSeg('slv-seg-settle', bedMins, asleepMins);
+            // Sleeping (asleep → morningWake)
+            addSeg('slv-seg-sleep', asleepMins, wakeMins);
+
+            // Waking ticks — distribute evenly across the night
+            if (wakings > 0) {
+                const sleepLen = wakeMins - asleepMins;
+                for (let i = 1; i <= wakings; i++) {
+                    const tickMins = asleepMins + (sleepLen / (wakings + 1)) * i;
+                    const tick = document.createElement('div');
+                    tick.className = 'slv-tick';
+                    tick.style.left = pct(tickMins) + '%';
+                    // Colour the surrounding ~20min as waking
+                    addSeg('slv-seg-waking', tickMins - 10, tickMins + 10);
+                    bar.appendChild(tick);
+                }
+            }
+
+            // Time axis labels
+            const labels = document.getElementById('slv-labels');
+            labels.innerHTML = '';
+            const labelTimes = [bedMins, asleepMins];
+            if (morningWake) labelTimes.push(wakeMins);
+            labelTimes.forEach(t => {
+                const lbl = document.createElement('div');
+                lbl.className = 'slv-label';
+                lbl.style.position = 'absolute';
+                lbl.style.left = pct(t) + '%';
+                lbl.style.transform = 'translateX(-50%)';
+                lbl.textContent = fmtMins(t % (24 * 60));
+                labels.style.position = 'relative';
+                labels.style.height = '14px';
+                labels.appendChild(lbl);
+            });
+
+            // Stats
+            const settleDur = asleepMins - bedMins;
+            const totalSleep = wakeMins - asleepMins;
+            document.getElementById('slv-settle').textContent  = durLabel(settleDur);
+            document.getElementById('slv-total').textContent   = durLabel(totalSleep);
+            document.getElementById('slv-wakings').textContent = wakings;
+
+            // Score
+            const scoreEl = document.getElementById('slv-score');
+            let score = 'great', label = '✦ Great night';
+            if (settleDur > 45 || wakings >= 3 || totalSleep < 480) { score = 'rough'; label = '✦ Rough night'; }
+            else if (settleDur > 25 || wakings >= 1 || totalSleep < 540) { score = 'good'; label = '✦ Decent night'; }
+            scoreEl.className = `slv-score ${score}`;
+            scoreEl.textContent = label;
         }
 
 
         
-        function openModalAndFocus(trackerId) {
             // 1. Open the modal for the currently viewed date on the dashboard
             openSpecificDay(getLocalISODate(currentOverviewDate));
             
@@ -2619,9 +2883,8 @@ Respond with ONLY a JSON object, no explanation, no markdown:
                 `Select the parent ${actionLabel} this entry`,
                 async (selectedParent) => {
                     if (!selectedParent) return;
-                    const savingOwner = selectedParent === 'alf'
-                        ? "Alferenzo's turn with Ava"
-                        : "Lesly's turn with Ava";
+                    // Preserve the shift's rightful owner — don't overwrite with whoever is logging
+                    const shiftOwner = existingRec?.owner || getDefaultOwner(activeDateStr);
                     try {
                         logSystemAudit(
                             isEdit
@@ -2633,11 +2896,11 @@ Respond with ONLY a JSON object, no explanation, no markdown:
                             appDB.saveRecord(activeDateStr, {
                                 feedback: feedbackText,
                                 trackers: { ...currentTrackers },
-                                owner: savingOwner,
+                                owner: shiftOwner,
                                 lastSavedBy: selectedParent,
                                 lastSavedAt: new Date().toISOString()
                             }),
-                            Promise.resolve() // placeholder for any parallel work
+                            Promise.resolve()
                         ]);
                         closeModal();
                         fetchEvents(); // don't await — let calendar refresh in background
@@ -3274,4 +3537,4 @@ async function removeReminder(index) {
 
 </script>
 </body>
-                </html>
+    </html>
