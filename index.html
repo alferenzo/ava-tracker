@@ -746,24 +746,24 @@
 
         /* ── SLEEP VISUALISER ─────────────────────────────────────── */
         .slv-wrap {
-            margin-top: 7px;
+            margin-top: 6px;
             background: linear-gradient(135deg, var(--input-bg) 0%, var(--card-bg) 100%);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 10px 11px 9px;
+            border-radius: 12px;
+            padding: 6px 8px 5px;
             display: none;
         }
         .slv-header {
             display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
         .slv-title {
-            font-size: 9px; font-weight: 800; text-transform: uppercase;
+            font-size: 8px; font-weight: 800; text-transform: uppercase;
             letter-spacing: 0.8px; color: var(--text-muted);
-            display: flex; align-items: center; gap: 4px;
+            display: flex; align-items: center; gap: 3px;
         }
         .slv-score {
-            font-size: 9px; font-weight: 900; padding: 2px 9px;
+            font-size: 8px; font-weight: 900; padding: 1px 7px;
             border-radius: 20px; letter-spacing: 0.3px;
         }
         .slv-score.great  { background: linear-gradient(90deg,#bbf7d0,#86efac); color: #166534; }
@@ -773,9 +773,8 @@
         body.night-vision .slv-score.good  { background: linear-gradient(90deg,rgba(202,138,4,0.3),rgba(202,138,4,0.15));  color: #facc15; }
         body.night-vision .slv-score.rough { background: linear-gradient(90deg,rgba(220,38,38,0.3),rgba(220,38,38,0.15));  color: #f87171; }
 
-        /* Timeline track */
         .slv-bar-wrap {
-            position: relative; height: 28px;
+            position: relative; height: 18px;
             border-radius: 20px; overflow: hidden;
             background: var(--border-color);
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
@@ -834,26 +833,24 @@
             white-space: nowrap;
         }
 
-        /* Stats row */
         .slv-stats {
-            display: flex; gap: 5px; margin-top: 8px;
+            display: flex; gap: 4px; margin-top: 5px;
         }
         .slv-stat {
             flex: 1; text-align: center;
             background: var(--card-bg);
-            border-radius: 10px; padding: 5px 2px;
+            border-radius: 7px; padding: 3px 2px;
             border: 1px solid var(--border-color);
         }
-        .slv-stat-val { font-size: 13px; font-weight: 900; color: var(--text-main); line-height: 1; }
-        .slv-stat-lbl { font-size: 7px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+        .slv-stat-val { font-size: 11px; font-weight: 900; color: var(--text-main); line-height: 1; }
+        .slv-stat-lbl { font-size: 6px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 1px; }
 
-        /* Legend */
         .slv-legend {
-            display: flex; gap: 10px; margin-top: 7px; flex-wrap: wrap; justify-content: center;
+            display: flex; gap: 8px; margin-top: 5px; flex-wrap: wrap; justify-content: center;
         }
-        .slv-legend-item { display: flex; align-items: center; gap: 4px; }
-        .slv-legend-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .slv-legend-lbl  { font-size: 8px; font-weight: 700; color: var(--text-muted); }
+        .slv-legend-item { display: flex; align-items: center; gap: 3px; }
+        .slv-legend-dot  { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .slv-legend-lbl  { font-size: 7px; font-weight: 700; color: var(--text-muted); }
 
         /* ═══════════════════════════════════════════════════════════
            SYNC STATUS INDICATOR
@@ -910,6 +907,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
 </head>
 
 <body>
@@ -1608,13 +1606,18 @@
 
             async init() {
                 try {
-                    const doc = await db.collection(this.collectionName).doc('_system_settings_').get();
+                    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000));
+                    const doc = await Promise.race([
+                        db.collection(this.collectionName).doc('_system_settings_').get(),
+                        timeout
+                    ]);
                     if (doc.exists) {
                         this.settings = doc.data();
                     } else {
-                        await db.collection(this.collectionName).doc('_system_settings_').set(this.settings);
+                        // Don't await the set — fire and forget so it doesn't block
+                        db.collection(this.collectionName).doc('_system_settings_').set(this.settings).catch(() => {});
                     }
-                } catch(e) { console.error("Settings load error:", e); }
+                } catch(e) { console.warn("Settings load skipped:", e.message); }
                 return true;
             }
             
@@ -1643,14 +1646,18 @@
             async getAllRecords() {
                 if (this.cachedRecords) return this.cachedRecords;
                 try {
-                    const snap = await db.collection(this.collectionName).get();
+                    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 7000));
+                    const snap = await Promise.race([
+                        db.collection(this.collectionName).get(),
+                        timeout
+                    ]);
                     let recs = {};
                     snap.forEach(doc => { 
                         if(doc.id !== '_system_settings_') recs[doc.id] = doc.data(); 
                     });
                     this.cachedRecords = recs;
                     return recs;
-                } catch(e) { console.error("Error getting all:", e); return {}; }
+                } catch(e) { console.warn("getAllRecords skipped:", e.message); return {}; }
             }
 
             async exportAllRecords() {
@@ -2115,14 +2122,18 @@ Respond with ONLY a JSON object, no explanation, no markdown:
                 if (cached) return JSON.parse(cached);
             } catch(e) {}
 
-            // Groq API call
+            // Groq API call — 5s timeout so it never hangs the UI
             try {
                 if (typeof GROQ_API_KEY === 'undefined' || GROQ_API_KEY === 'YOUR_GROQ_API_KEY_HERE') throw new Error('No API key');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
                 const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
-                    body: JSON.stringify({ model: GROQ_MODEL, messages: [{ role: 'user', content: prompt }], temperature: 0.3, max_tokens: 80 })
+                    body: JSON.stringify({ model: GROQ_MODEL, messages: [{ role: 'user', content: prompt }], temperature: 0.3, max_tokens: 80 }),
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const data = await resp.json();
                 const text = data.choices[0].message.content.trim().replace(/```json|```/g, '');
@@ -2312,10 +2323,15 @@ Respond with ONLY a JSON object, no explanation, no markdown:
         }
 
         window.onload = async function() {
-            document.getElementById('picker-morningWake').innerHTML = createTimePickerHTML('trk-morningWake');
-            document.getElementById('picker-wakeTime').innerHTML = createTimePickerHTML('trk-wakeTime');
-            document.getElementById('picker-bedtimeStart').innerHTML = createTimePickerHTML('trk-bedtimeStart');
-            document.getElementById('picker-asleepTime').innerHTML = createTimePickerHTML('trk-asleepTime');
+            // Absolute fallback — hide loader after 12s no matter what
+            const emergencyTimer = setTimeout(() => hideLoader(), 12000);
+
+            try {
+                document.getElementById('picker-morningWake').innerHTML = createTimePickerHTML('trk-morningWake');
+                document.getElementById('picker-wakeTime').innerHTML = createTimePickerHTML('trk-wakeTime');
+                document.getElementById('picker-bedtimeStart').innerHTML = createTimePickerHTML('trk-bedtimeStart');
+                document.getElementById('picker-asleepTime').innerHTML = createTimePickerHTML('trk-asleepTime');
+            } catch(e) { console.warn('Picker init error:', e); }
 
             // Animate progress bar + rotate status messages
             const loaderMessages = [
@@ -2363,6 +2379,7 @@ Respond with ONLY a JSON object, no explanation, no markdown:
             } catch(e) {
                 console.error("App init error:", e);
             } finally {
+                clearTimeout(emergencyTimer);
                 clearInterval(loadInterval);
                 hideLoader();
             }
@@ -2577,22 +2594,25 @@ Respond with ONLY a JSON object, no explanation, no markdown:
             if (aiChip) aiChip.style.display = 'inline-flex';
             if (aiTimeEl) aiTimeEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="font-size:9px"></i> Calculating...`;
 
-            const aiResult = await getAIBedtimeRecommendation(localStr, trks, allRecs);
-            if (aiResult && aiResult.bedtime) {
-                if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: <b>${aiResult.bedtime}</b>`;
-                if (aiResult.reason) {
-                    let reasonEl = document.getElementById('ov-ai-reason');
-                    if (!reasonEl) {
-                        reasonEl = document.createElement('div');
-                        reasonEl.id = 'ov-ai-reason';
-                        reasonEl.style.cssText = 'font-size:15px;color:var(--text-muted);margin-top:4px;padding:0 4px;line-height:1.4;width:100%;';
-                        aiTimeEl.parentNode.insertAdjacentElement('afterend', reasonEl);
+            // Fire AI call AFTER overview renders — never blocks the loading spinner
+            setTimeout(async () => {
+                const aiResult = await getAIBedtimeRecommendation(localStr, trks, allRecs);
+                if (aiResult && aiResult.bedtime) {
+                    if (aiTimeEl) aiTimeEl.innerHTML = `AI Recommend Bedtime: <b>${aiResult.bedtime}</b>`;
+                    if (aiResult.reason) {
+                        let reasonEl = document.getElementById('ov-ai-reason');
+                        if (!reasonEl) {
+                            reasonEl = document.createElement('div');
+                            reasonEl.id = 'ov-ai-reason';
+                            reasonEl.style.cssText = 'font-size:15px;color:var(--text-muted);margin-top:4px;padding:0 4px;line-height:1.4;width:100%;';
+                            aiTimeEl.parentNode.insertAdjacentElement('afterend', reasonEl);
+                        }
+                        reasonEl.textContent = aiResult.reason;
                     }
-                    reasonEl.textContent = aiResult.reason;
+                } else {
+                    if (aiChip) aiChip.style.display = 'none';
                 }
-            } else {
-                if (aiChip) aiChip.style.display = 'none';
-            }
+            }, 0);
 
             // Update daily notes snippet
             const notesRow = document.getElementById('ov-notes-row');
@@ -2615,102 +2635,103 @@ Respond with ONLY a JSON object, no explanation, no markdown:
             const wrap = document.getElementById('slv-wrap');
             if (!wrap) return;
 
-            const bedStart  = trks.bedtimeStart;
-            const asleep    = trks.asleepTime;
+            const bedStart    = trks.bedtimeStart;
+            const asleep      = trks.asleepTime;
             const morningWake = trks.morningWake;
-            const wakings   = parseInt(trks.wakings) || 0;
+            const wakings     = parseInt(trks.wakings) || 0;
 
-            // Need at least bedtime start + asleep time to draw anything meaningful
             if (!bedStart || !asleep) { wrap.style.display = 'none'; return; }
 
+            // Convert HH:MM to minutes since midnight, NO auto next-day adjustment here
             function toMins(t) {
                 if (!t || !t.includes(':')) return null;
                 const [h, m] = t.split(':').map(Number);
-                let mins = h * 60 + m;
-                // Treat early morning hours (< 8am) as next day
-                if (h < 8) mins += 24 * 60;
-                return mins;
+                return h * 60 + m;
             }
             function fmtMins(m) {
-                const h = Math.floor(m / 60) % 24;
-                const mm = m % 60;
+                const h = Math.floor(((m % 1440) + 1440) % 1440 / 60);
+                const mm = ((m % 1440) + 1440) % 1440 % 60;
                 return `${String(h).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
             }
             function durLabel(m) {
+                m = Math.abs(Math.round(m));
                 if (m < 60) return `${m}m`;
                 const h = Math.floor(m / 60), rem = m % 60;
                 return rem ? `${h}h ${rem}m` : `${h}h`;
             }
 
-            const bedMins    = toMins(bedStart);
-            const asleepMins = toMins(asleep);
-            const wakeMins   = morningWake ? toMins(morningWake) + 24 * 60 : asleepMins + 600; // fallback 10h
+            let bedMins   = toMins(bedStart);   // e.g. 18:30 → 1110
+            let asleepMins = toMins(asleep);     // e.g. 19:00 → 1140
+            let wakeMins  = morningWake ? toMins(morningWake) : null;
 
-            if (!bedMins || !asleepMins || asleepMins <= bedMins) { wrap.style.display = 'none'; return; }
+            if (bedMins === null || asleepMins === null) { wrap.style.display = 'none'; return; }
+
+            // If asleep is earlier than bed (crossed midnight), push asleep forward
+            if (asleepMins < bedMins) asleepMins += 1440;
+
+            // morningWake is next day — push past asleep
+            if (wakeMins !== null) {
+                if (wakeMins <= asleepMins) wakeMins += 1440;
+            } else {
+                wakeMins = asleepMins + 600; // fallback 10h
+            }
+
+            // Sanity clamp: sleep can't be > 14h
+            if (wakeMins - asleepMins > 840) wakeMins = asleepMins + 600;
 
             wrap.style.display = 'block';
 
-            // Timeline window: bedStart – 30min before → morningWake + 30min
-            const winStart = bedMins - 20;
-            const winEnd   = wakeMins + 20;
+            const winStart = bedMins - 15;
+            const winEnd   = wakeMins + 15;
             const winLen   = winEnd - winStart;
 
             function pct(mins) { return Math.max(0, Math.min(100, ((mins - winStart) / winLen) * 100)); }
 
-            // Build segments
             const bar = document.getElementById('slv-bar');
             bar.innerHTML = '';
 
-            function addSeg(cls, fromMins, toMins) {
-                if (toMins <= fromMins) return;
+            function addSeg(cls, from, to) {
+                if (to <= from) return;
                 const seg = document.createElement('div');
                 seg.className = `slv-segment ${cls}`;
-                seg.style.left  = pct(fromMins) + '%';
-                seg.style.width = (pct(toMins) - pct(fromMins)) + '%';
-                seg.title = `${fmtMins(fromMins % (24*60))} – ${fmtMins(toMins % (24*60))} (${durLabel(toMins - fromMins)})`;
+                seg.style.left  = pct(from) + '%';
+                seg.style.width = (pct(to) - pct(from)) + '%';
+                seg.title = `${fmtMins(from)} – ${fmtMins(to)} (${durLabel(to - from)})`;
                 bar.appendChild(seg);
             }
 
-            // Pre-routine (before bedStart)
-            addSeg('slv-seg-pre', winStart + 20, bedMins);
-            // Settling (bedStart → asleep)
-            addSeg('slv-seg-settle', bedMins, asleepMins);
-            // Sleeping (asleep → morningWake)
-            addSeg('slv-seg-sleep', asleepMins, wakeMins);
+            addSeg('slv-seg-pre',    winStart + 15, bedMins);
+            addSeg('slv-seg-settle', bedMins,       asleepMins);
+            addSeg('slv-seg-sleep',  asleepMins,    wakeMins);
 
-            // Waking ticks — distribute evenly across the night
             if (wakings > 0) {
                 const sleepLen = wakeMins - asleepMins;
                 for (let i = 1; i <= wakings; i++) {
                     const tickMins = asleepMins + (sleepLen / (wakings + 1)) * i;
+                    addSeg('slv-seg-waking', tickMins - 8, tickMins + 8);
                     const tick = document.createElement('div');
                     tick.className = 'slv-tick';
                     tick.style.left = pct(tickMins) + '%';
-                    // Colour the surrounding ~20min as waking
-                    addSeg('slv-seg-waking', tickMins - 10, tickMins + 10);
                     bar.appendChild(tick);
                 }
             }
 
-            // Time axis labels
+            // Labels
             const labels = document.getElementById('slv-labels');
             labels.innerHTML = '';
-            const labelTimes = [bedMins, asleepMins];
-            if (morningWake) labelTimes.push(wakeMins);
-            labelTimes.forEach(t => {
+            labels.style.position = 'relative';
+            labels.style.height = '14px';
+            [[bedMins, 'bed'], [asleepMins, 'asleep'], [wakeMins, 'wake']].forEach(([t, key]) => {
+                if (!t) return;
                 const lbl = document.createElement('div');
                 lbl.className = 'slv-label';
-                lbl.style.position = 'absolute';
                 lbl.style.left = pct(t) + '%';
-                lbl.style.transform = 'translateX(-50%)';
-                lbl.textContent = fmtMins(t % (24 * 60));
-                labels.style.position = 'relative';
-                labels.style.height = '14px';
+                lbl.textContent = fmtMins(t);
                 labels.appendChild(lbl);
             });
 
             // Stats
-            const settleDur = asleepMins - bedMins;
+            const settleDur  = asleepMins - bedMins;
             const totalSleep = wakeMins - asleepMins;
             document.getElementById('slv-settle').textContent  = durLabel(settleDur);
             document.getElementById('slv-total').textContent   = durLabel(totalSleep);
@@ -2718,15 +2739,16 @@ Respond with ONLY a JSON object, no explanation, no markdown:
 
             // Score
             const scoreEl = document.getElementById('slv-score');
-            let score = 'great', label = '✦ Great night';
-            if (settleDur > 45 || wakings >= 3 || totalSleep < 480) { score = 'rough'; label = '✦ Rough night'; }
-            else if (settleDur > 25 || wakings >= 1 || totalSleep < 540) { score = 'good'; label = '✦ Decent night'; }
+            let score = 'great', label = '✦ Great';
+            if (settleDur > 45 || wakings >= 3 || totalSleep < 480) { score = 'rough'; label = '✦ Rough'; }
+            else if (settleDur > 25 || wakings >= 1 || totalSleep < 540) { score = 'good'; label = '✦ Decent'; }
             scoreEl.className = `slv-score ${score}`;
             scoreEl.textContent = label;
         }
 
 
         
+        function openModalAndFocus(trackerId) {
             // 1. Open the modal for the currently viewed date on the dashboard
             openSpecificDay(getLocalISODate(currentOverviewDate));
             
