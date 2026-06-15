@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PULSE — Feel the Beat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0a0f;
+    --panel: #14141d;
+    --grid: rgba(255,255,255,0.035);
+    --coral: #ff4d6d;
+    --teal: #00d9c0;
+    --text: #f5f3ee;
+    --dim: #6b6b7d;
+    --line: rgba(255,255,255,0.08);
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body{
+    height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'JetBrains Mono', monospace;
+    overflow:hidden;
+    touch-action: manipulation;
+  }
+
+  .app{
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    padding: 20px 18px;
+    gap: 16px;
+  }
+
+  /* Header */
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+  }
+  .title{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size: 22px;
+    letter-spacing: 0.12em;
+  }
+  .title span{ color: var(--coral); }
+  .subtitle{
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-top: 4px;
+  }
+  .status{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+    padding-top: 4px;
+  }
+  .dot{
+    width:8px; height:8px; border-radius:50%;
+    background: var(--dim);
+    transition: background 0.1s, box-shadow 0.1s;
+  }
+  .dot.live{ background: var(--teal); }
+  .dot.beat{
+    background: var(--coral);
+    box-shadow: 0 0 12px 2px var(--coral);
+  }
+
+  /* Main visual area */
+  .stage{
+    flex:1;
+    position:relative;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow:hidden;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 100% 28px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 28px 100%,
+      var(--panel);
+  }
+  canvas{ display:block; width:100%; height:100%; }
+
+  .bpm-readout{
+    position:absolute;
+    top: 16px; left: 16px;
+    line-height: 1;
+  }
+  .bpm-value{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 48px;
+    font-weight:700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .bpm-label{
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--dim);
+    margin-top: 2px;
+  }
+
+  .hint{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap: 10px;
+    text-align:center;
+    padding: 0 30px;
+    transition: opacity 0.3s;
+  }
+  .hint.hidden{ opacity:0; pointer-events:none; }
+  .hint-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight:500;
+  }
+  .hint-body{
+    font-size: 11px;
+    color: var(--dim);
+    line-height: 1.6;
+    max-width: 280px;
+  }
+
+  /* Controls */
+  .controls{
+    display:flex;
+    flex-direction:column;
+    gap: 14px;
+  }
+
+  .start-btn{
+    width:100%;
+    padding: 16px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text);
+    font-family:'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor:pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .start-btn:active{ transform: scale(0.99); }
+  .start-btn.on{
+    border-color: var(--teal);
+    color: var(--teal);
+  }
+
+  .row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 14px;
+  }
+  .row-label{
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--dim);
+    white-space:nowrap;
+  }
+
+  /* Sensitivity slider */
+  input[type="range"]{
+    -webkit-appearance: none;
+    flex:1;
+    height: 2px;
+    background: var(--line);
+    border-radius: 2px;
+    outline:none;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--coral);
+    cursor:pointer;
+    border: none;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--coral);
+    cursor:pointer;
+    border: none;
+  }
+
+  /* Toggle switch */
+  .toggle{
+    width: 40px; height: 22px;
+    border-radius: 11px;
+    background: var(--line);
+    position: relative;
+    cursor:pointer;
+    transition: background 0.2s;
+    flex-shrink:0;
+  }
+  .toggle.on{ background: var(--teal); }
+  .toggle::after{
+    content:'';
+    position:absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--text);
+    transition: left 0.2s;
+  }
+  .toggle.on::after{ left: 21px; }
+
+  .note{
+    font-size: 9px;
+    color: var(--dim);
+    text-align:center;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div>
+      <div class="title">PUL<span>S</span>E</div>
+      <div class="subtitle">Beat detection · v1</div>
+    </div>
+    <div class="status">
+      <div class="dot" id="statusDot"></div>
+      <span id="statusText">OFFLINE</span>
+    </div>
+  </header>
+
+  <div class="stage">
+    <canvas id="canvas"></canvas>
+
+    <div class="bpm-readout">
+      <div class="bpm-value" id="bpmValue">––</div>
+      <div class="bpm-label">BPM</div>
+    </div>
+
+    <div class="hint" id="hint">
+      <div class="hint-title">Turn your screen into a beat</div>
+      <div class="hint-body">
+        Tap start, allow microphone access, and play some music near your phone.
+        The screen will pulse and your phone will vibrate in time with the beat.
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="start-btn" id="startBtn">Start Listening</button>
+
+    <div class="row">
+      <span class="row-label">Sensitivity</span>
+      <input type="range" id="sensitivity" min="1" max="100" value="50">
+    </div>
+
+    <div class="row">
+      <span class="row-label">Haptic pulse</span>
+      <div class="toggle on" id="hapticToggle"></div>
+    </div>
+
+    <div class="note" id="note">Vibration works best on Android browsers. On iOS you'll get visual pulses only.</div>
+  </div>
+
+</div>
+
+<script>
+(() => {
+  const startBtn = document.getElementById('startBtn');
+  const statusDot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+  const bpmValue = document.getElementById('bpmValue');
+  const hint = document.getElementById('hint');
+  const sensitivitySlider = document.getElementById('sensitivity');
+  const hapticToggle = document.getElementById('hapticToggle');
+  const note = document.getElementById('note');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  let audioCtx, analyser, source, dataArray, freqBins;
+  let running = false;
+  let hapticsEnabled = true;
+  let rafId;
+
+  // Beat detection state
+  let bassHistory = [];
+  const HISTORY_SIZE = 43; // ~ 1 second at 60fps-ish energy samples
+  let lastBeatTime = 0;
+  let beatTimes = [];
+  let currentBPM = 0;
+
+  // Visual state
+  let pulse = 0; // 0-1 continuous energy for breathing
+  let rings = []; // expanding rings on beat detect
+  let beatFlashUntil = 0;
+
+  function resizeCanvas(){
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+  }
+  window.addEventListener('resize', resizeCanvas);
+
+  // Vibration support check
+  const hasVibration = 'vibrate' in navigator;
+  if (!hasVibration){
+    note.textContent = "This browser doesn't support vibration — you'll get visual pulses only.";
+  }
+
+  hapticToggle.addEventListener('click', () => {
+    hapticsEnabled = !hapticsEnabled;
+    hapticToggle.classList.toggle('on', hapticsEnabled);
+  });
+
+  startBtn.addEventListener('click', async () => {
+    if (running){
+      stop();
+      return;
+    }
+    try{
+      await start();
+    }catch(err){
+      statusText.textContent = 'MIC ACCESS DENIED';
+      hint.querySelector('.hint-body').textContent =
+        'Microphone access is needed to detect the beat. Check your browser permissions and try again.';
+    }
+  });
+
+  async function start(){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: {
+      echoCancellation: false,
+      noiseSuppression: false,
+      autoGainControl: false
+    }});
+    source = audioCtx.createMediaStreamSource(stream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 1024;
+    analyser.smoothingTimeConstant = 0.6;
+    source.connect(analyser);
+
+    freqBins = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(freqBins);
+
+    running = true;
+    startBtn.textContent = 'Stop Listening';
+    startBtn.classList.add('on');
+    statusDot.classList.add('live');
+    statusText.textContent = 'LISTENING';
+    hint.classList.add('hidden');
+
+    resizeCanvas();
+    loop();
+  }
+
+  function stop(){
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    if (source) source.mediaStream.getTracks().forEach(t => t.stop());
+    if (audioCtx) audioCtx.close();
+    startBtn.textContent = 'Start Listening';
+    startBtn.classList.remove('on');
+    statusDot.classList.remove('live', 'beat');
+    statusText.textContent = 'OFFLINE';
+    bpmValue.textContent = '––';
+    hint.classList.remove('hidden');
+    bassHistory = [];
+    beatTimes = [];
+    rings = [];
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+  }
+
+  function loop(){
+    rafId = requestAnimationFrame(loop);
+    analyser.getByteFrequencyData(dataArray);
+
+    // Bass band: roughly 20Hz - 160Hz
+    const nyquist = audioCtx.sampleRate / 2;
+    const bassMaxBin = Math.floor((160 / nyquist) * freqBins);
+    let bassSum = 0;
+    for (let i = 1; i <= bassMaxBin; i++) bassSum += dataArray[i];
+    const bassEnergy = bassSum / bassMaxBin;
+
+    bassHistory.push(bassEnergy);
+    if (bassHistory.length > HISTORY_SIZE) bassHistory.shift();
+
+    const avg = bassHistory.reduce((a,b) => a+b, 0) / bassHistory.length;
+
+    // sensitivity slider: higher = more sensitive (lower threshold multiplier)
+    const sens = sensitivitySlider.value / 100; // 0.01 - 1
+    const thresholdMultiplier = 1.55 - sens * 0.5; // ranges ~1.05 to 1.55
+
+    const now = performance.now();
+    const minInterval = 240; // ms, caps detection at 250 BPM
+
+    if (bassEnergy > avg * thresholdMultiplier && bassEnergy > 12 && now - lastBeatTime > minInterval){
+      onBeat(now, bassEnergy);
+    }
+
+    // continuous "breathing" pulse based on overall energy
+    let total = 0;
+    for (let i = 0; i < freqBins; i++) total += dataArray[i];
+    const overall = total / freqBins / 255;
+    pulse = pulse * 0.85 + overall * 0.15;
+
+    draw();
+  }
+
+  function onBeat(now, energy){
+    lastBeatTime = now;
+    beatTimes.push(now);
+    if (beatTimes.length > 8) beatTimes.shift();
+
+    // compute BPM from recent intervals
+    if (beatTimes.length >= 2){
+      const intervals = [];
+      for (let i = 1; i < beatTimes.length; i++){
+        intervals.push(beatTimes[i] - beatTimes[i-1]);
+      }
+      const avgInterval = intervals.reduce((a,b)=>a+b,0) / intervals.length;
+      const bpm = 60000 / avgInterval;
+      if (bpm > 40 && bpm < 240){
+        currentBPM = currentBPM === 0 ? bpm : currentBPM * 0.7 + bpm * 0.3;
+        bpmValue.textContent = Math.round(currentBPM);
+      }
+    }
+
+    // spawn ring
+    const rect = canvas.getBoundingClientRect();
+    rings.push({
+      x: rect.width / 2,
+      y: rect.height / 2,
+      r: 10,
+      alpha: 0.9
+    });
+    if (rings.length > 6) rings.shift();
+
+    // flash status dot
+    statusDot.classList.add('beat');
+    setTimeout(() => statusDot.classList.remove('beat'), 90);
+
+    // haptic
+    if (hapticsEnabled && hasVibration){
+      navigator.vibrate(45);
+    }
+  }
+
+  function draw(){
+    const w = canvas.width, h = canvas.height;
+    const dpr = devicePixelRatio;
+    ctx.clearRect(0,0,w,h);
+
+    const cx = w/2, cy = h/2;
+    const baseRadius = Math.min(w,h) * 0.16;
+
+    // central breathing circle
+    const r = baseRadius * (1 + pulse * 0.9);
+    const grad = ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+    grad.addColorStop(0, 'rgba(0,217,192,' + (0.35 + pulse*0.4) + ')');
+    grad.addColorStop(1, 'rgba(0,217,192,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.lineWidth = 1.5 * dpr;
+    ctx.strokeStyle = 'rgba(245,243,238,0.5)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, baseRadius, 0, Math.PI*2);
+    ctx.stroke();
+
+    // expanding rings on beat
+    rings.forEach(ring => {
+      ctx.beginPath();
+      ctx.arc(ring.x * dpr, ring.y * dpr, ring.r * dpr, 0, Math.PI*2);
+      ctx.lineWidth = 2 * dpr;
+      ctx.strokeStyle = 'rgba(255,77,109,' + ring.alpha + ')';
+      ctx.stroke();
+      ring.r += Math.max(w,h) * 0.012;
+      ring.alpha *= 0.93;
+    });
+    rings = rings.filter(r => r.alpha > 0.02);
+
+    // frequency bars along bottom
+    const barCount = 40;
+    const barWidth = w / barCount;
+    for (let i = 0; i < barCount; i++){
+      const dataIndex = Math.floor((i / barCount) * (freqBins * 0.5));
+      const value = dataArray[dataIndex] / 255;
+      const barHeight = value * h * 0.28;
+      const hue = i / barCount;
+      ctx.fillStyle = hue < 0.5
+        ? `rgba(0,217,192,${0.25 + value*0.5})`
+        : `rgba(255,77,109,${0.25 + value*0.5})`;
+      ctx.fillRect(i * barWidth, h - barHeight, barWidth - (1*dpr), barHeight);
+    }
+  }
+
+  resizeCanvas();
+})();
+</script>
+</body>
+</html>
